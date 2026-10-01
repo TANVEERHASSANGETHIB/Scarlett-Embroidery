@@ -1,0 +1,20 @@
+<div class="plan{% if plan.is_highlighted %} is-featured{% endif %}">
+  <div class="plan-label">{{ plan.card_name }}</div>
+  <div class="plan-card">
+    {% if plan.ribbon %}<span class="plan-ribbon">{{ plan.ribbon }}</span>{% endif %}
+    <div class="plan-head">
+      <div class="plan-price"><span class="plan-currency">$</span>{{ plan.price|floatformat:"-2" }}</div>
+      <div class="plan-tier">{% if unit %}{{ unit }}{% else %}{{ plan.card_name }}{% endif %}</div>
+    </div>
+    <ul class="plan-features">
+      {% for feature in plan.feature_list %}
+      <li>{{ feature }}</li>
+      {% empty %}
+      <li>{{ plan.description }}</li>
+      {% endfor %}
+    </ul>
+    <div class="plan-foot">
+      <a class="btn btn-gold btn-md" href="{% url 'orders:place' %}?service={{ plan.service }}&amp;tier={{ plan.pk }}">Order now</a>
+    </div>
+  </div>
+</div>

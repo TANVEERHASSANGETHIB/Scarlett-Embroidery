@@ -27,16 +27,22 @@ def attach_files(order, files, kind, user):
 
 
 @transaction.atomic
-def create_order(user, order_form, patch_form=None, draft=None):
+def create_order(user, order_form, patch_form=None, draft=None, is_quote=False):
     order = order_form.save(commit=False)
     order.customer = user
+    order.is_quote = is_quote
     patch_data = patch_form.cleaned_data if patch_form is not None else {}
-    order.estimate = compute_estimate(
-        order.service,
-        tier=order.tier,
-        turnaround=order.turnaround,
-        patch_category=patch_data.get("category"),
-        quantity=patch_data.get("quantity"),
+    # A quote request never carries an estimate: the customer is told the price by us.
+    order.estimate = (
+        None
+        if is_quote
+        else compute_estimate(
+            order.service,
+            tier=order.tier,
+            turnaround=order.turnaround,
+            patch_category=patch_data.get("category"),
+            quantity=patch_data.get("quantity"),
+        )
     )
     order.save()
 
@@ -54,7 +60,7 @@ def create_order(user, order_form, patch_form=None, draft=None):
         order=order,
         actor=user,
         kind=OrderEvent.Kind.CREATED,
-        message=f"{order.get_service_display()} order placed.",
+        message=f"{order.get_service_display()} {'quote requested' if order.is_quote else 'order placed'}.",
     )
 
     transaction.on_commit(lambda: notify_order_created(order.pk))
@@ -74,7 +80,7 @@ def order_url(order, staff=False):
 def notify_order_created(order_id):
     order = Order.objects.select_related("customer", "tier", "turnaround", "patch__category").get(pk=order_id)
     send_templated_email(
-        f"Order {order.number} received",
+        f"Quote request {order.number} received" if order.is_quote else f"Order {order.number} received",
         "order_received",
         {"order": order, "url": order_url(order)},
         order.contact_email,
@@ -82,7 +88,8 @@ def notify_order_created(order_id):
     site = SiteSettings.load()
     if site.notify_on_new_order:
         send_templated_email(
-            f"New order {order.number} · {order.get_service_display()} · {order.design_name}",
+            f"New {'quote request' if order.is_quote else 'order'} {order.number} · "
+            f"{order.get_service_display()} · {order.design_name}",
             "order_staff",
             {"order": order, "url": order_url(order, staff=True)},
             site.notification_recipients,

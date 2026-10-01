@@ -121,6 +121,16 @@ class PatchCategory(models.Model):
     unit_price = models.DecimalField(
         "from price / piece", max_digits=8, decimal_places=2, validators=[MinValueValidator(Decimal("0"))]
     )
+    # How this category is presented on the home page pricing card (Patches tab).
+    ribbon = models.CharField(
+        max_length=16, blank=True, help_text="Corner flag on the card, e.g. POPULAR. Leave empty for none."
+    )
+    features = models.TextField(
+        blank=True, help_text="What the patch includes — one per line, shown as the card's list."
+    )
+    is_highlighted = models.BooleanField(
+        "highlight this plan", default=False, help_text="Lifts the card and marks it as the popular choice."
+    )
     is_active = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
 
@@ -130,6 +140,14 @@ class PatchCategory(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def card_name(self):
+        return self.name
+
+    @property
+    def feature_list(self):
+        return [line.strip() for line in self.features.splitlines() if line.strip()]
 
 
 class Order(TimeStampedModel):
@@ -156,6 +174,11 @@ class Order(TimeStampedModel):
     ]
 
     number = models.CharField(max_length=20, unique=True, blank=True, editable=False)
+    is_quote = models.BooleanField(
+        "quote request",
+        default=False,
+        help_text="A request for a price — the customer never sees an estimate.",
+    )
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders")
     service = models.CharField(max_length=20, choices=Service.choices, default=Service.DIGITIZING)
 
@@ -212,7 +235,7 @@ class Order(TimeStampedModel):
             self.due_at = timezone.now() + timedelta(hours=self.turnaround.hours)
         super().save(*args, **kwargs)
         if not self.number:
-            self.number = f"SE-{2900 + self.pk}"
+            self.number = f"{'QT' if self.is_quote else 'SE'}-{2900 + self.pk}"
             super().save(update_fields=["number"])
 
     @property

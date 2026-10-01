@@ -115,11 +115,23 @@ def test_order_now_preselects_that_plan(client, customer, pricing):
     assert f'name="tier" value="{tier.pk}" checked' in body
 
 
-def test_vector_and_patch_prices_sit_below_the_plans(client, pricing):
+def test_home_pricing_has_embroidery_vector_and_patch_tabs(client, pricing):
     body = client.get(reverse("core:home")).content.decode()
-    assert "plan-extra" in body
-    assert "Vector art" in body
-    assert "Patches" in body
+    for tab in ("embroidery", "vector", "patches"):
+        assert f'data-price-tab="{tab}"' in body
+        assert f'data-price-panel="{tab}"' in body
+    # Embroidery is the tab open by default; the others start hidden.
+    assert 'data-price-tab="embroidery"' in body and 'class="price-tab is-active"' in body
+    assert 'data-price-panel="vector" hidden' in body
+    assert "Standard vector" in body and "Iron-on patch" in body
+
+
+def test_patch_plan_card_is_editable_from_the_category(client, pricing):
+    cat = pricing["patches"]["iron"]
+    cat.ribbon, cat.features, cat.is_highlighted = "POPULAR", "Heat-seal backing\nFree artwork prep", True
+    cat.save()
+    body = client.get(reverse("core:home")).content.decode()
+    assert "POPULAR" in body and "Free artwork prep" in body and "is-featured" in body
 
 
 # ── Contact page map ─────────────────────────────────────

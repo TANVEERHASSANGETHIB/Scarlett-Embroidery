@@ -27,9 +27,12 @@ def compute_estimate(service, tier=None, turnaround=None, patch_category=None, q
     return total.quantize(CENT, ROUND_HALF_UP)
 
 
-def pricing_payload():
-    """Serializable pricing data for the live estimate on the order form."""
-    return {
+def pricing_payload(hide_prices=False):
+    """Serializable pricing data for the live estimate on the order form.
+
+    With ``hide_prices`` (the quote form) only names and ids are sent, never a price.
+    """
+    data = {
         "tiers": [
             {
                 "id": t.pk,
@@ -49,3 +52,9 @@ def pricing_payload():
             for c in PatchCategory.objects.filter(is_active=True)
         ],
     }
+    if hide_prices:
+        for key in ("tiers", "turnarounds", "patchCategories"):
+            for row in data[key]:
+                for field in ("price", "surcharge", "unitPrice"):
+                    row.pop(field, None)
+    return data

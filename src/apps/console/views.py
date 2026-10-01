@@ -2,7 +2,7 @@ import os
 
 from django.conf import settings as django_settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, F, Max, Q, Sum
@@ -17,13 +17,14 @@ from apps.accounts.models import User
 from apps.blog.models import Post
 from apps.chat import services as chat_services
 from apps.chat.models import BlockedIP, ChatSession
-from apps.core.models import ContactMessage, PortfolioItem, SiteSettings, Testimonial
+from apps.core.models import ContactMessage, PortfolioCategory, PortfolioItem, SiteSettings, Testimonial
 from apps.core.utils import get_client_ip, rate_limited, reset_rate_limit, send_templated_email
 from apps.orders.models import Order, OrderEvent, OrderFile
 from apps.orders.services import attach_files, change_status, order_url
 
 from .decorators import staff_required
 from .forms import (
+    AdminPasswordChangeForm,
     ConsoleLoginForm,
     InviteAdminForm,
     NotificationSettingsForm,
@@ -31,11 +32,13 @@ from .forms import (
     OrderNoteForm,
     OrderUpdateForm,
     PatchCategoryFormSet,
+    PortfolioCategoryForm,
     PortfolioItemForm,
     PortfolioUploadForm,
     PostForm,
     PricingTierFormSet,
     SiteSettingsForm,
+    SocialLinksForm,
     TestimonialForm,
     TurnaroundFormSet,
 )
@@ -215,6 +218,8 @@ def orders(request):
     query = request.GET.get("q", "").strip()
     if status == "open":
         qs = qs.filter(status__in=Order.OPEN_STATUSES)
+    elif status == "quotes":
+        qs = qs.filter(is_quote=True)
     elif status in Order.Status.values:
         qs = qs.filter(status=status)
     if service:
@@ -515,6 +520,42 @@ def portfolio(request, pk=None):
                 return redirect("console:portfolio")
             messages.error(request, "Please fix the highlighted fields.")
 
+        elif action == "category_add":
+            cat_form = PortfolioCategoryForm(request.POST)
+            if cat_form.is_valid():
+                top = PortfolioCategory.objects.aggregate(top=Max("sort_order"))["top"] or 0
+                cat = cat_form.save(commit=False)
+                cat.sort_order = top + 1
+                cat.save()
+                messages.success(request, f"Category “{cat.name}” added.")
+            else:
+                messages.error(request, "That category name is empty or already used.")
+            return redirect("console:portfolio")
+
+        elif action == "category_rename":
+            cat = get_object_or_404(PortfolioCategory, pk=request.POST.get("id"))
+            cat_form = PortfolioCategoryForm(request.POST, instance=cat)
+            if cat_form.is_valid():
+                cat_form.save()
+                messages.success(request, "Category renamed.")
+            else:
+                messages.error(request, "That category name is empty or already used.")
+            return redirect("console:portfolio")
+
+        elif action == "category_delete":
+            cat = get_object_or_404(PortfolioCategory, pk=request.POST.get("id"))
+            in_use = PortfolioItem.objects.filter(category=cat.slug).count()
+            if in_use:
+                messages.error(
+                    request,
+                    f"“{cat.name}” still has {in_use} photo{'s' if in_use != 1 else ''}. "
+                    "Move or delete them first.",
+                )
+            else:
+                cat.delete()
+                messages.success(request, f"Category “{cat.name}” deleted.")
+            return redirect("console:portfolio")
+
         elif action == "delete":
             target = get_object_or_404(PortfolioItem, pk=request.POST.get("id"))
             name = target.name
@@ -530,17 +571,23 @@ def portfolio(request, pk=None):
             target.save(update_fields=[field])
             return redirect(request.POST.get("return_to") or "console:portfolio")
 
+    categories = list(PortfolioCategory.objects.all())
     category = request.GET.get("category", "")
     items = PortfolioItem.objects.all()
-    if category in PortfolioItem.Category.values:
+    if category in {c.slug for c in categories}:
         items = items.filter(category=category)
     else:
         category = ""
+    items = list(items)
+    by_slug = {c.slug: c for c in categories}
+    for entry in items:
+        entry.cached_category = by_slug.get(entry.category)
 
     tallies = dict(
         PortfolioItem.objects.values_list("category").annotate(n=Count("pk")).values_list("category", "n")
     )
-    category_filters = [(c.value, c.label, tallies.get(c.value, 0)) for c in PortfolioItem.Category]
+    category_filters = [(c.slug, c.name, tallies.get(c.slug, 0)) for c in categories]
+    category_rows = [(c, tallies.get(c.slug, 0)) for c in categories]
     return render(
         request,
         "console/portfolio.html",
@@ -551,6 +598,8 @@ def portfolio(request, pk=None):
             "upload_form": upload_form,
             "item_form": item_form,
             "category_filters": category_filters,
+            "category_rows": category_rows,
+            "category_form": PortfolioCategoryForm(),
             "category": category,
             "total": PortfolioItem.objects.count(),
             "on_home": PortfolioItem.objects.filter(show_on_home=True, is_published=True).count(),
@@ -613,8 +662,10 @@ SETTINGS_TABS = [
     ("patches", "Patches", "Categories and price per piece"),
     ("notifications", "Notifications", "Where order alerts are sent"),
     ("site", "Site details", "Phone, email and public copy"),
+    ("social", "Social links", "Icons shown in the site footer"),
     ("team", "Team", "Admins who can sign in here"),
     ("security", "Security", "Blocked chat visitors"),
+    ("account", "My account", "Change your password"),
 ]
 # Which tab to reopen after a form in that tab is submitted.
 SECTION_TAB = {
@@ -624,6 +675,8 @@ SECTION_TAB = {
     "notifications": "notifications",
     "test_email": "notifications",
     "site": "site",
+    "social": "social",
+    "password": "account",
     "invite": "team",
     "toggle_admin": "team",
     "unblock_ip": "security",
@@ -672,9 +725,20 @@ def settings_view(request):
     turnarounds = TurnaroundFormSet(request.POST if section == "turnarounds" else None, prefix="ta")
     patches = PatchCategoryFormSet(request.POST if section == "patches" else None, prefix="pc")
     invite_form = InviteAdminForm(request.POST if section == "invite" else None)
+    social_form = SocialLinksForm(request.POST if section == "social" else None, instance=site)
+    password_form = AdminPasswordChangeForm(request.user, request.POST if section == "password" else None)
+
+    if section == "password":
+        if password_form.is_valid():
+            password_form.save()
+            update_session_auth_hash(request, password_form.user)  # stay signed in
+            messages.success(request, "Password changed.")
+            return redirect(f"{settings_url}?tab=account")
+        messages.error(request, "Your password was not changed — see the notes below.")
 
     targets = {
         "site": site_form,
+        "social": social_form,
         "notifications": notify_form,
         "tiers": tiers,
         "turnarounds": turnarounds,
@@ -750,6 +814,8 @@ def settings_view(request):
             "turnarounds": turnarounds,
             "patches": patches,
             "invite_form": invite_form,
+            "social_form": social_form,
+            "password_form": password_form,
             "email_status": _email_status(),
             "recipients": site.notification_recipients,
             "admins": User.objects.staff().order_by("full_name"),

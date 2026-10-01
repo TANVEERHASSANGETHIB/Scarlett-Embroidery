@@ -81,7 +81,7 @@
       <div class="kicker">Your artwork</div>
       {% include "orders/_files.html" with files=artwork %}
       {% if order.is_open %}
-      <form method="post" action="{% url 'orders:action' order.number %}" enctype="multipart/form-data" class="stack mt-m" data-once>
+      <form method="post" action="{% url 'orders:action' order.number %}" enctype="multipart/form-data" class="stack mt-m" data-progress data-once>
         {% csrf_token %}<input type="hidden" name="action" value="artwork">
         <div class="dropzone" data-dropzone style="padding:18px">
           <div class="muted" style="font-size:13px">Add more artwork</div>

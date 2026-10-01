@@ -150,3 +150,13 @@ make prod-seed     # pricing + first admin (no demo content)
 The production stack listens on **http://localhost** (port 80), not the dev port, and keeps its **own database** — separate from development. On a fresh production database nothing exists yet, so `make prod-seed` is required before you can sign in to the console; without it the login will reject every password because no admin account exists. Content (portfolio, reviews, settings) is likewise per-stack.
 
 In production, nginx serves public media and proxies `/ws/` WebSockets. Static files are served by WhiteNoise, and customer files are streamed only after a permission check. Put TLS in front of nginx, for example with a load balancer, Cloudflare or certbot.
+
+## Recent additions
+
+- **Quote page** (`/order/quote/`): same questions as the order form, but no prices are shown or stored. Quotes are numbered `QT-…` and can be filtered in the console (Orders → Quotes).
+- **Services pages** (`/services/`, `/services/embroidery|vector|patches/`), a **Testimonials page**, and a new header menu (Services and More dropdowns).
+- **Home pricing tabs** (Embroidery / Vector / Patches). Edit the cards under Console → Settings → Pricing and Patches (ribbon, features, highlight).
+- **Portfolio categories** are managed in Console → Portfolio → Categories.
+- **Footer social icons**: Console → Settings → Social links.
+- **Admin password change**: Console → Settings → My account.
+- Uploads show a progress bar and per-file "Attached / Uploaded" status; hero numbers count up on page load.

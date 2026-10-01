@@ -26,19 +26,18 @@
 
 <div class="card table-wrap">
   <table class="table">
-    <thead><tr><th>Order</th><th>Design</th><th>Service</th><th>Placed</th><th>Status</th><th class="text-right">Total</th></tr></thead>
+    <thead><tr><th>Order</th><th>Design</th><th>Service</th><th>Placed</th><th class="text-right">Total</th></tr></thead>
     <tbody>
       {% for o in orders %}
       <tr>
-        <td class="t-mono"><a href="{% url 'orders:detail' o.number %}">{{ o.number }}</a></td>
+        <td class="t-mono"><a href="{% url 'orders:detail' o.number %}">{{ o.number }}</a>{% if o.is_quote %} <span class="badge badge-soft">Quote</span>{% endif %}</td>
         <td class="t-strong"><a class="row-link" href="{% url 'orders:detail' o.number %}">{{ o.design_name }}</a></td>
         <td>{{ o.get_service_display }}{% if o.tier %} · {{ o.tier.name }}{% endif %}</td>
         <td class="nowrap">{{ o.created_at|date:"d M Y" }}</td>
-        <td>{% include "partials/status_badge.html" with order=o %}</td>
         <td class="t-total">{% if o.total is not None %}${{ o.total }}{% if o.final_price is None %} <span class="mono" style="font-size:10px;color:var(--ink-60)">est.</span>{% endif %}{% else %}Quote{% endif %}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" class="empty">{% if query %}No orders match “{{ query }}”.{% else %}No orders yet — <a href="{% url 'orders:place' %}">place your first one</a>.{% endif %}</td></tr>
+      <tr><td colspan="5" class="empty">{% if query %}No orders match “{{ query }}”.{% else %}No orders yet — <a href="{% url 'orders:place' %}">place your first one</a>.{% endif %}</td></tr>
       {% endfor %}
     </tbody>
   </table>

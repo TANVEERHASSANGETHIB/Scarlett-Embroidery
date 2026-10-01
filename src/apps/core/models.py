@@ -1,5 +1,6 @@
 from django.core.cache import cache
 from django.db import models
+from django.utils.text import slugify
 
 
 class TimeStampedModel(models.Model):
@@ -42,6 +43,15 @@ class SiteSettings(models.Model):
     )
     show_map = models.BooleanField("show the map on the contact page", default=True)
 
+    facebook_url = models.URLField("Facebook", max_length=300, blank=True)
+    instagram_url = models.URLField("Instagram", max_length=300, blank=True)
+    x_url = models.URLField("X (Twitter)", max_length=300, blank=True)
+    linkedin_url = models.URLField("LinkedIn", max_length=300, blank=True)
+    youtube_url = models.URLField("YouTube", max_length=300, blank=True)
+    tiktok_url = models.URLField("TikTok", max_length=300, blank=True)
+    pinterest_url = models.URLField("Pinterest", max_length=300, blank=True)
+    whatsapp_url = models.URLField("WhatsApp", max_length=300, blank=True)
+
     notify_on_new_order = models.BooleanField(
         "email me about new orders",
         default=True,
@@ -65,6 +75,23 @@ class SiteSettings(models.Model):
         self.pk = 1
         super().save(*args, **kwargs)
         cache.delete(self.CACHE_KEY)
+
+    SOCIAL_FIELDS = [
+        ("facebook", "Facebook"),
+        ("instagram", "Instagram"),
+        ("x", "X"),
+        ("linkedin", "LinkedIn"),
+        ("youtube", "YouTube"),
+        ("tiktok", "TikTok"),
+        ("pinterest", "Pinterest"),
+        ("whatsapp", "WhatsApp"),
+    ]
+
+    @property
+    def social_links(self):
+        """(key, label, url) for every network the admin has filled in."""
+        links = [(key, label, getattr(self, f"{key}_url")) for key, label in self.SOCIAL_FIELDS]
+        return [link for link in links if link[2]]
 
     @property
     def map_src(self):
@@ -106,24 +133,47 @@ class SiteSettings(models.Model):
         return obj
 
 
+class PortfolioCategory(models.Model):
+    """A filter on the portfolio page — the admin can add, rename and reorder these."""
+
+    name = models.CharField(max_length=60, unique=True)
+    slug = models.SlugField(max_length=40, unique=True, blank=True)
+    sort_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["sort_order", "name"]
+        verbose_name_plural = "portfolio categories"
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base = slugify(self.name)[:36] or "category"
+            slug, n = base, 2
+            while PortfolioCategory.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug, n = f"{base}-{n}", n + 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
+    @property
+    def tag(self):
+        return self.name.split()[0][:7].upper() if self.name else ""
+
+
 class PortfolioItem(TimeStampedModel):
     class Category(models.TextChoices):
+        """The categories every site starts with (seeded as PortfolioCategory rows)."""
+
         CAPS = "caps", "Caps"
         LEFT_CHEST = "left_chest", "Left chest"
         JACKET_BACK = "jacket_back", "Jacket back"
         PATCHES = "patches", "Patches"
         VECTOR = "vector", "Vector"
 
-    TAGS = {
-        "caps": "CAP",
-        "left_chest": "CHEST",
-        "jacket_back": "BACK",
-        "patches": "PATCH",
-        "vector": "VECTOR",
-    }
-
+    # Slug of a PortfolioCategory (kept as text so deleting a category never deletes photos).
     name = models.CharField(max_length=120)
-    category = models.CharField(max_length=20, choices=Category.choices)
+    category = models.CharField(max_length=40, blank=True, db_index=True)
     image = models.ImageField(upload_to="portfolio/", blank=True)
     meta = models.CharField(max_length=120, blank=True, help_text="Short line, e.g. 'cap front · 4,120 st'")
     showcase_tag = models.CharField(max_length=60, blank=True, help_text="e.g. 'Cap front · foam'")
@@ -143,8 +193,23 @@ class PortfolioItem(TimeStampedModel):
         return self.name
 
     @property
+    def category_obj(self):
+        if hasattr(self, "cached_category"):
+            return self.cached_category
+        return PortfolioCategory.objects.filter(slug=self.category).first()
+
+    @property
+    def category_name(self):
+        cat = self.category_obj
+        return cat.name if cat else ""
+
+    def get_category_display(self):
+        return self.category_name or self.category.replace("_", " ").title()
+
+    @property
     def tag(self):
-        return self.TAGS.get(self.category, "")
+        cat = self.category_obj
+        return cat.tag if cat else ""
 
     @property
     def short_name(self):

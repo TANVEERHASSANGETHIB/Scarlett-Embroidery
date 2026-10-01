@@ -140,6 +140,24 @@
         </form>
       </section>
 
+      <!-- ── Social links ──────────────────────────────── -->
+      <section class="settings-panel" data-panel="social" {% if active_tab != "social" %}hidden{% endif %}>
+        <form method="post" class="panel settings-card" novalidate>
+          {% csrf_token %}<input type="hidden" name="section" value="social">
+          <header class="settings-card-head">
+            <div>
+              <h2 class="settings-card-title">Social links</h2>
+              <p class="settings-card-sub">Paste the full link to each profile. An icon appears in the website footer for every link you fill in; leave a box empty to hide that icon.</p>
+            </div>
+          </header>
+          {% include "partials/form_errors.html" with form=social_form %}
+          <div class="settings-grid">
+            {% for field in social_form %}{% include "partials/field.html" with field=field hide_required=True %}{% endfor %}
+          </div>
+          {% include "console/_save_bar.html" with label="Save social links" %}
+        </form>
+      </section>
+
       <!-- ── Team ──────────────────────────────────────── -->
       <section class="settings-panel" data-panel="team" {% if active_tab != "team" %}hidden{% endif %}>
         <div class="panel settings-card">
@@ -221,6 +239,26 @@
             </table>
           </div>
         </div>
+      </section>
+
+      <!-- ── My account ────────────────────────────────── -->
+      <section class="settings-panel" data-panel="account" {% if active_tab != "account" %}hidden{% endif %}>
+        <form method="post" class="panel settings-card" novalidate>
+          {% csrf_token %}<input type="hidden" name="section" value="password">
+          <header class="settings-card-head">
+            <div>
+              <h2 class="settings-card-title">Change your password</h2>
+              <p class="settings-card-sub">Signed in as {{ user.email }}. Enter your current password, then choose a new one. You stay signed in on this device.</p>
+            </div>
+          </header>
+          {% include "partials/form_errors.html" with form=password_form %}
+          <div class="settings-grid">
+            {% include "partials/field.html" with field=password_form.old_password hide_required=True span=True %}
+            {% include "partials/field.html" with field=password_form.new_password1 hide_required=True %}
+            {% include "partials/field.html" with field=password_form.new_password2 hide_required=True %}
+          </div>
+          {% include "console/_save_bar.html" with label="Change password" always=True %}
+        </form>
       </section>
     </div>
   </div>

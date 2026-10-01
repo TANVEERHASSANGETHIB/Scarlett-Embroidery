@@ -55,7 +55,7 @@
 
     <div class="stack-lg">
       {% if item %}
-      <form method="post" enctype="multipart/form-data" class="panel-raised panel-pad stack" style="gap:14px" data-once novalidate>
+      <form method="post" enctype="multipart/form-data" class="panel-raised panel-pad stack" style="gap:14px" data-progress data-once novalidate>
         {% csrf_token %}<input type="hidden" name="action" value="save">
         <div class="row" style="justify-content:space-between">
           <div class="panel-title mb-0">Edit photo</div>
@@ -93,7 +93,7 @@
         </div>
       </form>
       {% else %}
-      <form method="post" enctype="multipart/form-data" class="panel-raised panel-pad stack" style="gap:14px" data-once novalidate>
+      <form method="post" enctype="multipart/form-data" class="panel-raised panel-pad stack" style="gap:14px" data-progress data-once novalidate>
         {% csrf_token %}<input type="hidden" name="action" value="upload">
         <div class="panel-title mb-0">Add photos</div>
         {% include "partials/form_errors.html" with form=upload_form %}
@@ -117,6 +117,30 @@
         <button class="btn btn-gold" style="align-self:flex-start">Add to portfolio</button>
       </form>
       {% endif %}
+
+      <div class="panel panel-pad stack" style="gap:12px">
+        <div class="panel-title mb-0">Categories</div>
+        <p class="muted mb-0" style="font-size:13px">These are the filters on the public portfolio page and the choices when you add a photo.</p>
+        {% for c, count in category_rows %}
+        <div class="row" style="gap:8px;flex-wrap:nowrap;align-items:center">
+          <form method="post" class="row" style="gap:8px;flex:1;flex-wrap:nowrap">{% csrf_token %}
+            <input type="hidden" name="action" value="category_rename"><input type="hidden" name="id" value="{{ c.pk }}">
+            <input class="input" type="text" name="name" value="{{ c.name }}" maxlength="60" aria-label="Category name" style="flex:1;min-width:0">
+            <button class="btn btn-outline">Rename</button>
+          </form>
+          <span class="mono" style="font-size:11px;color:var(--ink-60)">{{ count }}</span>
+          <form method="post">{% csrf_token %}
+            <input type="hidden" name="action" value="category_delete"><input type="hidden" name="id" value="{{ c.pk }}">
+            <button class="btn btn-danger" aria-label="Delete {{ c.name }}" data-confirm="Delete the “{{ c.name }}” category?">✕</button>
+          </form>
+        </div>
+        {% endfor %}
+        <form method="post" class="row" style="gap:8px;flex-wrap:nowrap">{% csrf_token %}
+          <input type="hidden" name="action" value="category_add">
+          {{ category_form.name }}
+          <button class="btn btn-gold">Add</button>
+        </form>
+      </div>
 
       <div class="panel panel-pad">
         <div class="panel-title">Where these show up</div>

@@ -1,11 +1,12 @@
 from django import forms
 from django.conf import settings
 from django.contrib.auth import password_validation
+from django.contrib.auth.forms import PasswordChangeForm
 from django.core.validators import validate_email
 
 from apps.accounts.models import User
 from apps.blog.models import Category, Post
-from apps.core.models import PortfolioItem, SiteSettings, Testimonial
+from apps.core.models import PortfolioCategory, PortfolioItem, SiteSettings, Testimonial
 from apps.orders.forms import MultipleFileField
 from apps.orders.models import Order, OrderFile, PatchCategory, PricingTier, TurnaroundOption
 from apps.orders.validators import validate_upload
@@ -96,6 +97,18 @@ class PostForm(forms.ModelForm):
         return post
 
 
+def category_choices():
+    return [(c.slug, c.name) for c in PortfolioCategory.objects.all()]
+
+
+class PortfolioCategoryForm(forms.ModelForm):
+    class Meta:
+        model = PortfolioCategory
+        fields = ["name"]
+        widgets = {"name": forms.TextInput(attrs={"placeholder": "e.g. Hoodies"})}
+        labels = {"name": "Category name"}
+
+
 class PortfolioUploadForm(forms.Form):
     """Add one or many portfolio photos at once, all filed under the same category."""
 
@@ -104,7 +117,7 @@ class PortfolioUploadForm(forms.Form):
         allowed_extensions=settings.IMAGE_EXTENSIONS,
         max_bytes=settings.PORTFOLIO_IMAGE_MAX_BYTES,
     )
-    category = forms.ChoiceField(choices=PortfolioItem.Category.choices)
+    category = forms.ChoiceField(choices=[])
     name = forms.CharField(
         required=False,
         max_length=120,
@@ -119,6 +132,10 @@ class PortfolioUploadForm(forms.Form):
     )
     show_on_home = forms.BooleanField(required=False, label="Also feature in the home page showcase")
     is_published = forms.BooleanField(required=False, initial=True, label="Visible on the website")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["category"].choices = category_choices()
 
 
 class PortfolioItemForm(forms.ModelForm):
@@ -153,6 +170,10 @@ class PortfolioItemForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["image"].required = False  # keep the current photo unless a new one is picked
+        choices = category_choices()
+        if self.instance.pk and self.instance.category not in {c[0] for c in choices}:
+            choices.append((self.instance.category, self.instance.get_category_display()))
+        self.fields["category"] = forms.ChoiceField(choices=choices, label="Category")
 
     def clean_image(self):
         image = self.cleaned_data.get("image")
@@ -215,6 +236,42 @@ class SiteSettingsForm(forms.ModelForm):
         widgets = {
             "address": forms.TextInput(attrs={"placeholder": "12 Loom St, Austin, TX 78701"}),
         }
+
+
+class SocialLinksForm(forms.ModelForm):
+    """Social profiles shown as icons in the site footer. Leave a box empty to hide that icon."""
+
+    class Meta:
+        model = SiteSettings
+        fields = [f"{key}_url" for key, _ in SiteSettings.SOCIAL_FIELDS]
+        widgets = {
+            "facebook_url": forms.URLInput(attrs={"placeholder": "https://facebook.com/yourpage"}),
+            "instagram_url": forms.URLInput(attrs={"placeholder": "https://instagram.com/yourhandle"}),
+            "x_url": forms.URLInput(attrs={"placeholder": "https://x.com/yourhandle"}),
+            "linkedin_url": forms.URLInput(attrs={"placeholder": "https://linkedin.com/company/yourcompany"}),
+            "youtube_url": forms.URLInput(attrs={"placeholder": "https://youtube.com/@yourchannel"}),
+            "tiktok_url": forms.URLInput(attrs={"placeholder": "https://tiktok.com/@yourhandle"}),
+            "pinterest_url": forms.URLInput(attrs={"placeholder": "https://pinterest.com/yourprofile"}),
+            "whatsapp_url": forms.URLInput(attrs={"placeholder": "https://wa.me/15125550148"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.assume_scheme = "https"
+
+
+class AdminPasswordChangeForm(PasswordChangeForm):
+    """Lets the signed-in admin change their own password."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["old_password"].label = "Current password"
+        self.fields["new_password1"].label = "New password"
+        self.fields["new_password2"].label = "Confirm new password"
+        self.fields["old_password"].widget.attrs.update({"autocomplete": "current-password"})
+        self.fields["new_password1"].widget.attrs.update({"autocomplete": "new-password"})
+        self.fields["new_password2"].widget.attrs.update({"autocomplete": "new-password"})
 
 
 class NotificationSettingsForm(forms.ModelForm):
@@ -286,8 +343,21 @@ TurnaroundFormSet = forms.modelformset_factory(
 )
 PatchCategoryFormSet = forms.modelformset_factory(
     PatchCategory,
-    fields=["name", "description", "unit_price", "sort_order", "is_active"],
-    widgets=_row_widgets(unit_price=forms.NumberInput(attrs={"step": "0.01", "min": "0"})),
+    fields=[
+        "name",
+        "description",
+        "unit_price",
+        "ribbon",
+        "features",
+        "sort_order",
+        "is_highlighted",
+        "is_active",
+    ],
+    widgets=_row_widgets(
+        unit_price=forms.NumberInput(attrs={"step": "0.01", "min": "0"}),
+        ribbon=forms.TextInput(attrs={"placeholder": "POPULAR"}),
+        features=forms.Textarea(attrs={"rows": 4, "placeholder": "One line per feature"}),
+    ),
     extra=0,
     can_delete=True,
 )

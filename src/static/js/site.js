@@ -11,6 +11,87 @@
     });
   }
 
+  // Header dropdowns (Services, More)
+  var dropdowns = document.querySelectorAll("[data-dropdown]");
+  function closeDropdowns(except) {
+    dropdowns.forEach(function (d) {
+      if (d === except) return;
+      d.classList.remove("is-open");
+      var b = d.querySelector(".nav-drop-btn");
+      if (b) b.setAttribute("aria-expanded", "false");
+    });
+  }
+  dropdowns.forEach(function (d) {
+    var btn = d.querySelector(".nav-drop-btn");
+    if (!btn) return;
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      closeDropdowns(d);
+      var open = d.classList.toggle("is-open");
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  });
+  document.addEventListener("click", function () { closeDropdowns(null); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeDropdowns(null); });
+
+  // Pricing tabs (home)
+  document.querySelectorAll("[data-price-tabs]").forEach(function (root) {
+    var tabs = Array.prototype.slice.call(root.querySelectorAll("[data-price-tab]"));
+    var panels = Array.prototype.slice.call(root.querySelectorAll("[data-price-panel]"));
+    function select(name, focus) {
+      tabs.forEach(function (t) {
+        var on = t.getAttribute("data-price-tab") === name;
+        t.classList.toggle("is-active", on);
+        t.setAttribute("aria-selected", on ? "true" : "false");
+        t.tabIndex = on ? 0 : -1;
+        if (on && focus) t.focus();
+      });
+      panels.forEach(function (p) { p.hidden = p.getAttribute("data-price-panel") !== name; });
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener("click", function () { select(t.getAttribute("data-price-tab")); });
+      t.addEventListener("keydown", function (e) {
+        var next = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : null;
+        if (next === null) return;
+        e.preventDefault();
+        select(tabs[(next + tabs.length) % tabs.length].getAttribute("data-price-tab"), true);
+      });
+    });
+  });
+
+  // Hero numbers count up when the page opens: "18,400+", "4 hrs", "99.2%", "34"
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelectorAll("[data-count-up]").forEach(function (el) {
+    var original = el.textContent.trim();
+    var m = original.match(/^(\D*)([\d,]*\.?\d+)(.*)$/);
+    if (!m || reduceMotion) return;
+    var target = parseFloat(m[2].replace(/,/g, ""));
+    var decimals = (m[2].split(".")[1] || "").length;
+    var grouped = m[2].indexOf(",") !== -1;
+    var duration = 1800;
+    var format = function (n) {
+      var text = n.toFixed(decimals);
+      if (grouped) {
+        var parts = text.split(".");
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        text = parts.join(".");
+      }
+      return m[1] + text + m[3];
+    };
+    el.setAttribute("aria-label", original);
+    el.textContent = format(0);
+    var start = null;
+    function frame(ts) {
+      if (start === null) start = ts;
+      var t = Math.min(1, (ts - start) / duration);
+      var eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = format(target * eased);
+      if (t < 1) window.requestAnimationFrame(frame);
+      else el.textContent = original;
+    }
+    window.requestAnimationFrame(frame);
+  });
+
   // Flash messages: dismiss + auto-hide
   document.querySelectorAll("[data-flash]").forEach(function (el) {
     var close = function () { el.remove(); };
@@ -60,7 +141,8 @@
   }
   document.querySelectorAll("[data-dropzone]").forEach(function (zone) {
     var input = zone.querySelector("input[type=file]");
-    var list = document.querySelector(zone.getAttribute("data-dropzone")) || zone.parentElement.querySelector("[data-file-list]");
+    var listSelector = zone.getAttribute("data-dropzone");
+    var list = (listSelector && document.querySelector(listSelector)) || zone.parentElement.querySelector("[data-file-list]");
     var maxBytes = Number(zone.getAttribute("data-max-bytes") || 0);
     if (!input) return;
 
@@ -71,12 +153,12 @@
         var tooBig = maxBytes && file.size > maxBytes;
         var row = document.createElement("div");
         row.className = "file-row";
-        row.innerHTML = '<div class="row"><div class="thumb placeholder-img"></div><div><div class="file-name"></div>' +
-          '<div class="file-meta"></div></div></div><span class="badge"></span>';
+        row.innerHTML = '<div class="row" style="min-width:0;flex-wrap:nowrap"><div class="thumb placeholder-img"></div><div style="min-width:0"><div class="file-name"></div>' +
+          '<div class="file-meta"></div><div class="file-progress" hidden><i></i></div></div></div><span class="badge"></span>';
         row.querySelector(".file-name").textContent = file.name;
-        row.querySelector(".file-meta").textContent = formatBytes(file.size) + (tooBig ? " · too large" : " · ready to upload");
+        row.querySelector(".file-meta").textContent = formatBytes(file.size) + (tooBig ? " · too large" : " · attached");
         var badge = row.querySelector(".badge");
-        badge.textContent = tooBig ? "Too large" : "Ready";
+        badge.textContent = tooBig ? "Too large" : "Attached ✓";
         badge.className = "badge " + (tooBig ? "badge-danger" : "badge-gold");
         list.appendChild(row);
       });
@@ -99,6 +181,119 @@
       Array.prototype.forEach.call(e.dataTransfer.files, function (f) { dt.items.add(f); });
       input.files = dt.files;
       renderList();
+    });
+  });
+
+  // Forms with files: send them with a progress bar, then show the page the server answers with.
+  // <form data-progress> — falls back to a normal submit when no file is chosen.
+  document.querySelectorAll("form[data-progress]").forEach(function (form) {
+    form.addEventListener("submit", function (e) {
+      if (e.defaultPrevented) return;
+      var files = [];
+      form.querySelectorAll("input[type=file]").forEach(function (input) {
+        if (!input.disabled) Array.prototype.forEach.call(input.files, function (f) { files.push(f); });
+      });
+      if (!files.length || !window.XMLHttpRequest || !window.FormData) return;
+      e.preventDefault();
+
+      var submit = e.submitter || form.querySelector("button[type=submit], button:not([type])");
+      var body;
+      try { body = new FormData(form, e.submitter || undefined); } catch (err) { body = new FormData(form); }
+      var rows = Array.prototype.slice.call(form.querySelectorAll("[data-file-list] .file-row"));
+
+      var bar = form.querySelector(".upload-bar");
+      if (!bar) {
+        bar = document.createElement("div");
+        bar.className = "upload-bar";
+        bar.setAttribute("role", "progressbar");
+        bar.setAttribute("aria-valuemin", "0");
+        bar.setAttribute("aria-valuemax", "100");
+        bar.innerHTML = '<div class="upload-bar-top"><span class="upload-bar-text"></span><span class="upload-bar-pct"></span></div>' +
+          '<div class="upload-bar-track"><div class="upload-bar-fill"></div></div>';
+        if (submit && submit.parentNode) submit.parentNode.insertBefore(bar, submit);
+        else form.appendChild(bar);
+      }
+      var fill = bar.querySelector(".upload-bar-fill");
+      var text = bar.querySelector(".upload-bar-text");
+      var pctEl = bar.querySelector(".upload-bar-pct");
+      var setBar = function (pct, label, state) {
+        fill.style.width = pct + "%";
+        pctEl.textContent = Math.round(pct) + "%";
+        text.textContent = label;
+        bar.setAttribute("aria-valuenow", String(Math.round(pct)));
+        bar.classList.toggle("is-done", state === "done");
+        bar.classList.toggle("is-error", state === "error");
+      };
+      bar.hidden = false;
+      setBar(0, "Uploading " + files.length + " file" + (files.length === 1 ? "" : "s") + "…");
+      if (submit) { submit.disabled = true; }
+      rows.forEach(function (row) {
+        var meta = row.querySelector(".file-meta");
+        var prog = row.querySelector(".file-progress");
+        if (prog) { prog.hidden = false; prog.firstChild.style.width = "0%"; }
+        var badge = row.querySelector(".badge");
+        if (badge) { badge.textContent = "Uploading"; badge.className = "badge badge-soft"; }
+        if (meta) meta.dataset.base = meta.textContent.replace(/ · attached$/, "");
+      });
+
+      var total = files.reduce(function (n, f) { return n + f.size; }, 0) || 1;
+      var xhr = new XMLHttpRequest();
+      xhr.open((form.method || "POST").toUpperCase(), form.getAttribute("action") || window.location.href);
+      xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+
+      xhr.upload.addEventListener("progress", function (ev) {
+        if (!ev.lengthComputable) return;
+        var pct = Math.min(99, (ev.loaded / ev.total) * 100);
+        setBar(pct, "Uploading… " + formatBytes(Math.min(total, Math.round(total * ev.loaded / ev.total))) + " of " + formatBytes(total));
+        var sent = (ev.loaded / ev.total) * total, offset = 0;
+        files.forEach(function (f, i) {
+          var share = Math.max(0, Math.min(1, (sent - offset) / (f.size || 1)));
+          offset += f.size;
+          var row = rows[i];
+          if (!row) return;
+          var prog = row.querySelector(".file-progress");
+          if (prog) prog.firstChild.style.width = Math.round(share * 100) + "%";
+          if (share >= 1) {
+            var badge = row.querySelector(".badge");
+            if (badge) { badge.textContent = "Uploaded ✓"; badge.className = "badge badge-gold"; }
+          }
+        });
+      });
+      xhr.upload.addEventListener("load", function () { setBar(99, "Upload complete — saving…"); });
+
+      var fail = function (message) {
+        setBar(0, message, "error");
+        if (submit) submit.disabled = false;
+        rows.forEach(function (row) {
+          var prog = row.querySelector(".file-progress");
+          if (prog) prog.hidden = true;
+          var badge = row.querySelector(".badge");
+          if (badge) { badge.textContent = "Attached ✓"; badge.className = "badge badge-gold"; }
+        });
+      };
+      xhr.addEventListener("error", function () { fail("Upload failed. Check your connection and try again."); });
+      xhr.addEventListener("abort", function () { fail("Upload cancelled."); });
+      xhr.addEventListener("load", function () {
+        if (xhr.status >= 500) { fail("The server could not save the upload. Please try again."); return; }
+        setBar(100, "All files uploaded ✓", "done");
+        rows.forEach(function (row) {
+          var prog = row.querySelector(".file-progress");
+          if (prog) prog.firstChild.style.width = "100%";
+          var badge = row.querySelector(".badge");
+          if (badge) { badge.textContent = "Uploaded ✓"; badge.className = "badge badge-gold"; }
+          var meta = row.querySelector(".file-meta");
+          if (meta && meta.dataset.base) meta.textContent = meta.dataset.base + " · uploaded";
+        });
+        // The server already followed any redirect, so this is the page the visitor would have landed on.
+        setTimeout(function () {
+          try { if (xhr.responseURL) window.history.replaceState(null, "", xhr.responseURL); } catch (err) { /* cross-origin */ }
+          document.open();
+          document.write(xhr.responseText);
+          document.close();
+          window.scrollTo(0, 0);
+        }, 500);
+      });
+      xhr.send(body);
     });
   });
 

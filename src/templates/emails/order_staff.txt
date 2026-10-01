@@ -1,4 +1,4 @@
-New order {{ order.number }}
+{% if order.is_quote %}New QUOTE REQUEST {{ order.number }} — reply with a price{% else %}New order {{ order.number }}{% endif %}
 
 Customer: {{ order.contact_name }} <{{ order.contact_email }}>{% if order.customer.company %} · {{ order.customer.company }}{% endif %}
 Design: {{ order.design_name }}

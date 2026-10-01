@@ -1,11 +1,12 @@
 from django.contrib import messages
+from django.http import Http404
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from apps.orders.models import PatchCategory, PricingTier, Service
 
 from .forms import ContactForm
-from .models import FAQ, PortfolioItem, SiteSettings, Testimonial
+from .models import FAQ, PortfolioCategory, PortfolioItem, SiteSettings, Testimonial
 from .utils import get_client_ip, rate_limited, send_templated_email
 
 HERO_STATS = [
@@ -66,6 +67,85 @@ ABOUT_VALUES = [
 ]
 
 
+SERVICE_PAGES = {
+    "embroidery": {
+        "service": Service.DIGITIZING,
+        "title": "Embroidery Digitizing",
+        "kicker": "Service 01",
+        "headline": "Stitch files punched by hand, sewn before you get them",
+        "lead": "We turn your logo or artwork into a machine-ready embroidery file. A digitizer builds every "
+        "column, underlay and trim by hand, then runs it on the fabric class you named.",
+        "highlights": [
+            (
+                "Fabric-specific",
+                "Density, underlay and pull compensation are set for the fabric you tell us.",
+            ),
+            ("Test-sewn", "Every file is run on a real machine and the sew-out photo comes with the file."),
+            ("All formats", "DST, PES, EXP, JEF, VP3 and more are included — no format fees."),
+            ("Free revisions", "Changes inside the original scope are turned around the same day."),
+        ],
+        "steps": [
+            ("Send artwork", "Upload any file type and tell us the fabric, placement, size and formats."),
+            ("We punch & test-sew", "A digitizer builds the file and sews it out on your fabric class."),
+            ("You approve", "Review the proof. Pay only once you're happy, then download the files."),
+        ],
+        "good_for": [
+            "Left-chest logos",
+            "Caps & beanies",
+            "Jacket backs",
+            "3D puff & appliqué",
+            "Towels & bags",
+        ],
+        "formats": "DST · PES · EXP · JEF · VP3 · XXX · HUS · EMB",
+    },
+    "vector": {
+        "service": Service.VECTOR,
+        "title": "Vector Art Services",
+        "kicker": "Service 02",
+        "headline": "Clean, scalable artwork rebuilt from any image",
+        "lead": "Blurry logo, photo of a sign, hand sketch? We redraw it as crisp vector art that prints, "
+        "cuts and embroiders cleanly at any size.",
+        "highlights": [
+            ("Redrawn, not auto-traced", "Curves are rebuilt by hand so edges stay smooth at 300% zoom."),
+            ("Print ready", "Screen print separations, sublimation and signage layouts on request."),
+            ("Every format", "AI, EPS, PDF, SVG, CDR and PNG delivered together."),
+            ("Pantone matched", "Colours matched to your brand swatches when you provide them."),
+        ],
+        "steps": [
+            ("Send your image", "Any raster, photo or sketch works — the rougher, the more we can help."),
+            ("We redraw it", "A designer rebuilds the artwork and sends a proof for your review."),
+            ("Download files", "Approve the proof and receive every vector format you asked for."),
+        ],
+        "good_for": ["Logo rebuilds", "Screen printing", "Sublimation", "Signage & vinyl", "Merch artwork"],
+        "formats": "AI · EPS · PDF · SVG · CDR · PNG",
+    },
+    "patches": {
+        "service": Service.PATCHES,
+        "title": "Embroidery Patches",
+        "kicker": "Service 03",
+        "headline": "Custom patches made and shipped to your door",
+        "lead": "From design to finished patch: iron-on, embroidered or rubber, with the backing you need, "
+        "produced in bulk and shipped to your address.",
+        "highlights": [
+            ("Three patch types", "Iron-on, embroidery (merrowed or laser-cut) and soft PVC rubber patches."),
+            ("Your backing", "Iron-on, velcro, adhesive or sew-on — choose per order."),
+            ("Artwork included", "We prepare the artwork and stitch file so you don't have to."),
+            (
+                "Delivered to you",
+                "Add your shipping address on the order and we ship when production is done.",
+            ),
+        ],
+        "steps": [
+            ("Choose type & size", "Pick the patch category, backing, size and quantity."),
+            ("Approve the proof", "We send a digital proof of your patch before production starts."),
+            ("Production & shipping", "Patches are made and shipped to the address on your order."),
+        ],
+        "good_for": ["Uniforms", "Clubs & teams", "Brand merch", "Caps & jackets", "Events"],
+        "formats": "Iron-on · Embroidery · Rubber",
+    },
+}
+
+
 def _services_overview():
     tiers = list(PricingTier.objects.filter(is_active=True))
     patch_from = PatchCategory.objects.filter(is_active=True).order_by("unit_price").first()
@@ -79,6 +159,7 @@ def _services_overview():
     return [
         {
             "no": "01",
+            "slug": "embroidery",
             "service": Service.DIGITIZING,
             "title": "Embroidery Digitizing",
             "body": "Manual punching for caps, flats, 3D puff, appliqué and towels — built for the fabric "
@@ -92,6 +173,7 @@ def _services_overview():
         },
         {
             "no": "02",
+            "slug": "vector",
             "service": Service.VECTOR,
             "title": "Vector Art Services",
             "body": "Clean, print-ready redraws from any raster: screen print separations, sublimation, "
@@ -101,6 +183,7 @@ def _services_overview():
         },
         {
             "no": "03",
+            "slug": "patches",
             "service": Service.PATCHES,
             "title": "Embroidery Patches",
             "body": "Custom patches manufactured and shipped — iron-on, embroidered or rubber, with the "
@@ -130,11 +213,8 @@ def home(request):
         "showcase": showcase,
         "steps": STEPS,
         "digitizing_tiers": PricingTier.objects.filter(is_active=True, service=Service.DIGITIZING),
-        "vector_tier": PricingTier.objects.filter(is_active=True, service=Service.VECTOR).first(),
-        "patch_from": PatchCategory.objects.filter(is_active=True)
-        .order_by("unit_price")
-        .values_list("unit_price", flat=True)
-        .first(),
+        "vector_tiers": PricingTier.objects.filter(is_active=True, service=Service.VECTOR),
+        "patch_categories": PatchCategory.objects.filter(is_active=True),
         "why_us": WHY_US,
         "testimonials": Testimonial.objects.filter(is_published=True),
         "faqs": FAQ.objects.filter(is_published=True),
@@ -143,15 +223,49 @@ def home(request):
 
 
 def portfolio(request):
-    categories = PortfolioItem.Category
+    categories = list(PortfolioCategory.objects.all())
     active = request.GET.get("category", "")
     items = PortfolioItem.objects.filter(is_published=True)
-    if active in categories.values:
+    if active in {c.slug for c in categories}:
         items = items.filter(category=active)
     else:
         active = ""
+    names = {c.slug: c for c in categories}
+    items = list(items)
+    for item in items:  # avoid one query per card
+        item.cached_category = names.get(item.category)
     return render(
-        request, "core/portfolio.html", {"items": items, "categories": categories.choices, "active": active}
+        request,
+        "core/portfolio.html",
+        {"items": items, "categories": [(c.slug, c.name) for c in categories], "active": active},
+    )
+
+
+def testimonials(request):
+    return render(
+        request, "core/testimonials.html", {"testimonials": Testimonial.objects.filter(is_published=True)}
+    )
+
+
+def services(request):
+    return render(request, "core/services.html", {"services": _services_overview()})
+
+
+def service_page(request, slug):
+    page = SERVICE_PAGES.get(slug)
+    if page is None:
+        raise Http404
+    overview = {sv["service"]: sv for sv in _services_overview()}
+    return render(
+        request,
+        "core/service_detail.html",
+        {
+            "page": page,
+            "slug": slug,
+            "price_line": overview[page["service"]]["price"],
+            "others": [(k, v["title"]) for k, v in SERVICE_PAGES.items() if k != slug],
+            "faqs": FAQ.objects.filter(is_published=True)[:4],
+        },
     )
 
 

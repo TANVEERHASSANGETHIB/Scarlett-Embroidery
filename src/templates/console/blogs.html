@@ -34,7 +34,7 @@
     </div>
 
     {% if editor_open %}
-    <form method="post" enctype="multipart/form-data" class="panel-raised panel-pad stack" style="gap:14px" data-once novalidate>
+    <form method="post" enctype="multipart/form-data" class="panel-raised panel-pad stack" style="gap:14px" data-progress data-once novalidate>
       {% csrf_token %}
       <div class="row" style="justify-content:space-between">
         <div class="panel-title mb-0">{% if post %}Edit post{% else %}New post{% endif %}</div>

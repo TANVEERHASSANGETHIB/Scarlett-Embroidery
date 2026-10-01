@@ -1,6 +1,6 @@
 Hi {{ order.contact_name }},
 
-Thanks — we've received order {{ order.number }} ({{ order.design_name }}).
+{% if order.is_quote %}Thanks — we've received your quote request {{ order.number }} ({{ order.design_name }}).{% else %}Thanks — we've received order {{ order.number }} ({{ order.design_name }}).{% endif %}
 
 Service: {{ order.get_service_display }}
 {% if order.is_patch %}Patch: {{ order.patch.category.name }} · {{ order.patch.quantity }} pcs · {{ order.patch.get_backing_display }} backing
@@ -8,9 +8,9 @@ Size: {{ order.patch.size_display }}
 {% else %}Design type: {{ order.tier.name }}
 Turnaround: {{ order.turnaround.name }}
 Formats: {{ order.formats_display }}
-{% endif %}Estimate: {% if order.estimate is not None %}${{ order.estimate }}{% else %}quote pending{% endif %}
+{% endif %}{% if order.is_quote %}Price: quote pending{% else %}Estimate: {% if order.estimate is not None %}${{ order.estimate }}{% else %}quote pending{% endif %}{% endif %}
 
-A digitizer will review your artwork and confirm the final price. You only pay once you approve the proof.
+{% if order.is_quote %}A digitizer will review your artwork and email you a price shortly. There's no obligation.{% else %}A digitizer will review your artwork and confirm the final price. You only pay once you approve the proof.{% endif %}
 
 Track your order: {{ url }}
 

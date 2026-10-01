@@ -29,11 +29,16 @@ from .services import attach_files, create_order, customer_approve, customer_req
 from .validators import validate_upload
 
 ORDER_META = [("Quote", "Under 30 min"), ("Pay", "After approval"), ("Revisions", "Free in scope")]
+QUOTE_META = [("Reply", "Under 30 min"), ("Cost", "Free quote"), ("Commitment", "None")]
 
 
 @require_http_methods(["GET", "POST"])
-def place_order(request):
-    """The order form. Guests may fill it in; we save their work and ask them to sign in."""
+def place_order(request, quote=False):
+    """The order form. Guests may fill it in; we save their work and ask them to sign in.
+
+    With ``quote=True`` it is the quote-request form instead: the same questions,
+    but no prices are shown and none are stored on the request.
+    """
     user = request.user
     draft = drafts.get_draft(request)
     saved_files = drafts.valid_saved_files(draft)
@@ -92,11 +97,18 @@ def place_order(request):
             order_ok = form.is_valid()
             patch_ok = patch_form.is_valid() if is_patch else True
             if order_ok and patch_ok:
-                order = create_order(user, form, patch_form if is_patch else None, draft=draft)
-                drafts.discard(request, draft)
-                messages.success(
-                    request, f"Order {order.number} placed — we're on it. Your quote lands in your inbox."
+                order = create_order(
+                    user, form, patch_form if is_patch else None, draft=draft, is_quote=quote
                 )
+                drafts.discard(request, draft)
+                if quote:
+                    messages.success(
+                        request, f"Quote request {order.number} sent — we'll email your price shortly."
+                    )
+                else:
+                    messages.success(
+                        request, f"Order {order.number} placed — we're on it. Your quote lands in your inbox."
+                    )
                 return redirect("accounts:dashboard")
             messages.error(request, "Please fix the highlighted fields below.")
     else:
@@ -126,6 +138,12 @@ def place_order(request):
         (Service.VECTOR, "Vector Art", f"from ${vector_from:.0f} / logo" if vector_from is not None else ""),
         (Service.PATCHES, "Patches", f"from ${patch_from} ea" if patch_from is not None else ""),
     ]
+    if quote:  # quote requests never show a price
+        service_cards = [
+            (Service.DIGITIZING, "Digitizing", "Embroidery files"),
+            (Service.VECTOR, "Vector Art", "Redrawn artwork"),
+            (Service.PATCHES, "Patches", "Made & shipped"),
+        ]
 
     return render(
         request,
@@ -133,8 +151,9 @@ def place_order(request):
         {
             "form": form,
             "patch_form": patch_form,
-            "order_meta": ORDER_META,
-            "pricing": pricing_payload(),
+            "order_meta": QUOTE_META if quote else ORDER_META,
+            "is_quote": quote,
+            "pricing": pricing_payload(hide_prices=quote),
             "service_cards": service_cards,
             "tiers": tiers,
             "turnarounds": TurnaroundOption.objects.filter(is_active=True),
@@ -145,7 +164,7 @@ def place_order(request):
             "saved_files": saved_files,
             "show_login_gate": show_login_gate,
             "restored": restored,
-            "login_next": reverse("orders:place"),
+            "login_next": reverse("orders:quote" if quote else "orders:place"),
         },
     )
 
@@ -162,7 +181,7 @@ def remove_saved_file(request, pk):
     saved.file.delete(save=False)
     saved.delete()
     messages.success(request, "File removed.")
-    return redirect("orders:place")
+    return redirect("orders:quote" if request.POST.get("from") == "quote" else "orders:place")
 
 
 def _customer_order(request, number):

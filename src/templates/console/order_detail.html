@@ -5,7 +5,7 @@
   <a href="{% url 'console:orders' %}" class="mono" style="font-size:12px">← Orders</a>
   <div class="console-head" style="margin-top:8px">
     <div>
-      <div class="panel-title" style="margin-bottom:4px">{{ order.number }} · {{ order.get_service_display }}</div>
+      <div class="panel-title" style="margin-bottom:4px">{{ order.number }} · {{ order.get_service_display }}{% if order.is_quote %} · Quote request{% endif %}</div>
       <h1 class="console-title">{{ order.design_name }}</h1>
       <p class="console-sub">{{ order.contact_name }} · <a href="mailto:{{ order.contact_email }}">{{ order.contact_email }}</a> · <a href="{% url 'console:customer_detail' order.customer_id %}">{{ order.customer.company|default:"customer profile" }}</a></p>
     </div>
@@ -45,7 +45,7 @@
         {% include "orders/_files.html" with files=proofs deletable=True %}
         <div class="panel-title mt-m">Final files</div>
         {% include "orders/_files.html" with files=deliverables deletable=True %}
-        <form method="post" enctype="multipart/form-data" class="stack mt-m" data-once>
+        <form method="post" enctype="multipart/form-data" class="stack mt-m" data-progress data-once>
           {% csrf_token %}<input type="hidden" name="section" value="upload">
           {% include "partials/form_errors.html" with form=upload_form %}
           <div class="grid-2">

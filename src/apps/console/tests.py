@@ -566,3 +566,97 @@ def test_only_staff_can_manage_reviews(client, customer):
     client.force_login(customer)
     resp = client.get(reverse("console:testimonials"))
     assert resp.status_code == 302 and reverse("console:login") in resp.url
+
+
+# ── Site upgrade: categories, social links, password ─────
+def test_admin_can_add_rename_and_delete_portfolio_categories(client, staff, image_file):
+    from apps.core.models import PortfolioCategory
+
+    client.force_login(staff)
+    url = reverse("console:portfolio")
+    client.post(url, {"action": "category_add", "name": "Hoodies"})
+    cat = PortfolioCategory.objects.get(name="Hoodies")
+
+    client.post(url, {"action": "category_rename", "id": cat.pk, "name": "Zip hoodies"})
+    cat.refresh_from_db()
+    assert cat.name == "Zip hoodies" and cat.slug == "hoodies"  # slug stays stable
+
+    # The new category is offered when adding a photo...
+    client.post(
+        url,
+        {"action": "upload", "images": [image_file("a.png")], "category": "hoodies", "is_published": "on"},
+    )
+    assert PortfolioItem.objects.get().category == "hoodies"
+    # ...cannot be deleted while it holds photos...
+    client.post(url, {"action": "category_delete", "id": cat.pk})
+    assert PortfolioCategory.objects.filter(pk=cat.pk).exists()
+    # ...but can once it is empty.
+    PortfolioItem.objects.all().delete()
+    client.post(url, {"action": "category_delete", "id": cat.pk})
+    assert not PortfolioCategory.objects.filter(pk=cat.pk).exists()
+
+
+def test_admin_sets_social_links(client, staff):
+    client.force_login(staff)
+    resp = client.post(
+        reverse("console:settings"),
+        {"section": "social", "facebook_url": "facebook.com/scarlett", "x_url": "https://x.com/scarlett"},
+    )
+    assert resp.status_code == 302 and "tab=social" in resp.url
+    site = SiteSettings.load()
+    assert site.facebook_url == "https://facebook.com/scarlett"
+    assert [k for k, _, _ in site.social_links] == ["facebook", "x"]
+
+
+def test_admin_changes_own_password_and_stays_signed_in(client, staff):
+    client.force_login(staff)
+    resp = client.post(
+        reverse("console:settings"),
+        {
+            "section": "password",
+            "old_password": "Str0ng-pass!",
+            "new_password1": "An0ther-Str0ng-pass",
+            "new_password2": "An0ther-Str0ng-pass",
+        },
+    )
+    assert resp.status_code == 302 and "tab=account" in resp.url
+    staff.refresh_from_db()
+    assert staff.check_password("An0ther-Str0ng-pass")
+    assert client.get(reverse("console:settings")).status_code == 200  # session survived
+
+
+def test_wrong_current_password_is_refused(client, staff):
+    client.force_login(staff)
+    resp = client.post(
+        reverse("console:settings"),
+        {
+            "section": "password",
+            "old_password": "nope",
+            "new_password1": "An0ther-Str0ng-pass",
+            "new_password2": "An0ther-Str0ng-pass",
+        },
+    )
+    assert resp.status_code == 200
+    staff.refresh_from_db()
+    assert staff.check_password("Str0ng-pass!")
+    assert b'data-active-tab="account"' in resp.content
+
+
+def test_patch_plan_fields_save_from_the_console(client, staff, pricing):
+    client.force_login(staff)
+    resp = client.get(reverse("console:settings") + "?tab=patches")
+    assert b"pc-0-features" in resp.content and b"pc-0-ribbon" in resp.content
+
+
+def test_console_orders_can_filter_quotes(client, staff, order):
+    quote = Order.objects.create(
+        customer=order.customer,
+        service="vector",
+        contact_name="Q",
+        contact_email="q@x.com",
+        design_name="Quote me",
+        is_quote=True,
+    )
+    client.force_login(staff)
+    body = client.get(reverse("console:orders") + "?status=quotes").content.decode()
+    assert quote.number in body and order.number not in body

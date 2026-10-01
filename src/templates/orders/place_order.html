@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Place order — Scarlett Embroidery{% endblock %}
+{% block title %}{% if is_quote %}Get a quote{% else %}Place order{% endif %} — Scarlett Embroidery{% endblock %}
 {% block content %}
 <section class="container" style="padding-block:48px 80px">
   <div class="between mb-l" style="margin-bottom:28px">
     <div>
-      <div class="kicker">Place order</div>
-      <h1 class="display" style="font-size:clamp(40px,4.6vw,60px);line-height:.98;margin-bottom:6px">Tell us what has to sew</h1>
-      <p class="muted mb-0">Quote back in 30 minutes. You only pay once you approve the proof.</p>
+      <div class="kicker">{% if is_quote %}Get a quote{% else %}Place order{% endif %}</div>
+      <h1 class="display" style="font-size:clamp(40px,4.6vw,60px);line-height:.98;margin-bottom:6px">{% if is_quote %}Tell us what you need priced{% else %}Tell us what has to sew{% endif %}</h1>
+      <p class="muted mb-0">{% if is_quote %}Send the details and we'll email you a price — free, with no obligation.{% else %}Quote back in 30 minutes. You only pay once you approve the proof.{% endif %}
+        {% if is_quote %}Ready to go? <a href="{% url 'orders:place' %}">Place an order</a>.{% else %}Just want a price first? <a href="{% url 'orders:quote' %}">Get a quote</a>.{% endif %}</p>
     </div>
     <div class="row">
       {% for k, v in order_meta %}
@@ -34,7 +35,7 @@
   </div>
   {% endif %}
 
-  <form method="post" enctype="multipart/form-data" class="order-grid" data-order-form data-once novalidate>
+  <form method="post" enctype="multipart/form-data" class="order-grid" data-order-form data-progress {% if is_quote %}data-quote{% endif %} data-once novalidate>
     {% csrf_token %}
     <div class="card card-raised card-pad-l">
       {% if form.non_field_errors or patch_form.non_field_errors %}
@@ -113,7 +114,7 @@
               <label class="option" data-tier-service="{{ tier.service }}">
                 <input type="radio" name="tier" value="{{ tier.pk }}" {% if form.tier.value|stringformat:"s" == tier.pk|stringformat:"s" %}checked{% endif %}>
                 <div class="option-title">{{ tier.name }}</div>
-                <div class="option-note">${{ tier.price|floatformat:"-2" }}{% if tier.description %} · {{ tier.description }}{% endif %}</div>
+                <div class="option-note">{% if is_quote %}{{ tier.description }}{% else %}${{ tier.price|floatformat:"-2" }}{% if tier.description %} · {{ tier.description }}{% endif %}{% endif %}</div>
               </label>
               {% endfor %}
             </div>
@@ -133,7 +134,7 @@
                 {% for ta in turnarounds %}
                 <label class="seg">
                   <input type="radio" name="turnaround" value="{{ ta.pk }}" {% if form.turnaround.value|stringformat:"s" == ta.pk|stringformat:"s" %}checked{% endif %}>
-                  {{ ta.name }}{% if ta.surcharge %}<small>+${{ ta.surcharge|floatformat:"-2" }}</small>{% endif %}
+                  {{ ta.name }}{% if ta.surcharge and not is_quote %}<small>+${{ ta.surcharge|floatformat:"-2" }}</small>{% endif %}
                 </label>
                 {% endfor %}
               </div>
@@ -173,7 +174,7 @@
               <label class="option">
                 <input type="radio" name="patch-category" value="{{ cat.pk }}" {% if patch_form.category.value|stringformat:"s" == cat.pk|stringformat:"s" %}checked{% endif %}>
                 <div class="option-title">{{ cat.name }}</div>
-                <div class="option-note">from ${{ cat.unit_price }} ea{% if cat.description %} · {{ cat.description }}{% endif %}</div>
+                <div class="option-note">{% if is_quote %}{{ cat.description }}{% else %}from ${{ cat.unit_price }} ea{% if cat.description %} · {{ cat.description }}{% endif %}{% endif %}</div>
               </label>
               {% endfor %}
             </div>
@@ -197,10 +198,11 @@
               {% include "partials/field.html" with field=patch_form.height_in label="Height (in)" %}
             </div>
           </div>
-          <p class="help" style="margin-top:-6px">Minimum {{ site_settings.patch_min_quantity }} pieces · {{ site_settings.patch_production_note }} plus shipping.</p>
+          <p class="help" style="margin-top:-6px">Minimum {{ site_settings.patch_min_quantity }} pieces · {{ site_settings.patch_production_note }}{% if not is_quote %} plus shipping{% endif %}.</p>
 
           <div class="patch-panel">
             <div class="sub-title">Shipping address</div>
+            <p class="help" style="margin-top:-4px">Where we should send your finished patches.</p>
             <div class="grid-2">
               {% include "partials/field.html" with field=patch_form.shipping_name %}
               {% include "partials/field.html" with field=patch_form.shipping_phone %}
@@ -217,12 +219,12 @@
 
       <!-- Instructions (all services) -->
       <div class="order-step">
-        {% include "partials/field.html" with field=form.instructions label="Instruction box — notes for your digitizer" %}
+        {% include "partials/field.html" with field=form.instructions label="Additional instructions" %}
       </div>
     </div>
 
     <aside class="order-summary">
-      <div class="kicker" style="margin-bottom:18px">Order summary</div>
+      <div class="kicker" style="margin-bottom:18px">{% if is_quote %}Quote summary{% else %}Order summary{% endif %}</div>
       <div>
         <div class="summary-row"><span class="k">Service</span><span class="v" data-summary="service">—</span></div>
         <div class="summary-row" data-summary-row="tier"><span class="k">Design type</span><span class="v" data-summary="tier">—</span></div>
@@ -235,6 +237,7 @@
         <div class="summary-row" data-summary-row="backing" hidden><span class="k">Backing</span><span class="v" data-summary="backing">—</span></div>
         <div class="summary-row" data-summary-row="ship" hidden><span class="k">Ship to</span><span class="v" data-summary="ship">—</span></div>
       </div>
+      {% if not is_quote %}
       <div class="row" style="justify-content:space-between;align-items:baseline;padding:20px 0 4px">
         <span class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#eceae7a8">Estimate</span>
         <span class="estimate" data-summary="estimate">—</span>
@@ -242,18 +245,23 @@
       <p style="font-size:12px;color:#eceae7a1;margin:0 0 20px" data-summary="note">Final price confirmed after we review the artwork. No charge if you don't approve the proof.</p>
       <button type="submit" class="btn btn-gold btn-lg btn-block">Place order</button>
       <div class="mono" style="font-size:11px;color:var(--bone-55);margin-top:12px">→ redirects to your dashboard</div>
+      {% else %}
+      <p style="font-size:13px;color:#eceae7a1;margin:20px 0">We'll review your artwork and email you a price, usually within 30 minutes. Free, no obligation.</p>
+      <button type="submit" class="btn btn-gold btn-lg btn-block">Request my quote</button>
+      <div class="mono" style="font-size:11px;color:var(--bone-55);margin-top:12px">→ your quote arrives by email</div>
+      {% endif %}
     </aside>
   </form>
   {{ pricing|json_script:"pricing-data" }}
 
-  <form method="post" id="remove-saved-form" hidden>{% csrf_token %}</form>
+  <form method="post" id="remove-saved-form" hidden>{% csrf_token %}{% if is_quote %}<input type="hidden" name="from" value="quote">{% endif %}</form>
 
   <div class="gate-backdrop" data-login-gate {% if not show_login_gate %}hidden{% endif %}>
     <div class="gate-card" role="dialog" aria-modal="true" aria-labelledby="gate-title" aria-describedby="gate-copy" tabindex="-1">
       <div class="kicker">One last step</div>
-      <h2 class="display d-xs" id="gate-title">Sign in to send your order</h2>
+      <h2 class="display d-xs" id="gate-title">Sign in to send your {% if is_quote %}quote request{% else %}order{% endif %}</h2>
       <p id="gate-copy" class="muted" style="font-size:15px">
-        Orders are delivered to your account, so we need to know who you are. Your details{% if saved_files %} and the {{ saved_files|length }} file{{ saved_files|length|pluralize }} you attached{% endif %} are saved — sign in or create your free account and we'll bring you straight back here with everything filled in.
+        {% if is_quote %}Your quote is sent to your account, so we need to know who you are.{% else %}Orders are delivered to your account, so we need to know who you are.{% endif %} Your details{% if saved_files %} and the {{ saved_files|length }} file{{ saved_files|length|pluralize }} you attached{% endif %} are saved — sign in or create your free account and we'll bring you straight back here with everything filled in.
       </p>
       <div class="gate-actions">
         <a class="btn btn-gold btn-lg" href="{% url 'accounts:login' %}?next={{ login_next|urlencode:"" }}">Log in</a>

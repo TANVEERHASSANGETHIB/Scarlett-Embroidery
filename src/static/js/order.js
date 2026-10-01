@@ -6,6 +6,7 @@
   if (!form || !dataEl) return;
 
   var pricing = JSON.parse(dataEl.textContent);
+  var isQuote = form.hasAttribute("data-quote");
   var money = function (n) { return "$" + n.toFixed(2); };
   var byId = function (list, id) {
     for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(id)) return list[i];
@@ -87,19 +88,19 @@
       setText("backing", backing ? backing.getAttribute("data-label") : "—");
       var city = value("patch-city");
       setText("ship", city ? city + (value("patch-country") ? ", " + value("patch-country") : "") : "—");
-      if (cat && qty) estimate = parseFloat(cat.unitPrice) * qty;
+      if (!isQuote && cat && qty) estimate = parseFloat(cat.unitPrice) * qty;
       note = "Starting price per piece × quantity. Final quote depends on size and detail.";
     } else {
       var tier = byId(pricing.tiers, checked("tier"));
       var ta = byId(pricing.turnarounds, checked("turnaround"));
-      setText("tier", tier ? tier.name + " · $" + parseFloat(tier.price).toFixed(0) : "—");
-      setText("turnaround", ta ? ta.name + (parseFloat(ta.surcharge) > 0 ? " (+$" + parseFloat(ta.surcharge).toFixed(0) + ")" : "") : "—");
+      setText("tier", tier ? tier.name + (isQuote ? "" : " · $" + parseFloat(tier.price).toFixed(0)) : "—");
+      setText("turnaround", ta ? ta.name + (!isQuote && parseFloat(ta.surcharge) > 0 ? " (+$" + parseFloat(ta.surcharge).toFixed(0) + ")" : "") : "—");
       var size = value("height_in") && value("width_in") ? " · " + value("height_in") + " × " + value("width_in") + " in" : "";
       setText("fabric", value("fabric") || "—");
       setText("placement", (value("placement") || "—") + size);
       var fmts = selectedFormats(service);
       setText("formats", fmts.length ? fmts.join(", ") : "—");
-      if (tier) estimate = parseFloat(tier.price) + (ta ? parseFloat(ta.surcharge) : 0);
+      if (!isQuote && tier) estimate = parseFloat(tier.price) + (ta ? parseFloat(ta.surcharge) : 0);
     }
 
     setText("estimate", estimate === null ? "—" : money(estimate));

@@ -20,6 +20,7 @@
   <div class="row mb-m" style="gap:6px">
     <a class="chip{% if status == 'open' %} is-active{% endif %}" href="{% querystring status='open' page=None %}">Open</a>
     <a class="chip{% if status == 'all' %} is-active{% endif %}" href="{% querystring status='all' page=None %}">All</a>
+    <a class="chip{% if status == 'quotes' %} is-active{% endif %}" href="{% querystring status='quotes' page=None %}">Quotes</a>
     {% for value, label in statuses %}
     <a class="chip{% if status == value %} is-active{% endif %}" href="{% querystring status=value page=None %}">{{ label }}</a>
     {% endfor %}
@@ -31,7 +32,7 @@
       <tbody>
         {% for o in page %}
         <tr>
-          <td class="t-mono"><a href="{% url 'console:order_detail' o.number %}">{{ o.number }}</a></td>
+          <td class="t-mono"><a href="{% url 'console:order_detail' o.number %}">{{ o.number }}</a>{% if o.is_quote %} <span class="badge badge-soft">Quote</span>{% endif %}</td>
           <td class="t-strong">{{ o.customer.company|default:o.customer.full_name }}</td>
           <td><a href="{% url 'console:order_detail' o.number %}" style="color:inherit">{{ o.design_name }}</a></td>
           <td>{{ o.get_service_display }}{% if o.tier %} · {{ o.tier.name }}{% endif %}</td>

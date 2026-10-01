@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Services — Scarlett Embroidery{% endblock %}
+{% block meta_description %}Embroidery digitizing, vector art and custom patches — see what each service includes and start an order or ask for a quote.{% endblock %}
+{% block content %}
+<section class="dark page-hero">
+  <div class="container">
+    <div class="kicker">Services</div>
+    <h1 class="display d-xl" style="margin-bottom:14px;max-width:22ch">Three services, one production standard</h1>
+    <p class="lead" style="max-width:56ch;margin-bottom:28px">Every file is built by hand and checked before it reaches you. Pick a service to see exactly what's included.</p>
+    <div class="row">
+      <a class="btn btn-gold btn-lg" href="{% url 'orders:place' %}">Place order</a>
+      <a class="btn btn-ghost-light btn-lg" href="{% url 'orders:quote' %}">Get a quote</a>
+    </div>
+  </div>
+</section>
+
+<section class="container section">
+  <div class="grid-3 service-cards">
+    {% for sv in services %}
+    <article class="card card-pad service-card">
+      <div class="service-no">{{ sv.no }}</div>
+      <h2 class="display d-xs">{{ sv.title }}</h2>
+      <p class="muted">{{ sv.body }}</p>
+      <ul class="tick-list">{% for p in sv.points %}<li>{{ p }}</li>{% endfor %}</ul>
+      {% if sv.price %}<div class="mono service-price">{{ sv.price }}</div>{% endif %}
+      <div class="row" style="margin-top:auto;gap:10px">
+        <a class="btn btn-ink btn-md" href="{% url 'core:service' sv.slug %}">Learn more</a>
+        <a class="btn btn-outline btn-md" href="{% url 'orders:place' %}?service={{ sv.service }}">Order</a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="container">
+    <div>
+      <h2 class="display" style="font-size:clamp(34px,4vw,52px);line-height:1;margin-bottom:8px;max-width:22ch">Not sure which one you need?</h2>
+      <p class="mb-0" style="font-size:16px;color:var(--ink-80)">Tell us about the job and we'll price it for free.</p>
+    </div>
+    <div class="row">
+      <a class="btn btn-night btn-lg" href="{% url 'orders:quote' %}">Get a quote</a>
+      <a class="btn btn-ghost-ink btn-lg" href="{% url 'core:contact' %}">Talk to a digitizer</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

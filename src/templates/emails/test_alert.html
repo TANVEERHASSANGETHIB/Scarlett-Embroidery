@@ -1,0 +1,10 @@
+{% extends "emails/base.html" %}
+{% block body %}
+<p style="margin:0 0 16px"><strong>Order notifications are working.</strong></p>
+<p style="margin:0 0 20px">This is a test alert from your Scarlett Embroidery website. When a customer places an order, you will get an email here with their details, the specification and a link to open the order in the admin console.</p>
+<table role="presentation" width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-size:14px">
+  <tr><td style="border-bottom:1px solid #eee;color:#1c1a1799">Sent to</td><td style="border-bottom:1px solid #eee;text-align:right">{{ recipients|join:", " }}</td></tr>
+  <tr><td style="color:#1c1a1799">Triggered by</td><td style="text-align:right">{{ user.get_full_name }}</td></tr>
+</table>
+<p style="margin:24px 0 0"><a href="{{ console_url }}?tab=notifications" style="background:#e0a53c;color:#1c1a17;text-decoration:none;font-weight:700;padding:12px 20px;display:inline-block;text-transform:uppercase;letter-spacing:1px">Manage alerts</a></p>
+{% endblock %}

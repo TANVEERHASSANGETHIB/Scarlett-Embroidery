@@ -1,0 +1,11 @@
+Hi {{ order.contact_name }},
+
+Order {{ order.number }} ({{ order.design_name }}) has been delivered.
+{% if order.is_patch %}Your patches are on their way to the address you provided.{% else %}Your final files are ready to download from your account.{% endif %}
+{% if message %}
+{{ message }}
+{% endif %}
+{{ url }}
+
+Thanks for sewing with us.
+— Scarlett Embroidery

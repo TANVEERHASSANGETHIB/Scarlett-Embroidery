@@ -1,0 +1,18 @@
+New order {{ order.number }}
+
+Customer: {{ order.contact_name }} <{{ order.contact_email }}>{% if order.customer.company %} · {{ order.customer.company }}{% endif %}
+Design: {{ order.design_name }}
+Service: {{ order.get_service_display }}
+{% if order.is_patch %}Patch: {{ order.patch.category.name }} · {{ order.patch.quantity }} pcs · {{ order.patch.get_backing_display }} · {{ order.patch.size_display }}
+Ship to:
+{% for line in order.patch.address_lines %}  {{ line }}
+{% endfor %}{% else %}Design type: {{ order.tier.name }}
+Turnaround: {{ order.turnaround.name }} (due {{ order.due_at|date:"d M H:i" }})
+Fabric / placement: {{ order.fabric|default:"-" }} / {{ order.placement|default:"-" }} {{ order.size_display }}
+Formats: {{ order.formats_display }}
+{% endif %}Estimate: {% if order.estimate is not None %}${{ order.estimate }}{% else %}-{% endif %}
+
+Instructions:
+{{ order.instructions|default:"(none)" }}
+
+Open in console: {{ url }}

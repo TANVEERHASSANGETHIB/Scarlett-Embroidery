@@ -1,0 +1,26 @@
+<div class="chat-widget" data-chat-widget data-session-url="{% url 'chat:session' %}" data-authenticated="{% if user.is_authenticated %}1{% else %}0{% endif %}">
+  <section class="chat-panel" data-chat-panel id="chat-panel" hidden aria-label="Live chat">
+    <div class="chat-head">
+      <div>
+        <div class="chat-title">Chat with a digitizer</div>
+        <div class="chat-sub"><span class="dot-live"></span>Online · replies in ~2 min</div>
+      </div>
+      <button type="button" class="chat-close" data-chat-close aria-label="Close chat">✕</button>
+    </div>
+    <div class="chat-body" data-chat-body aria-live="polite"></div>
+    <div class="chat-state" data-chat-state></div>
+    <form data-chat-form autocomplete="off">
+      <div class="chat-identity" data-chat-identity hidden>
+        <input name="name" placeholder="Your name (optional)" maxlength="120" aria-label="Your name">
+        <input name="email" type="email" placeholder="Email (optional)" maxlength="254" aria-label="Your email">
+      </div>
+      <div class="chat-compose">
+        <input name="body" placeholder="Type your message…" maxlength="2000" aria-label="Message" required>
+        <button type="submit">Send</button>
+      </div>
+    </form>
+  </section>
+  <button type="button" class="chat-launch" data-chat-launch aria-controls="chat-panel" aria-expanded="false">
+    <i></i>Live chat <span class="unread" data-chat-unread hidden>0</span>
+  </button>
+</div>

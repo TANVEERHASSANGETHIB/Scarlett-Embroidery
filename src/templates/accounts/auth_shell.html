@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+{% block footer %}{% endblock %}
+{% block content %}
+<section class="auth-grid">
+  <div class="auth-panel">
+    <div class="auth-logo"><img src="{% static 'img/logo.png' %}" alt="Scarlett Embroidery"></div>
+    <div>
+      <h2 class="display d-m" style="line-height:.98;margin-bottom:18px;max-width:22ch">One account for orders, quotes and files</h2>
+      <ul class="perks">
+        <li>Every delivered file, re-downloadable forever</li>
+        <li>Live order status and sew-out proofs</li>
+        <li>Saved fabric, size and format defaults</li>
+        <li>One invoice history for your accountant</li>
+      </ul>
+    </div>
+    <div class="mono" style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--bone-55)">sedigitizer.com/account</div>
+  </div>
+  <div class="auth-form on-paper">
+    {% block auth_form %}{% endblock %}
+  </div>
+</section>
+{% endblock %}

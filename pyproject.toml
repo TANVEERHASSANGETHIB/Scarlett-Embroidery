@@ -1,0 +1,19 @@
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["src/**/migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "DJ"]
+ignore = ["DJ001", "E501", "UP038"]
+
+[tool.pytest.ini_options]
+# --ds on the command line beats any DJANGO_SETTINGS_MODULE inherited from the
+# environment (the containers set config.settings.dev), so tests always run
+# against the isolated test settings.
+addopts = "--ds=config.settings.test"
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+pythonpath = ["src"]
+testpaths = ["src"]
+python_files = ["tests.py", "test_*.py"]
+asyncio_mode = "auto"

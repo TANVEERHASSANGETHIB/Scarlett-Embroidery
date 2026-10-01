@@ -1,0 +1,46 @@
+{% extends "accounts/account_base.html" %}
+{% block title %}{% if show_all %}Orders{% else %}Dashboard{% endif %} — Scarlett Embroidery{% endblock %}
+{% block account %}
+<div class="between" style="margin-bottom:24px;gap:24px">
+  <div>
+    <h1 class="display" style="font-size:44px;letter-spacing:.02em;margin-bottom:2px">{% if show_all %}Orders{% else %}Dashboard{% endif %}</h1>
+    <p class="muted mb-0" style="font-size:14px">{% if stats.0.1 %}You have open orders — proofs land in your inbox.{% else %}Place an order and track it here, start to finish.{% endif %}</p>
+  </div>
+  <a class="btn btn-gold btn-md" href="{% url 'orders:place' %}">Place order</a>
+</div>
+
+{% if not show_all %}
+<div class="grid-4" style="margin-bottom:28px">
+  {% for k, v in stats %}
+  <div class="card stat-tile"><div class="label" style="margin-bottom:4px">{{ k }}</div><div class="v">{{ v }}</div></div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="between" style="margin-bottom:12px;align-items:center">
+  <h2 class="h3" style="font-size:26px">{% if show_all %}All orders{% else %}Recent orders{% endif %}</h2>
+  <form method="get" role="search">
+    <input class="input" type="search" name="q" value="{{ query }}" placeholder="Search orders…" aria-label="Search orders" style="width:240px;max-width:100%;background:var(--card);padding:10px 14px;font-size:13px">
+  </form>
+</div>
+
+<div class="card table-wrap">
+  <table class="table">
+    <thead><tr><th>Order</th><th>Design</th><th>Service</th><th>Placed</th><th>Status</th><th class="text-right">Total</th></tr></thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td class="t-mono"><a href="{% url 'orders:detail' o.number %}">{{ o.number }}</a></td>
+        <td class="t-strong"><a class="row-link" href="{% url 'orders:detail' o.number %}">{{ o.design_name }}</a></td>
+        <td>{{ o.get_service_display }}{% if o.tier %} · {{ o.tier.name }}{% endif %}</td>
+        <td class="nowrap">{{ o.created_at|date:"d M Y" }}</td>
+        <td>{% include "partials/status_badge.html" with order=o %}</td>
+        <td class="t-total">{% if o.total is not None %}${{ o.total }}{% if o.final_price is None %} <span class="mono" style="font-size:10px;color:var(--ink-60)">est.</span>{% endif %}{% else %}Quote{% endif %}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="empty">{% if query %}No orders match “{{ query }}”.{% else %}No orders yet — <a href="{% url 'orders:place' %}">place your first one</a>.{% endif %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

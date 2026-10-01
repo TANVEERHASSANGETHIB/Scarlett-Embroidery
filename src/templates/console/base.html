@@ -1,0 +1,61 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}Console{% endblock %} — Scarlett Admin</title>
+  <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  <link rel="stylesheet" href="{% static 'css/console.css' %}">
+</head>
+<body class="console" data-theme="{{ user.console_theme|default:'dark' }}">
+  {% include "partials/messages.html" %}
+  <div class="console-shell">
+    <aside class="console-side">
+      <a class="console-brand" href="{% url 'console:index' %}" style="color:var(--bone)">Scarlett<span>Admin</span></a>
+      <nav class="console-nav" aria-label="Console">
+        <a href="{% url 'console:chat' %}" class="{% if nav == 'chat' %}is-active{% endif %}"><span>Live Chat</span><span class="count">{% if console_badges.chat %}{{ console_badges.chat }}{% endif %}</span></a>
+        <a href="{% url 'console:orders' %}" class="{% if nav == 'orders' %}is-active{% endif %}"><span>Orders</span><span class="count">{% if console_badges.orders %}{{ console_badges.orders }}{% endif %}</span></a>
+        <a href="{% url 'console:customers' %}" class="{% if nav == 'customers' %}is-active{% endif %}"><span>Customers</span></a>
+        <a href="{% url 'console:inbox' %}" class="{% if nav == 'inbox' %}is-active{% endif %}"><span>Inbox</span><span class="count">{% if console_badges.inbox %}{{ console_badges.inbox }}{% endif %}</span></a>
+        <a href="{% url 'console:portfolio' %}" class="{% if nav == 'portfolio' %}is-active{% endif %}"><span>Portfolio</span></a>
+        <a href="{% url 'console:testimonials' %}" class="{% if nav == 'testimonials' %}is-active{% endif %}"><span>Reviews</span></a>
+        <a href="{% url 'console:blogs' %}" class="{% if nav == 'blogs' %}is-active{% endif %}"><span>Blogs</span></a>
+        <a href="{% url 'console:settings' %}" class="{% if nav == 'settings' %}is-active{% endif %}"><span>Settings</span></a>
+      </nav>
+      <div class="console-theme">
+        <form method="post" action="{% url 'console:set_theme' %}" data-theme-form>
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          {# Without JavaScript this posts the opposite theme; JS keeps it in step. #}
+          <input type="hidden" name="theme" value="{% if user.console_theme == 'light' %}dark{% else %}light{% endif %}" data-theme-input>
+          <button type="submit" class="theme-toggle" role="switch" data-theme-toggle
+                  aria-checked="{% if user.console_theme == 'light' %}true{% else %}false{% endif %}"
+                  aria-label="Light mode">
+            <span class="theme-toggle-text" data-theme-text>{% if user.console_theme == 'light' %}Light mode{% else %}Dark mode{% endif %}</span>
+            <span class="theme-toggle-track" aria-hidden="true">
+              <span class="theme-toggle-knob">
+                <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v1.6M12 20.4V22M4.2 4.2l1.2 1.2M18.6 18.6l1.2 1.2M2 12h1.6M20.4 12H22M4.2 19.8l1.2-1.2M18.6 5.4l1.2-1.2"/></svg>
+              </span>
+            </span>
+          </button>
+        </form>
+      </div>
+      <div class="console-foot">
+        <a href="{% url 'core:home' %}" target="_blank" rel="noopener">View site ↗</a>
+        {% if user.is_superuser %}<a href="{% url 'admin:index' %}">Content admin ↗</a>{% endif %}
+        <span>{{ user.email }}</span>
+        <form method="post" action="{% url 'console:logout' %}">{% csrf_token %}<button class="btn btn-outline" type="submit">Log out</button></form>
+      </div>
+    </aside>
+    <main class="console-main" id="main">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <script src="{% static 'js/site.js' %}" defer></script>
+  <script src="{% static 'js/console-theme.js' %}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

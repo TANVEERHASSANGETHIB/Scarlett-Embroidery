@@ -1,0 +1,9 @@
+Hi {{ order.contact_name }},
+
+Your sew-out proof for {{ order.number }} ({{ order.design_name }}) is ready.
+{% if order.final_price is not None %}Price: ${{ order.final_price }}
+{% endif %}
+Review it and either approve or request a revision here:
+{{ url }}
+
+— Scarlett Embroidery

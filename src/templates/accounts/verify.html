@@ -1,0 +1,43 @@
+{% extends "accounts/auth_shell.html" %}
+{% block title %}Verify your email — Scarlett Embroidery{% endblock %}
+{% block auth_form %}
+<div class="kicker">Step 2 of 2</div>
+<h1 class="display" style="font-size:42px;letter-spacing:.02em;margin-bottom:6px">Check your inbox</h1>
+<p class="muted" style="font-size:14px;margin-bottom:24px">We sent a 6-digit code to <strong style="color:var(--ink)">{{ pending_user.email }}</strong>. It expires in 15 minutes.</p>
+
+<form method="post" class="stack-lg" data-once novalidate>
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ next }}">
+  {% include "partials/field.html" with field=form.code label="Verification code" hide_required=True %}
+  <button type="submit" class="btn btn-gold btn-lg">Verify email</button>
+</form>
+
+<form method="post" action="{% url 'accounts:resend_code' %}" class="row mt-m" style="justify-content:space-between;font-size:13px;color:var(--ink-70)">
+  {% csrf_token %}
+  <span>Didn't get it? Check spam, or</span>
+  <button type="submit" class="link-btn" {% if resend_wait %}data-resend-wait="{{ resend_wait }}"{% endif %}>
+    {% if resend_wait %}resend in {{ resend_wait }}s{% else %}send a new code{% endif %}
+  </button>
+</form>
+<script>
+  (function () {
+    var btn = document.querySelector("[data-resend-wait]");
+    if (!btn) return;
+    var left = parseInt(btn.getAttribute("data-resend-wait"), 10);
+    btn.disabled = true;
+    var t = setInterval(function () {
+      left -= 1;
+      if (left <= 0) { clearInterval(t); btn.disabled = false; btn.textContent = "send a new code"; return; }
+      btn.textContent = "resend in " + left + "s";
+    }, 1000);
+    var input = document.querySelector("input[name=code]");
+    if (input) {
+      input.focus();
+      input.addEventListener("input", function () {
+        input.value = input.value.replace(/\D/g, "").slice(0, 6);
+        if (input.value.length === 6) input.form.requestSubmit();
+      });
+    }
+  })();
+</script>
+{% endblock %}

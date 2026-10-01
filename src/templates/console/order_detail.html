@@ -1,0 +1,91 @@
+{% extends "console/base.html" %}
+{% block title %}{{ order.number }}{% endblock %}
+{% block content %}
+<div class="console-page">
+  <a href="{% url 'console:orders' %}" class="mono" style="font-size:12px">← Orders</a>
+  <div class="console-head" style="margin-top:8px">
+    <div>
+      <div class="panel-title" style="margin-bottom:4px">{{ order.number }} · {{ order.get_service_display }}</div>
+      <h1 class="console-title">{{ order.design_name }}</h1>
+      <p class="console-sub">{{ order.contact_name }} · <a href="mailto:{{ order.contact_email }}">{{ order.contact_email }}</a> · <a href="{% url 'console:customer_detail' order.customer_id %}">{{ order.customer.company|default:"customer profile" }}</a></p>
+    </div>
+    <div class="row">{% include "partials/status_badge.html" %}<span class="badge badge-muted">{{ order.get_payment_status_display }}</span></div>
+  </div>
+
+  <div class="split-wide">
+    <div class="stack-lg">
+      <div class="panel panel-pad">
+        <div class="panel-title">Specification</div>
+        {% if order.is_patch %}
+          <div class="spec-row"><span class="label">Patch category</span><span class="v">{{ order.patch.category.name }}</span></div>
+          <div class="spec-row"><span class="label">Backing</span><span class="v">{{ order.patch.get_backing_display }}</span></div>
+          <div class="spec-row"><span class="label">Quantity</span><span class="v">{{ order.patch.quantity }} pcs</span></div>
+          <div class="spec-row"><span class="label">Size</span><span class="v">{{ order.patch.size_display }}</span></div>
+          <div class="spec-row"><span class="label">Ship to</span><span class="v">{% for line in order.patch.address_lines %}{{ line }}<br>{% endfor %}</span></div>
+        {% else %}
+          <div class="spec-row"><span class="label">Design type</span><span class="v">{{ order.tier.name|default:"—" }}{% if order.tier %} · ${{ order.tier.price }}{% endif %}</span></div>
+          <div class="spec-row"><span class="label">Turnaround</span><span class="v">{{ order.turnaround.name|default:"—" }}{% if order.turnaround.surcharge %} · +${{ order.turnaround.surcharge }}{% endif %}</span></div>
+          {% if order.fabric %}<div class="spec-row"><span class="label">Fabric</span><span class="v">{{ order.fabric }}</span></div>{% endif %}
+          {% if order.placement %}<div class="spec-row"><span class="label">Placement</span><span class="v">{{ order.placement }}</span></div>{% endif %}
+          {% if order.size_display %}<div class="spec-row"><span class="label">Size (H × W)</span><span class="v">{{ order.size_display }}</span></div>{% endif %}
+          <div class="spec-row"><span class="label">Formats</span><span class="v">{{ order.formats_display }}</span></div>
+          <div class="spec-row"><span class="label">Due</span><span class="v">{{ order.due_at|date:"d M Y H:i"|default:"—" }}{% if order.is_overdue %} · <span style="color:#ff8a80">overdue</span>{% endif %}</span></div>
+        {% endif %}
+        <div class="spec-row"><span class="label">Placed</span><span class="v">{{ order.created_at|date:"d M Y H:i" }}</span></div>
+        <div class="spec-row"><span class="label">Estimate</span><span class="v">{% if order.estimate is not None %}${{ order.estimate }}{% else %}—{% endif %}</span></div>
+        {% if order.instructions %}<div class="mt-s"><span class="label">Instructions</span><p class="mb-0" style="white-space:pre-line;font-size:14px">{{ order.instructions }}</p></div>{% endif %}
+      </div>
+
+      <div class="panel panel-pad">
+        <div class="panel-title">Customer artwork</div>
+        {% include "orders/_files.html" with files=artwork %}
+      </div>
+      <div class="panel panel-pad">
+        <div class="panel-title">Proofs</div>
+        {% include "orders/_files.html" with files=proofs deletable=True %}
+        <div class="panel-title mt-m">Final files</div>
+        {% include "orders/_files.html" with files=deliverables deletable=True %}
+        <form method="post" enctype="multipart/form-data" class="stack mt-m" data-once>
+          {% csrf_token %}<input type="hidden" name="section" value="upload">
+          {% include "partials/form_errors.html" with form=upload_form %}
+          <div class="grid-2">
+            {% include "partials/field.html" with field=upload_form.kind label="Upload as" hide_required=True %}
+            <div class="field"><span class="label">Files</span>{{ upload_form.files }}{{ upload_form.files.errors }}</div>
+          </div>
+          <label class="checkbox">{{ upload_form.mark_status }} {{ upload_form.mark_status.label }}</label>
+          <button class="btn btn-gold" style="align-self:flex-start">Upload files</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="stack-lg">
+      <form method="post" class="panel panel-pad stack" data-once>
+        {% csrf_token %}<input type="hidden" name="section" value="update">
+        <div class="panel-title mb-0">Manage order</div>
+        {% include "partials/form_errors.html" with form=update_form %}
+        {% include "partials/field.html" with field=update_form.status hide_required=True %}
+        {% include "partials/field.html" with field=update_form.final_price %}
+        {% include "partials/field.html" with field=update_form.payment_status hide_required=True %}
+        {% include "partials/field.html" with field=update_form.assigned_to label="Assigned digitizer" %}
+        <p class="help mb-0">Moving to “Awaiting approval”, “In production”, “Delivered” or “Cancelled” emails the customer.</p>
+        <button class="btn btn-gold btn-md" style="align-self:flex-start">Save changes</button>
+      </form>
+
+      <div class="panel panel-pad">
+        <div class="panel-title">Activity</div>
+        <ul class="timeline">
+          {% for e in events %}
+          <li class="{% if e.is_internal %}is-internal{% endif %}"><div class="t-head">{{ e.get_kind_display }}{% if e.is_internal %} (internal){% endif %} · {{ e.created_at|date:"d M H:i" }}{% if e.actor %} · {{ e.actor.get_short_name }}{% endif %}</div><div class="t-body">{{ e.message }}</div></li>
+          {% endfor %}
+        </ul>
+        <form method="post" class="stack mt-s" data-once>
+          {% csrf_token %}<input type="hidden" name="section" value="note">
+          <div class="field">{{ note_form.message }}{{ note_form.message.errors }}</div>
+          <label class="checkbox">{{ note_form.internal }} {{ note_form.internal.label }}</label>
+          <button class="btn btn-outline" style="align-self:flex-start">Add</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

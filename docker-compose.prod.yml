@@ -1,0 +1,63 @@
+# Production stack: daphne (ASGI) behind nginx, PostgreSQL, Redis.
+# Configure real SMTP via EMAIL_URL and set DEBUG=False in .env.
+name: scarlett-prod
+
+services:
+  db:
+    image: postgres:16-alpine
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      args:
+        REQUIREMENTS: prod
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+      DB_HOST: db
+      REDIS_HOST: redis
+      RUN_MIGRATIONS: "1"
+    restart: unless-stopped
+    volumes:
+      - media:/app/media
+      - private_media:/app/private_media
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - media:/app/media:ro
+    depends_on:
+      - web
+
+volumes:
+  pgdata:
+  redisdata:
+  media:
+  private_media:

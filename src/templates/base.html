@@ -1,0 +1,114 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Scarlett Embroidery — Digitizing, Vector Art & Patches{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Hand-punched embroidery digitizing, clean vector art and custom patches — test-sewn before delivery.{% endblock %}">
+  <meta name="theme-color" content="#0d0e0f">
+  <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
+  <link rel="preload" href="{% static 'fonts/barlow-condensed-700-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="sr-only" href="#main">Skip to content</a>
+
+  {% block header %}
+  <header class="site-header" data-site-header>
+    <div class="container">
+      <a class="brand" href="{% url 'core:home' %}" aria-label="Scarlett Embroidery home">
+        <span class="brand-logo"><img src="{% static 'img/logo.png' %}" alt="" width="36" height="36"></span>
+        <span class="brand-text">
+          <span class="brand-word">Scarlett<span>Embroidery</span></span>
+          <span class="brand-tag">digitizing · vector · patches</span>
+        </span>
+      </a>
+      {% with url=request.resolver_match.url_name ns=request.resolver_match.namespace %}
+      <nav class="site-nav" id="site-nav" aria-label="Main">
+        <a href="{% url 'core:home' %}" class="{% if ns == 'core' and url == 'home' %}is-active{% endif %}">Home</a>
+        <a href="{% url 'core:portfolio' %}" class="{% if url == 'portfolio' %}is-active{% endif %}">Portfolio</a>
+        <a href="{% url 'core:about' %}" class="{% if url == 'about' %}is-active{% endif %}">About</a>
+        <a href="{% url 'blog:list' %}" class="{% if ns == 'blog' %}is-active{% endif %}">Blog</a>
+        <a href="{% url 'core:contact' %}" class="{% if url == 'contact' %}is-active{% endif %}">Contact</a>
+      </nav>
+      {% endwith %}
+      <div class="header-actions">
+        <span class="header-phone">24/7 · {{ site.phone }}</span>
+        {% if user.is_authenticated %}
+          {% if user.is_staff %}
+            <a class="btn btn-ghost-light" href="{% url 'console:index' %}">Console</a>
+          {% else %}
+            <a class="btn btn-ghost-light" href="{% url 'accounts:dashboard' %}">My account</a>
+          {% endif %}
+        {% else %}
+          <a class="btn btn-ghost-light" href="{% url 'accounts:login' %}">Log in</a>
+        {% endif %}
+        <a class="btn btn-gold" href="{% url 'orders:place' %}">Place order</a>
+        <button type="button" class="nav-toggle" data-nav-toggle aria-controls="site-nav" aria-expanded="false" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+  {% endblock %}
+
+  {% include "partials/messages.html" %}
+
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block footer %}
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <div class="footer-logo"><img src="{% static 'img/logo.png' %}" alt="Scarlett Embroidery" width="60" height="60"></div>
+        <p class="muted" style="font-size:14px;max-width:34ch;color:var(--bone-70)">Embroidery digitizing, vector art and custom patches. Hand-punched files, test-sewn before delivery.</p>
+        <div class="mono" style="font-size:12px;color:var(--bone-55)">{{ site.email }}</div>
+      </div>
+      <div>
+        <div class="footer-col-title">Services</div>
+        <div class="footer-links">
+          <a href="{% url 'orders:place' %}?service=digitizing">Embroidery Digitizing</a>
+          <a href="{% url 'orders:place' %}?service=vector">Vector Art</a>
+          <a href="{% url 'orders:place' %}?service=patches">Embroidery Patches</a>
+          <a href="{% url 'core:home' %}#pricing">Pricing</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <div class="footer-links">
+          <a href="{% url 'core:about' %}">About us</a>
+          <a href="{% url 'core:portfolio' %}">Portfolio</a>
+          <a href="{% url 'blog:list' %}">Blog</a>
+          <a href="{% url 'core:contact' %}">Contact</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Account</div>
+        <div class="footer-links">
+          <a href="{% url 'accounts:login' %}">Log in / Sign up</a>
+          <a href="{% url 'accounts:dashboard' %}">My account</a>
+          <a href="{% url 'core:privacy' %}">Privacy Policy</a>
+          <a href="{% url 'core:terms' %}">Terms &amp; Conditions</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <span>© {% now "Y" %} Scarlett Embroidery. All rights reserved.</span>
+        <span>Digitizing · Vector art · Patches — 24/7 support</span>
+      </div>
+    </div>
+  </footer>
+  {% endblock %}
+
+  {% block chat %}{% include "partials/chat_widget.html" %}{% endblock %}
+
+  <script src="{% static 'js/site.js' %}" defer></script>
+  <script src="{% static 'js/chat-widget.js' %}" defer></script>
+  <script src="{% static 'js/carousel.js' %}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

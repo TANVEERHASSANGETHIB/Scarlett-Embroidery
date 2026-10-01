@@ -1,0 +1,7 @@
+{% extends "emails/base.html" %}
+{% block body %}
+<p style="margin:0 0 12px">Hi {{ order.contact_name }},</p>
+<p style="margin:0 0 20px">Your sew-out proof for <strong>{{ order.number }}</strong> ({{ order.design_name }}) is ready.{% if order.final_price is not None %} Price: <strong>${{ order.final_price }}</strong>.{% endif %}</p>
+<p style="margin:0 0 20px">Review it, then approve or request a revision.</p>
+<p style="margin:0"><a href="{{ url }}" style="background:#e0a53c;color:#1c1a17;text-decoration:none;font-weight:700;padding:12px 20px;display:inline-block;text-transform:uppercase;letter-spacing:1px">Review proof</a></p>
+{% endblock %}

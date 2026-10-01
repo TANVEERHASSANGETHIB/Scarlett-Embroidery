@@ -1,0 +1,65 @@
+{% extends "console/base.html" %}
+{% block title %}Reviews{% endblock %}
+{% block content %}
+<div class="console-page">
+  <div class="console-head">
+    <div>
+      <h1 class="console-title">Reviews</h1>
+      <p class="console-sub">{{ items|length }} quote{{ items|length|pluralize }} · {{ published_count }} shown on the home page</p>
+    </div>
+    {% if item %}<a class="btn btn-outline btn-md" href="{% url 'console:testimonials' %}">Close editor</a>{% endif %}
+  </div>
+
+  <div class="split-wide">
+    <div class="stack-lg">
+      {% for t in items %}
+      <div class="panel panel-pad review-row{% if item and item.pk == t.pk %} is-editing{% endif %}{% if not t.is_published %} is-hidden{% endif %}">
+        <div class="review-stars" aria-label="{{ t.rating }} out of 5">{% for _ in ""|rjust:t.rating %}★{% endfor %}</div>
+        <blockquote class="review-quote">“{{ t.quote }}”</blockquote>
+        <div class="review-foot">
+          <div>
+            <div class="review-name">{{ t.name }}</div>
+            <div class="review-role">{{ t.role|default:"—" }}</div>
+          </div>
+          <div class="row" style="gap:6px">
+            {% if not t.is_published %}<span class="badge badge-muted">Hidden</span>{% endif %}
+            <a class="btn btn-outline" href="{% url 'console:testimonial_edit' t.pk %}">Edit</a>
+            <form method="post">{% csrf_token %}
+              <input type="hidden" name="action" value="toggle_published">
+              <input type="hidden" name="id" value="{{ t.pk }}">
+              <button class="btn btn-outline">{% if t.is_published %}Hide{% else %}Show{% endif %}</button>
+            </form>
+            <form method="post">{% csrf_token %}
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="id" value="{{ t.pk }}">
+              <button class="btn btn-danger" data-confirm="Delete the quote from {{ t.name }}? This cannot be undone.">Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="panel empty" style="padding:40px">No reviews yet — add your first one on the right.</div>
+      {% endfor %}
+    </div>
+
+    <form method="post" class="panel-raised panel-pad stack" style="gap:14px" data-once novalidate>
+      {% csrf_token %}
+      <div class="panel-title mb-0">{% if item %}Edit review{% else %}Add a review{% endif %}</div>
+      {% include "partials/form_errors.html" %}
+      {% include "partials/field.html" with field=form.quote hide_required=True %}
+      {% include "partials/field.html" with field=form.name hide_required=True %}
+      {% include "partials/field.html" with field=form.role hide_required=True %}
+      <div class="grid-2" style="gap:14px">
+        {% include "partials/field.html" with field=form.rating label="Stars (1–5)" %}
+        {% include "partials/field.html" with field=form.sort_order %}
+      </div>
+      <label class="checkbox">{{ form.is_published }} Show on the home page</label>
+      <div class="row" style="gap:10px">
+        <button class="btn btn-gold">{% if item %}Save changes{% else %}Add review{% endif %}</button>
+        {% if item %}<a class="btn btn-outline" href="{% url 'console:testimonials' %}">Cancel</a>{% endif %}
+      </div>
+      <p class="help mb-0">Reviews appear in the carousel on the home page, ordered by the number above (lowest first).</p>
+    </form>
+  </div>
+</div>
+{% endblock %}

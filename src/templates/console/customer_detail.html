@@ -1,0 +1,59 @@
+{% extends "console/base.html" %}
+{% block title %}{{ customer.full_name }}{% endblock %}
+{% block content %}
+<div class="console-page">
+  <a href="{% url 'console:customers' %}" class="mono" style="font-size:12px">← Customers</a>
+  <div class="console-head" style="margin-top:8px">
+    <div>
+      <h1 class="console-title">{{ customer.full_name }}</h1>
+      <p class="console-sub">{{ customer.company|default:"No company" }} · <a href="mailto:{{ customer.email }}">{{ customer.email }}</a></p>
+    </div>
+    <div class="row">
+      {% if not customer.email_verified %}
+      <form method="post">{% csrf_token %}<input type="hidden" name="action" value="verify"><button class="btn btn-outline">Mark email verified</button></form>
+      {% endif %}
+      <form method="post">{% csrf_token %}<input type="hidden" name="action" value="toggle_active">
+        <button class="{% if customer.is_active %}btn btn-danger{% else %}btn btn-gold{% endif %}" data-confirm="{% if customer.is_active %}Disable this account? They won't be able to log in.{% else %}Enable this account?{% endif %}">{% if customer.is_active %}Disable account{% else %}Enable account{% endif %}</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="panel table-wrap">
+      <table class="table">
+        <thead><tr><th>Order</th><th>Design</th><th>Placed</th><th>Status</th><th class="text-right">Total</th></tr></thead>
+        <tbody>
+          {% for o in orders %}
+          <tr>
+            <td class="t-mono"><a href="{% url 'console:order_detail' o.number %}">{{ o.number }}</a></td>
+            <td class="t-strong">{{ o.design_name }}</td>
+            <td class="nowrap">{{ o.created_at|date:"d M Y" }}</td>
+            <td>{% include "partials/status_badge.html" with order=o %}</td>
+            <td class="t-total">{% if o.total is not None %}${{ o.total }}{% else %}—{% endif %}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="empty">No orders yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="stack-lg">
+      <div class="panel panel-pad">
+        <div class="panel-title">Profile</div>
+        <div class="info-row"><div class="k">Phone</div><div class="v">{{ customer.phone|default:"—" }}</div></div>
+        <div class="info-row"><div class="k">Default formats</div><div class="v">{{ customer.default_formats|default:"—" }}</div></div>
+        <div class="info-row"><div class="k">Machine</div><div class="v">{{ customer.machine|default:"—" }}</div></div>
+        <div class="info-row"><div class="k">Email verified</div><div class="v">{{ customer.email_verified|yesno:"Yes,No" }}</div></div>
+        <div class="info-row"><div class="k">Joined</div><div class="v">{{ customer.date_joined|date:"d M Y H:i" }}</div></div>
+        <div class="info-row"><div class="k">Last login</div><div class="v">{{ customer.last_login|date:"d M Y H:i"|default:"Never" }}</div></div>
+      </div>
+      {% if chats %}
+      <div class="panel panel-pad">
+        <div class="panel-title">Chats</div>
+        {% for c in chats %}<div class="info-row"><a href="{% url 'console:chat' %}?s={{ c.pk }}">{{ c.last_message_at|date:"d M Y H:i" }} · {{ c.get_status_display }}</a></div>{% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

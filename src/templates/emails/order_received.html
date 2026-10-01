@@ -1,0 +1,18 @@
+{% extends "emails/base.html" %}
+{% block body %}
+<p style="margin:0 0 12px">Hi {{ order.contact_name }},</p>
+<p style="margin:0 0 20px">Thanks — we've received <strong>{{ order.number }}</strong> ({{ order.design_name }}). A digitizer will review your artwork and confirm the final price. You only pay once you approve the proof.</p>
+<table role="presentation" width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-size:14px">
+<tr><td style="border-bottom:1px solid #eee;color:#1c1a1799">Service</td><td style="border-bottom:1px solid #eee;text-align:right"><strong>{{ order.get_service_display }}</strong></td></tr>
+{% if order.is_patch %}
+<tr><td style="border-bottom:1px solid #eee;color:#1c1a1799">Patch</td><td style="border-bottom:1px solid #eee;text-align:right">{{ order.patch.category.name }} · {{ order.patch.quantity }} pcs</td></tr>
+<tr><td style="border-bottom:1px solid #eee;color:#1c1a1799">Backing</td><td style="border-bottom:1px solid #eee;text-align:right">{{ order.patch.get_backing_display }}</td></tr>
+{% else %}
+<tr><td style="border-bottom:1px solid #eee;color:#1c1a1799">Design type</td><td style="border-bottom:1px solid #eee;text-align:right">{{ order.tier.name }}</td></tr>
+<tr><td style="border-bottom:1px solid #eee;color:#1c1a1799">Turnaround</td><td style="border-bottom:1px solid #eee;text-align:right">{{ order.turnaround.name }}</td></tr>
+<tr><td style="border-bottom:1px solid #eee;color:#1c1a1799">Formats</td><td style="border-bottom:1px solid #eee;text-align:right">{{ order.formats_display }}</td></tr>
+{% endif %}
+<tr><td style="color:#1c1a1799">Estimate</td><td style="text-align:right;font-size:20px"><strong>{% if order.estimate is not None %}${{ order.estimate }}{% else %}Quote pending{% endif %}</strong></td></tr>
+</table>
+<p style="margin:24px 0 0"><a href="{{ url }}" style="background:#e0a53c;color:#1c1a17;text-decoration:none;font-weight:700;padding:12px 20px;display:inline-block;text-transform:uppercase;letter-spacing:1px">Track your order</a></p>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin sign in — Scarlett Embroidery</title>
+  <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  <link rel="stylesheet" href="{% static 'css/console.css' %}">
+</head>
+<body class="console">
+  <section class="console-login">
+    <div class="console-login-card">
+      <div class="row" style="margin-bottom:28px">
+        <div style="background:var(--bone);border-radius:var(--radius);padding:6px;display:flex"><img src="{% static 'img/logo.png' %}" alt="" style="width:34px;height:34px;object-fit:contain"></div>
+        <div>
+          <div class="brand-word" style="font-size:20px;letter-spacing:.05em">Scarlett<span>Embroidery</span></div>
+          <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)">Admin console</div>
+        </div>
+      </div>
+      <h1 class="display" style="font-size:34px;letter-spacing:.02em;margin-bottom:22px">Sign in to the console</h1>
+      <form method="post" class="stack" style="gap:14px" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {% include "partials/form_errors.html" %}
+        {% include "partials/field.html" with field=form.email label="Admin email" hide_required=True %}
+        {% include "partials/field.html" with field=form.password hide_required=True %}
+        <button type="submit" class="btn btn-gold btn-lg btn-block">Enter console</button>
+        <div style="font-size:12px;color:var(--bone-55)">Admin accounts are created inside the console — Settings → Team → Invite admin.</div>
+      </form>
+    </div>
+  </section>
+</body>
+</html>

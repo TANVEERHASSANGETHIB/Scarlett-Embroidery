@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Contact — Scarlett Embroidery{% endblock %}
+{% block content %}
+<section class="container" style="padding-block:64px 40px">
+  <div class="two-col">
+    <div>
+      <div class="kicker">Contact</div>
+      <h1 class="display" style="font-size:clamp(44px,5vw,68px);line-height:.97;margin-bottom:16px;max-width:20ch">Talk to a digitizer, not a form robot</h1>
+      <p class="muted" style="font-size:16px;max-width:44ch;margin-bottom:28px">Replies within 30 minutes, 24 hours a day. Need a quote on artwork? Use live chat or place an order — we'll quote it in the same reply.</p>
+      <div class="stack">
+        <div class="card contact-row"><span class="label">Email</span><a href="mailto:{{ site.email }}" style="font-size:16px;font-weight:600;color:var(--ink)">{{ site.email }}</a></div>
+        <div class="card contact-row"><span class="label">Orders</span><a href="mailto:{{ site.orders_email }}" style="font-size:16px;font-weight:600;color:var(--ink)">{{ site.orders_email }}</a></div>
+        <div class="card contact-row"><span class="label">Phone</span><span style="font-size:16px;font-weight:600">{{ site.phone }}</span></div>
+        <div class="card contact-row"><span class="label">Hours</span><span style="font-size:16px;font-weight:600">{{ site.hours }}</span></div>
+        {% if site.address %}
+        <div class="card contact-row"><span class="label">Studio</span><span style="font-size:16px;font-weight:600">{{ site.address }}</span></div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="card card-raised card-pad-l">
+      <h2 class="display d-xs" style="font-size:30px;margin-bottom:20px">Send a message</h2>
+      <form method="post" data-once novalidate>
+        {% csrf_token %}
+        {% include "partials/form_errors.html" %}
+        <div class="grid-2">
+          {% include "partials/field.html" with field=form.name %}
+          {% include "partials/field.html" with field=form.email %}
+          {% include "partials/field.html" with field=form.subject span=True %}
+          {% include "partials/field.html" with field=form.message span=True %}
+        </div>
+        <div class="hp-field" aria-hidden="true">{{ form.website }}</div>
+        <button type="submit" class="btn btn-gold btn-md mt-m">Send message</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+{% if site.map_src %}
+<section class="container map-section" aria-label="Where to find us">
+  <div class="map-band">
+    <iframe class="map-frame" src="{{ site.map_src }}" title="Map showing {{ site.business_name }}"
+            loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

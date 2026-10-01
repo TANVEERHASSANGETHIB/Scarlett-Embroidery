@@ -1,0 +1,8 @@
+{{ order.number }} · {{ order.design_name }}
+Customer: {{ order.contact_name }} <{{ order.contact_email }}>
+
+{{ headline }}
+{% if message %}
+{{ message }}
+{% endif %}
+Open in console: {{ url }}

@@ -1,0 +1,71 @@
+{% extends "console/base.html" %}
+{% block title %}Blogs{% endblock %}
+{% block content %}
+<div class="console-page">
+  <div class="console-head">
+    <div>
+      <h1 class="console-title">Blogs</h1>
+      <p class="console-sub">{{ published_count }} published · {{ draft_count }} draft{{ draft_count|pluralize }}</p>
+    </div>
+    {% if editor_open %}
+    <a class="btn btn-outline btn-md" href="{% url 'console:blogs' %}">Close editor</a>
+    {% else %}
+    <a class="btn btn-gold btn-md" href="{% url 'console:blogs' %}?new=1">New post</a>
+    {% endif %}
+  </div>
+
+  <div class="{% if editor_open %}split{% endif %}">
+    <div class="panel table-wrap">
+      <table class="table">
+        <thead><tr><th>Title</th><th>Category</th><th>Status</th><th>Updated</th></tr></thead>
+        <tbody>
+          {% for p in posts %}
+          <tr{% if post and post.pk == p.pk %} style="background:var(--night-raised)"{% endif %}>
+            <td class="t-strong"><a href="{% url 'console:blog_edit' p.pk %}" style="color:inherit">{{ p.title }}</a></td>
+            <td>{{ p.category.name|default:"—" }}</td>
+            <td><span class="badge {% if p.status == 'published' %}badge-muted{% else %}badge-gold{% endif %}">{{ p.get_status_display }}</span></td>
+            <td class="mono nowrap" style="font-size:11.5px">{{ p.updated_at|date:"Y-m-d" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="empty">No posts yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if editor_open %}
+    <form method="post" enctype="multipart/form-data" class="panel-raised panel-pad stack" style="gap:14px" data-once novalidate>
+      {% csrf_token %}
+      <div class="row" style="justify-content:space-between">
+        <div class="panel-title mb-0">{% if post %}Edit post{% else %}New post{% endif %}</div>
+        {% if post %}<a class="mono" style="font-size:11px" href="{{ post.get_absolute_url }}" target="_blank" rel="noopener">{% if post.status == "published" %}View live ↗{% else %}Preview ↗{% endif %}</a>{% endif %}
+      </div>
+      {% include "partials/form_errors.html" %}
+      {% include "partials/field.html" with field=form.title hide_required=True %}
+      <div class="grid-2" style="gap:14px">
+        {% include "partials/field.html" with field=form.category %}
+        {% include "partials/field.html" with field=form.new_category %}
+      </div>
+      <div class="grid-2" style="gap:14px">
+        {% include "partials/field.html" with field=form.slug %}
+        {% include "partials/field.html" with field=form.author_title label="Author title" %}
+      </div>
+      {% include "partials/field.html" with field=form.excerpt %}
+      <div class="field">
+        <span class="label">Cover image — 1600×900 recommended</span>
+        {% if post.cover %}<img src="{{ post.cover.url }}" alt="" style="max-height:120px;border-radius:6px;margin-bottom:8px">{% endif %}
+        {{ form.cover }}{{ form.cover.errors }}
+      </div>
+      {% include "partials/field.html" with field=form.body hide_required=True %}
+      <label class="checkbox">{{ form.is_featured }} Feature on the blog page</label>
+      <input type="hidden" name="status" value="{{ form.status.value|default:'draft' }}">
+      <div class="row" style="gap:10px">
+        <button type="submit" name="action" value="publish" class="btn btn-gold">{% if post.status == "published" %}Update{% else %}Publish{% endif %}</button>
+        <button type="submit" name="action" value="draft" class="btn btn-outline">{% if post.status == "published" %}Unpublish to draft{% else %}Save draft{% endif %}</button>
+        {% if post %}<button type="submit" name="action" value="delete" class="btn btn-danger" style="margin-left:auto" formnovalidate data-confirm="Delete this post permanently?">Delete</button>{% endif %}
+      </div>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

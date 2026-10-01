@@ -1,0 +1,10 @@
+Hi {{ order.contact_name }},
+
+Update on order {{ order.number }} ({{ order.design_name }}):
+Status: {{ order.get_status_display }}
+{% if message %}
+{{ message }}
+{% endif %}
+View your order: {{ url }}
+
+— Scarlett Embroidery

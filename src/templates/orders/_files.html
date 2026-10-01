@@ -1,0 +1,20 @@
+{% for f in files %}
+<div class="file-row">
+  <div class="row" style="min-width:0;flex-wrap:nowrap">
+    <div class="thumb placeholder-img"></div>
+    <div style="min-width:0">
+      <a class="file-name" href="{% url 'orders:download' f.pk %}" style="color:inherit">{{ f.original_name }}</a>
+      <div class="file-meta">{{ f.size|filesizeformat }} · {{ f.created_at|date:"d M Y H:i" }}{% if f.uploaded_by %} · {{ f.uploaded_by.get_short_name }}{% endif %}</div>
+    </div>
+  </div>
+  <div class="row" style="flex-wrap:nowrap;gap:8px">
+    {% if f.is_image %}<a class="btn btn-outline" href="{% url 'orders:download' f.pk %}?inline=1" target="_blank" rel="noopener">View</a>{% endif %}
+    <a class="btn btn-outline" href="{% url 'orders:download' f.pk %}">Download</a>
+    {% if deletable %}
+    <form method="post">{% csrf_token %}<input type="hidden" name="section" value="delete_file"><input type="hidden" name="file_id" value="{{ f.pk }}"><button class="btn btn-danger" data-confirm="Remove this file?">✕</button></form>
+    {% endif %}
+  </div>
+</div>
+{% empty %}
+<div class="file-meta" style="padding:8px 0">{{ empty|default:"No files yet." }}</div>
+{% endfor %}

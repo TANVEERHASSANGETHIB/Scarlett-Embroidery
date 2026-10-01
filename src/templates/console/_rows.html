@@ -1,0 +1,11 @@
+{% comment %}A full settings formset: existing rows, an "add row" template and the add button.{% endcomment %}
+<div class="rows" data-rows data-prefix="{{ formset.prefix }}">
+  {{ formset.management_form }}
+  {% if formset.non_form_errors %}<div class="form-errors">{{ formset.non_form_errors }}</div>{% endif %}
+  <div data-row-list>
+    {% for form in formset %}{% include "console/_row.html" with form=form %}{% endfor %}
+  </div>
+  <p class="rows-empty" data-rows-empty {% if formset|length %}hidden{% endif %}>Nothing here yet — add your first row.</p>
+  <template data-row-template>{% include "console/_row.html" with form=formset.empty_form %}</template>
+  <button type="button" class="btn btn-outline btn-add" data-add-row>+ Add {{ add_label|default:"row" }}</button>
+</div>

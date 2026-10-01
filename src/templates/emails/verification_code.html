@@ -1,0 +1,7 @@
+{% extends "emails/base.html" %}
+{% block body %}
+<p style="margin:0 0 16px">Hi {{ user.get_short_name }},</p>
+<p style="margin:0 0 20px">Enter this code to verify your email and finish creating your account:</p>
+<div style="font-family:'Courier New',monospace;font-size:36px;letter-spacing:10px;font-weight:700;background:#f7f4ef;border:1px solid #e5dfd5;border-radius:10px;padding:18px;text-align:center;color:#1c1a17">{{ code }}</div>
+<p style="margin:20px 0 0;color:#1c1a17ab;font-size:13px">The code expires in {{ ttl }} minutes. If you didn't create an account, you can ignore this email.</p>
+{% endblock %}

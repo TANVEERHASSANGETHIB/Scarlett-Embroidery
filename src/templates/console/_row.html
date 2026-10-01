@@ -1,0 +1,26 @@
+{% comment %}One editable record inside a settings formset. Used for saved rows and the "add" template.{% endcomment %}
+<div class="row-card" data-row>
+  {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+  <div class="row-fields">
+    {% for field in form.visible_fields %}
+      {% if field.name != "DELETE" %}
+        {% if field.field.widget.input_type == "checkbox" %}
+          <label class="row-toggle{% if field.errors %} has-error{% endif %}">
+            {{ field }}<span>{{ field.label }}</span>{{ field.errors }}
+          </label>
+        {% else %}
+          <label class="field row-field row-field--{{ field.name }}{% if field.errors %} has-error{% endif %}">
+            <span class="label">{{ field.label }}</span>
+            {{ field }}
+            {{ field.errors }}
+          </label>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  </div>
+  <label class="row-remove" title="Remove this row">
+    {{ form.DELETE }}
+    <span class="row-remove-x" aria-hidden="true">✕</span>
+    <span class="row-remove-note">Removed on save</span>
+  </label>
+</div>

@@ -1,0 +1,9 @@
+New contact form message
+
+From: {{ msg.name }} <{{ msg.email }}>
+Subject: {{ msg.subject|default:"(none)" }}
+IP: {{ msg.ip_address|default:"-" }}
+
+{{ msg.message }}
+
+Reply directly to this email, or open the inbox: {{ site_url }}/console/inbox/?m={{ msg.pk }}

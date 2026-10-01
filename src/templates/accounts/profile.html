@@ -1,0 +1,43 @@
+{% extends "accounts/account_base.html" %}
+{% block title %}Profile — Scarlett Embroidery{% endblock %}
+{% block account %}
+<div style="max-width:800px">
+  <div style="margin-bottom:24px">
+    <h1 class="display" style="font-size:44px;letter-spacing:.02em;margin-bottom:2px">Profile</h1>
+    <p class="muted mb-0" style="font-size:14px">Contact details and default sewing preferences.</p>
+  </div>
+  <form method="post" class="card card-raised" style="padding:28px" data-once novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="form" value="profile">
+    {% include "partials/form_errors.html" %}
+    <div class="grid-2" style="margin-bottom:22px">
+      {% include "partials/field.html" with field=form.full_name %}
+      {% include "partials/field.html" with field=form.company %}
+      {% include "partials/field.html" with field=form.email %}
+      {% include "partials/field.html" with field=form.phone %}
+      {% include "partials/field.html" with field=form.default_formats %}
+      {% include "partials/field.html" with field=form.machine %}
+    </div>
+    <p class="help" style="margin:-8px 0 18px">Changing your email sends a new verification code to the new address.</p>
+    <div class="row">
+      <button type="submit" class="btn btn-gold btn-md">Save changes</button>
+      <a href="#password" class="btn btn-outline btn-md" onclick="document.getElementById('password').open=true">Change password</a>
+    </div>
+  </form>
+
+  <details id="password" class="card card-raised mt-m" style="padding:0"{% if show_password %} open{% endif %}>
+    <summary style="padding:20px 28px;cursor:pointer" class="h4">Change password</summary>
+    <form method="post" style="padding:0 28px 28px" data-once novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="form" value="password">
+      {% include "partials/form_errors.html" with form=password_form %}
+      <div class="grid-2" style="margin-bottom:22px">
+        {% include "partials/field.html" with field=password_form.old_password label="Current password" span=True %}
+        {% include "partials/field.html" with field=password_form.new_password1 label="New password" %}
+        {% include "partials/field.html" with field=password_form.new_password2 label="Confirm new password" %}
+      </div>
+      <button type="submit" class="btn btn-ink btn-md">Update password</button>
+    </form>
+  </details>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+This is a test alert from your Scarlett Embroidery website.
+
+If you are reading this, order notifications are working. When a customer places
+an order you will get an email here with their details, the specification and a
+link to open the order in the admin console.
+
+Sent to: {{ recipients|join:", " }}
+Triggered by: {{ user.get_full_name }} ({{ user.email }})
+
+Manage who receives these: {{ console_url }}?tab=notifications
+
+— Scarlett Embroidery

@@ -1,0 +1,108 @@
+{% extends "accounts/account_base.html" %}
+{% block title %}{{ order.number }} — Scarlett Embroidery{% endblock %}
+{% block account %}
+<a href="{% url 'accounts:orders' %}" class="mono" style="font-size:12px">← All orders</a>
+<div class="between" style="margin:10px 0 24px;align-items:center">
+  <div>
+    <div class="kicker mb-0">{{ order.number }} · {{ order.get_service_display }}</div>
+    <h1 class="display" style="font-size:clamp(32px,3.4vw,44px);letter-spacing:.02em">{{ order.design_name }}</h1>
+  </div>
+  <div class="row">{% include "partials/status_badge.html" %}<span class="badge badge-muted">{{ order.get_payment_status_display }}</span></div>
+</div>
+
+{% if order.status == "awaiting_approval" %}
+<div class="card card-pad mb-m" style="border-left:4px solid var(--gold)">
+  <div class="h3" style="margin-bottom:4px">Your proof is ready</div>
+  <p class="muted" style="font-size:14px">Check the sew-out proof below. Approve it and we'll deliver the final files, or tell us what to change.</p>
+  <div class="row" style="align-items:flex-start">
+    <form method="post" action="{% url 'orders:action' order.number %}">{% csrf_token %}<input type="hidden" name="action" value="approve"><button class="btn btn-gold btn-md" data-confirm="Approve this proof?">Approve proof</button></form>
+    <details style="flex:1;min-width:260px">
+      <summary class="btn btn-outline btn-md" style="list-style:none;display:inline-flex">Request revision</summary>
+      <form method="post" action="{% url 'orders:action' order.number %}" class="stack mt-s">{% csrf_token %}<input type="hidden" name="action" value="revision">
+        <div class="field">{{ revision_form.message }}</div>
+        <button class="btn btn-ink" style="align-self:flex-start">Send revision request</button>
+      </form>
+    </details>
+  </div>
+</div>
+{% endif %}
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px;align-items:start">
+  <div class="stack-lg">
+    <div class="card card-pad">
+      <div class="kicker">Summary</div>
+      {% if order.is_patch %}
+        <div class="spec-row"><span class="label">Patch</span><span class="v">{{ order.patch.category.name }}</span></div>
+        <div class="spec-row"><span class="label">Backing</span><span class="v">{{ order.patch.get_backing_display }}</span></div>
+        <div class="spec-row"><span class="label">Quantity</span><span class="v">{{ order.patch.quantity }} pcs</span></div>
+        <div class="spec-row"><span class="label">Size</span><span class="v">{{ order.patch.size_display }}</span></div>
+      {% else %}
+        <div class="spec-row"><span class="label">Design type</span><span class="v">{{ order.tier.name|default:"—" }}</span></div>
+        <div class="spec-row"><span class="label">Turnaround</span><span class="v">{{ order.turnaround.name|default:"—" }}</span></div>
+        {% if order.fabric %}<div class="spec-row"><span class="label">Fabric</span><span class="v">{{ order.fabric }}</span></div>{% endif %}
+        {% if order.placement %}<div class="spec-row"><span class="label">Placement</span><span class="v">{{ order.placement }}{% if order.size_display %} · {{ order.size_display }}{% endif %}</span></div>{% endif %}
+        <div class="spec-row"><span class="label">Formats</span><span class="v">{{ order.formats_display }}</span></div>
+        {% if order.due_at and order.is_open %}<div class="spec-row"><span class="label">Due</span><span class="v">{{ order.due_at|date:"d M Y H:i" }}</span></div>{% endif %}
+      {% endif %}
+      <div class="spec-row"><span class="label">Placed</span><span class="v">{{ order.created_at|date:"d M Y H:i" }}</span></div>
+      <div class="spec-row" style="border:0"><span class="label">{% if order.final_price is not None %}Price{% else %}Estimate{% endif %}</span><span class="v display" style="font-size:28px">{% if order.total is not None %}${{ order.total }}{% else %}Quote pending{% endif %}</span></div>
+      {% if order.instructions %}<div class="mt-s"><span class="label">Instructions</span><p class="mb-0" style="white-space:pre-line;font-size:14px">{{ order.instructions }}</p></div>{% endif %}
+    </div>
+
+    {% if order.is_patch %}
+    <div class="card card-pad">
+      <div class="kicker">Shipping address</div>
+      <address style="font-style:normal;font-size:14px;line-height:1.7">{% for line in order.patch.address_lines %}{{ line }}<br>{% endfor %}</address>
+    </div>
+    {% endif %}
+
+    <div class="card card-pad">
+      <div class="kicker">Activity</div>
+      <ul class="timeline">
+        {% for e in events %}
+        <li><div class="t-head">{{ e.get_kind_display }} · {{ e.created_at|date:"d M H:i" }}{% if e.actor %} · {% if e.actor.is_staff %}Scarlett Embroidery{% else %}You{% endif %}{% endif %}</div><div class="t-body">{{ e.message }}</div></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="stack-lg">
+    {% if deliverables %}
+    <div class="card card-pad" style="border-top:3px solid var(--gold)">
+      <div class="kicker">Final files</div>
+      {% include "orders/_files.html" with files=deliverables %}
+    </div>
+    {% endif %}
+    <div class="card card-pad">
+      <div class="kicker">Sew-out proofs</div>
+      {% include "orders/_files.html" with files=proofs empty="Your proof appears here once it's sewn." %}
+    </div>
+    <div class="card card-pad">
+      <div class="kicker">Your artwork</div>
+      {% include "orders/_files.html" with files=artwork %}
+      {% if order.is_open %}
+      <form method="post" action="{% url 'orders:action' order.number %}" enctype="multipart/form-data" class="stack mt-m" data-once>
+        {% csrf_token %}<input type="hidden" name="action" value="artwork">
+        <div class="dropzone" data-dropzone style="padding:18px">
+          <div class="muted" style="font-size:13px">Add more artwork</div>
+          <label class="btn btn-outline" data-browse for="{{ artwork_form.files.id_for_label }}">Choose files</label>
+          {{ artwork_form.files }}
+        </div>
+        <div data-file-list></div>
+        <div class="field">{{ artwork_form.note }}</div>
+        <button class="btn btn-ink" style="align-self:flex-start">Upload</button>
+      </form>
+      {% endif %}
+    </div>
+    {% if order.status == "delivered" %}
+    <details class="card card-pad">
+      <summary class="h4" style="cursor:pointer">Something not sewing right? Request a revision</summary>
+      <form method="post" action="{% url 'orders:action' order.number %}" class="stack mt-s">{% csrf_token %}<input type="hidden" name="action" value="revision">
+        <div class="field">{{ revision_form.message }}</div>
+        <button class="btn btn-ink" style="align-self:flex-start">Send revision request</button>
+      </form>
+    </details>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

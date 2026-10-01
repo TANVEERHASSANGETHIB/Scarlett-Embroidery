@@ -1,0 +1,10 @@
+Hi {{ user.get_short_name }},
+
+Your Scarlett Embroidery verification code is:
+
+    {{ code }}
+
+It expires in {{ ttl }} minutes. If you didn't create an account, you can ignore this email.
+
+— Scarlett Embroidery
+{{ site_url }}

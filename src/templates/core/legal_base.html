@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="container" style="padding-block:56px 80px">
+  <div class="aside-col">
+    <aside>
+      <nav class="side-tabs" aria-label="Legal">
+        <a class="side-tab{% if page == 'privacy' %} is-active{% endif %}" href="{% url 'core:privacy' %}">Privacy Policy</a>
+        <a class="side-tab{% if page == 'terms' %} is-active{% endif %}" href="{% url 'core:terms' %}">Terms &amp; Conditions</a>
+      </nav>
+      <p style="font-size:12px;color:var(--ink-60);margin-top:18px">Last updated 1 August 2026. Placeholder legal copy — replace with text reviewed by your counsel.</p>
+    </aside>
+    <article>
+      <h1 class="display" style="font-size:clamp(40px,4.4vw,56px);margin-bottom:22px">{% block legal_title %}{% endblock %}</h1>
+      <div class="stack">
+        {% block legal_body %}{% endblock %}
+      </div>
+    </article>
+  </div>
+</section>
+{% endblock %}

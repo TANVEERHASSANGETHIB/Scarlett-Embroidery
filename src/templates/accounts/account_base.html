@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block footer %}{% endblock %}
+{% block content %}
+<section class="account">
+  <aside class="account-side">
+    <div class="account-user">
+      <div class="avatar">{{ user.initials }}</div>
+      <div style="min-width:0">
+        <div style="font-weight:700;font-size:14px">{{ user.full_name }}</div>
+        <div style="font-size:11px;color:var(--bone-55);overflow:hidden;text-overflow:ellipsis">{{ user.email }}</div>
+      </div>
+    </div>
+    <nav class="account-nav" aria-label="Account">
+      <a href="{% url 'accounts:dashboard' %}" class="{% if nav == 'dash' %}is-active{% endif %}">Dashboard</a>
+      <a href="{% url 'accounts:orders' %}" class="{% if nav == 'orders' %}is-active{% endif %}">Orders</a>
+      <a href="{% url 'accounts:profile' %}" class="{% if nav == 'profile' %}is-active{% endif %}">Profile</a>
+      <a href="{% url 'accounts:logout' %}" class="{% if nav == 'logout' %}is-active{% endif %}">Logout</a>
+    </nav>
+    <div style="padding:20px 22px" class="mono"><span style="font-size:11px;color:var(--bone-55)">Member since {{ user.date_joined|date:"M Y" }}</span></div>
+  </aside>
+  <div class="account-main">
+    {% block account %}{% endblock %}
+  </div>
+</section>
+{% endblock %}

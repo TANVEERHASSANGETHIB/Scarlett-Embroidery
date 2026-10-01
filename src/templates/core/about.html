@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}About — Scarlett Embroidery{% endblock %}
+{% block content %}
+<section class="container" style="padding-top:64px">
+  <div class="about-grid">
+    <div>
+      <div class="kicker">About us</div>
+      <h1 class="display d-xl" style="font-size:clamp(44px,5.4vw,72px);margin-bottom:20px;max-width:22ch">A digitizing studio run by embroiderers</h1>
+      <p class="lead">Scarlett Embroidery started on two commercial heads in a back room. We were the shop that kept getting bad files — thread breaks, blown-out density, caps that puckered — so we learned to punch our own.</p>
+      <p class="muted" style="max-width:60ch">Today we digitize for uniform shops, promotional distributors and brands across the US, Canada, UK and Australia. Every file still passes the same test it did on day one: it has to sew clean, first pass, on the fabric it was made for.</p>
+      <div class="grid-4 mt-l" style="gap:14px">
+        {% for n, l in facts %}
+        <div class="card" style="padding:18px">
+          <div class="fact-n">{{ n }}</div>
+          <div class="mono" style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-60)">{{ l }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="about-media">
+      <span class="placeholder-note">studio photograph — machine floor</span>
+      <div class="about-logo"><img src="{% static 'img/logo.png' %}" alt="Scarlett Embroidery"></div>
+    </div>
+  </div>
+</section>
+<section class="container section section-last" style="padding-top:64px">
+  <h2 class="display d-s mb-m">How we work</h2>
+  <div class="grid-3" style="gap:18px">
+    {% for no, title, body in values %}
+    <div class="card card-accent-top" style="padding:26px 24px">
+      <div class="mono" style="font-size:11px;letter-spacing:.16em;color:var(--gold-dark);margin-bottom:14px">{{ no }}</div>
+      <h3 class="h3" style="font-size:26px;margin-bottom:8px">{{ title }}</h3>
+      <p class="muted mb-0" style="font-size:14px">{{ body }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

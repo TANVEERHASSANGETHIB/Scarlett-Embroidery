@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dark">
+  <div class="container hero-grid">
+    <div>
+      <div class="hero-flag"><i></i>{{ site.announcement }}</div>
+      <h1 class="display d-hero">Files built for<br>machines that<br><span class="accent">don't forgive</span></h1>
+      <p class="lead" style="max-width:50ch;margin-bottom:34px">Hand-punched embroidery digitizing, clean vector art and finished patches — run on a test head before delivery, with the sew-out photo in the same email as the file.</p>
+      <div class="row">
+        <a class="btn btn-gold btn-lg" href="{% url 'orders:place' %}">Get my design digitized</a>
+        <a class="btn btn-ghost-light btn-lg" href="{% url 'core:portfolio' %}">View portfolio</a>
+      </div>
+    </div>
+    <div class="hero-media">
+      <span class="placeholder-note">hero photograph — cap on the machine</span>
+      {% if showcase %}{% with latest=showcase.0 %}
+      <div class="hero-callout">
+        <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-dark)">latest delivery</div>
+        <div class="display" style="font-size:19px;letter-spacing:.02em">{{ latest.name }}{% if latest.stitches %} · {{ latest.stitches|floatformat:"g" }} st{% endif %}</div>
+        <div style="font-size:12px;color:#1c1a17a1">{{ latest.formats }}{% if latest.turnaround %} · {{ latest.turnaround }}{% endif %}</div>
+      </div>
+      {% endwith %}{% endif %}
+    </div>
+  </div>
+  <div class="container">
+    <div class="hero-stats">
+      {% for n, l in hero_stats %}
+      <div><div class="stat-n">{{ n }}</div><div class="stat-l">{{ l }}</div></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="brands-bar">
+  <div class="container">
+    <span class="mono" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-60)">Trusted by uniform shops &amp; brands</span>
+    <div class="row" style="gap:34px">{% for b in brands %}<span class="brand-name">{{ b }}</span>{% endfor %}</div>
+  </div>
+</section>
+
+<section class="container section" id="services">
+  <div class="between mb-l">
+    <div>
+      <div class="kicker">01 — Services</div>
+      <h2 class="display d-m" style="max-width:20ch">Three services, one production standard</h2>
+    </div>
+    <p class="muted mb-0" style="max-width:34ch">Every file is punched manually — no auto-trace — then test-sewn on the fabric you named before it is released.</p>
+  </div>
+  <div style="border-top:1px solid var(--ink-line)">
+    {% for sv in services %}
+    <div class="service-row">
+      <div class="service-no">{{ sv.no }}</div>
+      <div>
+        <h3 class="service-title">{{ sv.title }}</h3>
+        <p class="muted mb-0" style="max-width:42ch">{{ sv.body }}</p>
+      </div>
+      <div class="row" style="gap:8px;padding-top:6px;align-items:flex-start">
+        {% for p in sv.points %}<span class="pill">{{ p }}</span>{% endfor %}
+      </div>
+      <div class="stack" style="align-items:flex-start;gap:14px;padding-top:4px">
+        <span class="mono" style="font-size:12.5px;font-weight:500">{{ sv.price }}</span>
+        <a class="btn btn-ink" href="{% url 'orders:place' %}?service={{ sv.service }}">Start this</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% if showcase %}
+<section class="container section" data-showcase>
+  <div class="kicker">02 — Sew-outs</div>
+  <div class="between" style="margin-bottom:28px">
+    <h2 class="display d-m">Recent work, with the spec sheet</h2>
+    <a class="btn btn-outline btn-md" href="{% url 'core:portfolio' %}">Full portfolio</a>
+  </div>
+  {% with first=showcase.0 %}
+  <div class="showcase">
+    <div class="showcase-main placeholder-img">
+      <img data-sc-img src="{% if first.image %}{{ first.image.url }}{% endif %}" alt="{{ first.name }}" {% if not first.image %}hidden{% endif %}>
+      <span class="placeholder-note" style="position:relative">sew-out photograph — <span data-sc-name>{{ first.name }}</span></span>
+      <div class="showcase-tag" data-sc-tag>{% firstof first.showcase_tag first.get_category_display %}</div>
+    </div>
+    <div class="stack-lg">
+      <div class="card card-pad" style="flex:1;border-radius:var(--radius-lg)">
+        <h3 class="display d-xs mb-m" data-sc-name>{{ first.name }}</h3>
+        <div data-sc-specs>
+          {% for k, v in first.specs %}<div class="spec-row"><span class="label">{{ k }}</span><span class="v">{{ v }}</span></div>{% endfor %}
+        </div>
+      </div>
+      <div class="thumbs">
+        {% for item in showcase %}
+        <button type="button" class="thumb-btn placeholder-img{% if forloop.first %} is-active{% endif %}" data-sc-thumb="{{ forloop.counter0 }}" aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}">
+          {% if item.image %}<img src="{{ item.image.url }}" alt="">{% endif %}
+          <span>{{ item.short_name }}</span>
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endwith %}
+  {{ showcase_data|json_script:"showcase-data" }}
+</section>
+{% endif %}
+
+<section class="container section">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:56px">
+    <div>
+      <div class="kicker">03 — How it works</div>
+      <h2 class="display d-s" style="margin-bottom:14px">Three steps,<br>no back<br>and forth</h2>
+      <p class="muted" style="max-width:34ch">Upload once. We handle fabric, density, pull compensation and trims — and send the sew-out photo with the file.</p>
+    </div>
+    <div class="stack" style="gap:14px">
+      {% for n, title, body, time in steps %}
+      <div class="card step">
+        <div class="step-n">{{ n }}</div>
+        <div>
+          <h3 class="h3" style="margin-bottom:4px">{{ title }}</h3>
+          <p class="muted mb-0" style="font-size:14px">{{ body }}</p>
+        </div>
+        <div class="step-time">{{ time }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="dark" style="margin-top:72px" id="pricing">
+  <div class="container" style="padding-block:72px">
+    <div class="kicker">04 — Pricing</div>
+    <div class="between mb-l">
+      <h2 class="display" style="font-size:clamp(36px,4vw,54px);max-width:24ch">Flat price per design. Nothing else added.</h2>
+      <p class="muted mb-0" style="font-size:14px;max-width:30ch">Quoted before we start, invoiced after you approve. Revisions inside scope are free.</p>
+    </div>
+
+    <div class="plan-grid">
+      {% for tier in digitizing_tiers %}
+      <div class="plan{% if tier.is_highlighted %} is-featured{% endif %}">
+        <div class="plan-label">{{ tier.card_name }}</div>
+        <div class="plan-card">
+          {% if tier.ribbon %}<span class="plan-ribbon">{{ tier.ribbon }}</span>{% endif %}
+          <div class="plan-head">
+            <div class="plan-price"><span class="plan-currency">$</span>{{ tier.price|floatformat:"-2" }}</div>
+            <div class="plan-tier">{{ tier.card_name }}</div>
+          </div>
+          <ul class="plan-features">
+            {% for feature in tier.feature_list %}
+            <li>{{ feature }}</li>
+            {% empty %}
+            <li>{{ tier.description }}</li>
+            {% endfor %}
+          </ul>
+          <div class="plan-foot">
+            <a class="btn btn-gold btn-md" href="{% url 'orders:place' %}?service=digitizing&amp;tier={{ tier.pk }}">Order now</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="plan-extras">
+      {% if vector_tier %}
+      <div class="plan-extra">
+        <div>
+          <div class="kicker mb-0">Vector art</div>
+          <div class="h4">{{ vector_tier.name }}</div>
+          <div class="muted" style="font-size:13px">{{ vector_tier.description }}</div>
+        </div>
+        <div class="plan-extra-price">${{ vector_tier.price|floatformat:"-2" }}<small>/ logo</small></div>
+      </div>
+      {% endif %}
+      {% if patch_from %}
+      <div class="plan-extra">
+        <div>
+          <div class="kicker mb-0">Patches</div>
+          <div class="h4">Made &amp; shipped</div>
+          <div class="muted" style="font-size:13px">Iron-on, embroidered or rubber · {{ site.patch_production_note }}</div>
+        </div>
+        <div class="plan-extra-price">${{ patch_from }}<small>each</small></div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="row mt-l" style="gap:14px">
+      <a class="btn btn-gold btn-lg" href="{% url 'orders:place' %}">Get an exact quote</a>
+      <span style="font-size:13px;color:#eceae7a8">Free quote in under 30 minutes · ask anything on live chat</span>
+    </div>
+  </div>
+</section>
+
+<section class="container section">
+  <div class="kicker" style="margin-bottom:20px">05 — Why shops stay</div>
+  <div class="grid-4">
+    {% for title, body in why_us %}
+    <div class="card card-pad">
+      <h3 class="h3" style="margin-bottom:8px">{{ title }}</h3>
+      <p class="muted mb-0" style="font-size:14px">{{ body }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% if testimonials %}
+<section class="container section">
+  <div class="kicker">06 — Testimonials</div>
+  <h2 class="display d-m mb-l">Judged on the machine, not the mockup</h2>
+  <div class="carousel" data-carousel data-autoplay="6000">
+    <div class="carousel-track" data-track tabindex="0" role="group" aria-label="Customer reviews">
+      {% for q in testimonials %}
+      <figure class="card quote-card carousel-item" style="margin:0">
+        <div class="stars" aria-label="{{ q.rating }} out of 5 stars">{% for _ in ""|rjust:q.rating %}★{% endfor %}</div>
+        <blockquote class="quote-text" style="margin:0 0 22px">“{{ q.quote }}”</blockquote>
+        <figcaption class="quote-by">
+          <div class="avatar-ph placeholder-img"></div>
+          <div>
+            <div style="font-weight:700;font-size:14px">{{ q.name }}</div>
+            <div style="font-size:12px;color:var(--ink-60)">{{ q.role }}</div>
+          </div>
+        </figcaption>
+      </figure>
+      {% endfor %}
+    </div>
+    <div class="carousel-nav" data-nav hidden>
+      <button type="button" class="carousel-btn" data-prev aria-label="Previous reviews">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <div class="carousel-dots" data-dots></div>
+      <button type="button" class="carousel-btn" data-next aria-label="More reviews">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if faqs %}
+<section class="container section section-last">
+  <div class="aside-col" style="grid-template-columns:1fr 1.6fr">
+    <div>
+      <div class="kicker">07 — FAQ</div>
+      <h2 class="display d-s" style="margin-bottom:18px">Questions we get every week</h2>
+      <a class="btn btn-outline btn-md" href="{% url 'core:contact' %}">Ask us anything</a>
+    </div>
+    <div class="stack" style="gap:10px">
+      {% for f in faqs %}
+      <details class="card faq"{% if forloop.first %} open{% endif %}>
+        <summary><span class="faq-q">{{ f.question }}</span><span class="faq-sign" aria-hidden="true"></span></summary>
+        <p class="faq-a">{{ f.answer }}</p>
+      </details>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="cta-band">
+  <div class="container">
+    <div>
+      <h2 class="display" style="font-size:clamp(38px,4.4vw,58px);line-height:.98;margin-bottom:8px;max-width:22ch">Send artwork. Get a sewn proof today.</h2>
+      <p class="mb-0" style="font-size:16px;color:var(--ink-80)">First design digitized free for new uniform shops.</p>
+    </div>
+    <div class="row">
+      <a class="btn btn-night btn-lg" href="{% url 'orders:place' %}">Place an order</a>
+      <a class="btn btn-ghost-ink btn-lg" href="{% url 'core:contact' %}">Talk to a digitizer</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

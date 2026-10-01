@@ -1,0 +1,229 @@
+{% extends "console/base.html" %}
+{% load static %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<div class="console-page settings" data-settings data-active-tab="{{ active_tab }}">
+  <div class="console-head">
+    <div>
+      <h1 class="console-title">Settings</h1>
+      <p class="console-sub">Prices, alerts, site details and who can sign in here. Changes go live immediately.</p>
+    </div>
+  </div>
+
+  <div class="settings-layout">
+    <nav class="settings-rail" aria-label="Settings sections">
+      {% for slug, label, hint in tabs %}
+      <button type="button" class="settings-tab{% if active_tab == slug %} is-active{% endif %}" data-tab="{{ slug }}"
+              aria-current="{% if active_tab == slug %}true{% else %}false{% endif %}">
+        <span class="settings-tab-label">{{ label }}</span>
+        <span class="settings-tab-hint">{{ hint }}</span>
+      </button>
+      {% endfor %}
+    </nav>
+
+    <div class="settings-body">
+      <!-- ── Pricing ───────────────────────────────────── -->
+      <section class="settings-panel" data-panel="pricing" {% if active_tab != "pricing" %}hidden{% endif %}>
+        <form method="post" class="panel settings-card" novalidate>
+          {% csrf_token %}<input type="hidden" name="section" value="tiers">
+          <header class="settings-card-head">
+            <div>
+              <h2 class="settings-card-title">Flat pricing</h2>
+              <p class="settings-card-sub">One price per design type. Customers pick one of these when they order digitizing or vector art.</p>
+            </div>
+          </header>
+          {% include "console/_rows.html" with formset=tiers add_label="design type" %}
+          {% include "console/_save_bar.html" with label="Save pricing" %}
+        </form>
+      </section>
+
+      <!-- ── Turnaround ────────────────────────────────── -->
+      <section class="settings-panel" data-panel="turnaround" {% if active_tab != "turnaround" %}hidden{% endif %}>
+        <form method="post" class="panel settings-card" novalidate>
+          {% csrf_token %}<input type="hidden" name="section" value="turnarounds">
+          <header class="settings-card-head">
+            <div>
+              <h2 class="settings-card-title">Turnaround options</h2>
+              <p class="settings-card-sub">Delivery speeds shown on the order form. The surcharge is added to the design price; tick “default” for the one pre-selected.</p>
+            </div>
+          </header>
+          {% include "console/_rows.html" with formset=turnarounds add_label="turnaround" %}
+          {% include "console/_save_bar.html" with label="Save turnaround" %}
+        </form>
+      </section>
+
+      <!-- ── Patches ───────────────────────────────────── -->
+      <section class="settings-panel" data-panel="patches" {% if active_tab != "patches" %}hidden{% endif %}>
+        <form method="post" class="panel settings-card" novalidate>
+          {% csrf_token %}<input type="hidden" name="section" value="patches">
+          <header class="settings-card-head">
+            <div>
+              <h2 class="settings-card-title">Patch categories</h2>
+              <p class="settings-card-sub">Patch types customers can choose, with the starting price per piece. The estimate is this price × quantity.</p>
+            </div>
+          </header>
+          {% include "console/_rows.html" with formset=patches add_label="patch type" %}
+          {% include "console/_save_bar.html" with label="Save patch types" %}
+        </form>
+      </section>
+
+      <!-- ── Notifications ─────────────────────────────── -->
+      <section class="settings-panel" data-panel="notifications" {% if active_tab != "notifications" %}hidden{% endif %}>
+        <div class="panel settings-card">
+          <header class="settings-card-head">
+            <div>
+              <h2 class="settings-card-title">Order alerts</h2>
+              <p class="settings-card-sub">We email you the moment a customer places an order, with their details, specs and a link to the order.</p>
+            </div>
+            <span class="badge {% if email_status.live %}badge-gold{% else %}badge-muted{% endif %}">
+              {% if email_status.live %}Live email{% else %}Test inbox{% endif %}
+            </span>
+          </header>
+
+          <div class="mail-status">
+            <div class="info-row"><div class="k">Mail server</div><div class="v">{{ email_status.label }}{% if email_status.secure != "none" %} · {{ email_status.secure }}{% endif %}</div></div>
+            {% if email_status.account %}<div class="info-row"><div class="k">Sending account</div><div class="v">{{ email_status.account }}</div></div>{% endif %}
+            <div class="info-row"><div class="k">App password</div><div class="v">{% if email_status.password_set %}Saved securely on the server ✓{% else %}Not set{% endif %}</div></div>
+            <div class="info-row"><div class="k">From address</div><div class="v">{{ email_status.from_email }}</div></div>
+          </div>
+          {% if not email_status.live %}
+          <p class="help">Emails are going to the development inbox (Mailpit), not to real addresses. Set <code>EMAIL_URL</code> in the server's <code>.env</code> file to send for real.</p>
+          {% endif %}
+
+          <form method="post" class="settings-form" novalidate>
+            {% csrf_token %}<input type="hidden" name="section" value="notifications">
+            {% include "partials/form_errors.html" with form=notify_form %}
+            <label class="switch">
+              {{ notify_form.notify_on_new_order }}
+              <span class="switch-track" aria-hidden="true"></span>
+              <span class="switch-text">
+                <strong>Email me about new orders</strong>
+                <small>Turn off to stop new-order alerts. Proof and delivery emails to customers are unaffected.</small>
+              </span>
+            </label>
+            {% include "partials/field.html" with field=notify_form.order_notification_emails hide_required=True %}
+            {% if recipients %}
+            <div class="chips" style="margin-top:-4px">
+              {% for r in recipients %}<span class="chip" style="cursor:default">{{ r }}</span>{% endfor %}
+            </div>
+            {% endif %}
+            {% include "console/_save_bar.html" with label="Save alerts" %}
+          </form>
+
+          <div class="settings-divider"></div>
+          <form method="post" class="row" style="justify-content:space-between">
+            {% csrf_token %}<input type="hidden" name="section" value="test_email">
+            <div>
+              <div class="h4">Send yourself a test</div>
+              <div class="muted" style="font-size:13px">Delivers a sample alert to the addresses above, so you can confirm it arrives.</div>
+            </div>
+            <button class="btn btn-outline btn-md">Send test email</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ── Site details ──────────────────────────────── -->
+      <section class="settings-panel" data-panel="site" {% if active_tab != "site" %}hidden{% endif %}>
+        <form method="post" class="panel settings-card" novalidate>
+          {% csrf_token %}<input type="hidden" name="section" value="site">
+          <header class="settings-card-head">
+            <div>
+              <h2 class="settings-card-title">Site details</h2>
+              <p class="settings-card-sub">Contact details and copy shown across the public website.</p>
+            </div>
+          </header>
+          {% include "partials/form_errors.html" with form=site_form %}
+          <div class="settings-grid">
+            {% for field in site_form %}{% include "partials/field.html" with field=field hide_required=True %}{% endfor %}
+          </div>
+          {% include "console/_save_bar.html" with label="Save site details" %}
+        </form>
+      </section>
+
+      <!-- ── Team ──────────────────────────────────────── -->
+      <section class="settings-panel" data-panel="team" {% if active_tab != "team" %}hidden{% endif %}>
+        <div class="panel settings-card">
+          <header class="settings-card-head">
+            <div>
+              <h2 class="settings-card-title">Admin team</h2>
+              <p class="settings-card-sub">People who can sign in to this console. Disable an account to revoke access instantly.</p>
+            </div>
+          </header>
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>Name</th><th>Email</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                {% for a in admins %}
+                <tr>
+                  <td class="t-strong">{{ a.full_name }}{% if a.is_superuser %} <span class="badge badge-muted">Owner</span>{% endif %}</td>
+                  <td class="t-mono">{{ a.email }}</td>
+                  <td>{% if a.is_active %}<span class="badge badge-gold">Active</span>{% else %}<span class="badge badge-danger">Disabled</span>{% endif %}</td>
+                  <td class="text-right">
+                    {% if a != user %}
+                    <form method="post">{% csrf_token %}<input type="hidden" name="section" value="toggle_admin"><input type="hidden" name="user_id" value="{{ a.pk }}">
+                      <button class="btn btn-outline" data-confirm="{% if a.is_active %}Disable{% else %}Enable{% endif %} {{ a.email }}?">{% if a.is_active %}Disable{% else %}Enable{% endif %}</button>
+                    </form>
+                    {% else %}<span class="mono" style="font-size:11px">you</span>{% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <form method="post" class="panel settings-card" novalidate>
+          {% csrf_token %}<input type="hidden" name="section" value="invite">
+          <header class="settings-card-head">
+            <div>
+              <h2 class="settings-card-title">Add an admin</h2>
+              <p class="settings-card-sub">Creates a console account straight away. Share the temporary password privately; they can change it after signing in.</p>
+            </div>
+          </header>
+          {% include "partials/form_errors.html" with form=invite_form %}
+          <div class="settings-grid">
+            {% include "partials/field.html" with field=invite_form.full_name label="Full name" hide_required=True %}
+            {% include "partials/field.html" with field=invite_form.email hide_required=True %}
+            {% include "partials/field.html" with field=invite_form.password label="Temporary password" hide_required=True %}
+          </div>
+          {% include "console/_save_bar.html" with label="Create admin" always=True %}
+        </form>
+      </section>
+
+      <!-- ── Security ──────────────────────────────────── -->
+      <section class="settings-panel" data-panel="security" {% if active_tab != "security" %}hidden{% endif %}>
+        <div class="panel settings-card">
+          <header class="settings-card-head">
+            <div>
+              <h2 class="settings-card-title">Blocked chat visitors</h2>
+              <p class="settings-card-sub">IP addresses blocked from live chat. Block someone from the chat screen; unblock them here.</p>
+            </div>
+          </header>
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>IP address</th><th>Reason</th><th>Blocked by</th><th>When</th><th></th></tr></thead>
+              <tbody>
+                {% for b in blocked %}
+                <tr>
+                  <td class="t-mono">{{ b.ip_address }}</td><td>{{ b.reason|default:"—" }}</td>
+                  <td>{{ b.created_by.get_short_name|default:"—" }}</td>
+                  <td class="mono nowrap" style="font-size:11.5px">{{ b.created_at|date:"d M Y" }}</td>
+                  <td class="text-right">
+                    <form method="post">{% csrf_token %}<input type="hidden" name="section" value="unblock_ip"><input type="hidden" name="block_id" value="{{ b.pk }}">
+                      <button class="btn btn-outline">Unblock</button>
+                    </form>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="empty">Nobody is blocked.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/console-settings.js' %}" defer></script>{% endblock %}

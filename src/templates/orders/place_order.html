@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Place order — Scarlett Embroidery{% endblock %}
+{% block content %}
+<section class="container" style="padding-block:48px 80px">
+  <div class="between mb-l" style="margin-bottom:28px">
+    <div>
+      <div class="kicker">Place order</div>
+      <h1 class="display" style="font-size:clamp(40px,4.6vw,60px);line-height:.98;margin-bottom:6px">Tell us what has to sew</h1>
+      <p class="muted mb-0">Quote back in 30 minutes. You only pay once you approve the proof.</p>
+    </div>
+    <div class="row">
+      {% for k, v in order_meta %}
+      <div class="card meta-tile"><div class="k">{{ k }}</div><div class="v">{{ v }}</div></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if restored %}
+  <div class="notice notice-good mb-m" role="status">
+    <span class="notice-icon" aria-hidden="true">✓</span>
+    <div>
+      <strong>Welcome back — we kept your order exactly as you left it.</strong>
+      <div class="muted" style="font-size:13.5px">Check it over{% if saved_files %} (your {{ saved_files|length }} file{{ saved_files|length|pluralize }} {{ saved_files|length|pluralize:"is,are" }} still attached){% endif %} and send it whenever you're ready.</div>
+    </div>
+  </div>
+  {% elif not user.is_authenticated %}
+  <div class="notice mb-m">
+    <span class="notice-icon" aria-hidden="true">i</span>
+    <div>
+      <strong>Fill this in now — sign in when you send it.</strong>
+      <div class="muted" style="font-size:13.5px">You'll need an account so we can deliver your files and you can track the job. Nothing you type here is lost.</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="order-grid" data-order-form data-once novalidate>
+    {% csrf_token %}
+    <div class="card card-raised card-pad-l">
+      {% if form.non_field_errors or patch_form.non_field_errors %}
+      <div class="form-errors" role="alert">{{ form.non_field_errors }}{{ patch_form.non_field_errors }}</div>
+      {% endif %}
+
+      <!-- 01 Service -->
+      <div class="order-step">
+        <div class="order-step-title">01 — Service</div>
+        <div class="options options-3" role="radiogroup" aria-label="Service">
+          {% for value, label, note in service_cards %}
+          <label class="option">
+            <input type="radio" name="service" value="{{ value }}" data-label="{{ label }}" {% if form.service.value == value %}checked{% endif %}>
+            <div class="option-title">{{ label }}</div>
+            <div class="option-note">{{ note }}</div>
+          </label>
+          {% endfor %}
+        </div>
+        {{ form.service.errors }}
+      </div>
+
+      <!-- 02 Details -->
+      <div class="order-step">
+        <div class="order-step-title">02 — Your details</div>
+        <div class="grid-2">
+          {% include "partials/field.html" with field=form.contact_name hide_required=True %}
+          {% include "partials/field.html" with field=form.contact_email hide_required=True %}
+          {% include "partials/field.html" with field=form.design_name span=True hide_required=True %}
+        </div>
+      </div>
+
+      <!-- 03 Artwork -->
+      <div class="order-step">
+        <div class="order-step-title">03 — Artwork</div>
+        <div class="dropzone{% if form.artwork.errors %} has-error{% endif %}" data-dropzone data-max-bytes="{{ max_upload_bytes }}">
+          <div>
+            <div class="h3" style="margin-bottom:2px">Drop artwork here</div>
+            <div class="muted" style="font-size:13px">PNG, JPG, AI, EPS, PDF, SVG, PSD, CDR — up to {{ max_upload_bytes|filesizeformat }} each. Multiple files welcome.</div>
+          </div>
+          <label class="btn btn-ink" data-browse for="{{ form.artwork.id_for_label }}">Browse files</label>
+          {{ form.artwork }}
+        </div>
+        <div data-file-list></div>
+        {% if saved_files %}
+        <div class="saved-files">
+          <div class="label" style="margin-top:14px">Already attached</div>
+          {% for f in saved_files %}
+          <div class="file-row">
+            <div class="row" style="min-width:0;flex-wrap:nowrap">
+              <div class="thumb placeholder-img"></div>
+              <div style="min-width:0">
+                <div class="file-name">{{ f.original_name }}</div>
+                <div class="file-meta">{{ f.size|filesizeformat }} · saved with your order</div>
+              </div>
+            </div>
+            <div class="row" style="flex-wrap:nowrap;gap:8px">
+              <span class="badge badge-gold">Saved</span>
+              <button type="button" class="btn btn-danger" data-remove-saved="{% url 'orders:remove_saved_file' f.pk %}"
+                      data-confirm="Remove {{ f.original_name }} from this order?" aria-label="Remove {{ f.original_name }}">✕</button>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {{ form.artwork.errors }}
+      </div>
+
+      <!-- 04 Specification: digitizing & vector -->
+      <div class="order-step" data-service-only="digitizing vector">
+        <div class="order-step-title">04 — Specification</div>
+        <div class="stack-lg">
+          <div>
+            <span class="label">Design type</span>
+            <div class="options options-3">
+              {% for tier in tiers %}
+              <label class="option" data-tier-service="{{ tier.service }}">
+                <input type="radio" name="tier" value="{{ tier.pk }}" {% if form.tier.value|stringformat:"s" == tier.pk|stringformat:"s" %}checked{% endif %}>
+                <div class="option-title">{{ tier.name }}</div>
+                <div class="option-note">${{ tier.price|floatformat:"-2" }}{% if tier.description %} · {{ tier.description }}{% endif %}</div>
+              </label>
+              {% endfor %}
+            </div>
+            {{ form.tier.errors }}
+          </div>
+
+          <div class="grid-2">
+            <div class="field" data-service-only="digitizing">{% include "partials/field.html" with field=form.fabric label="Fabric type" hide_required=True %}</div>
+            <div class="field" data-service-only="digitizing">{% include "partials/field.html" with field=form.placement hide_required=True %}</div>
+            <div class="grid-2" style="gap:12px">
+              {% include "partials/field.html" with field=form.height_in label="Height (in)" %}
+              {% include "partials/field.html" with field=form.width_in label="Width (in)" %}
+            </div>
+            <div>
+              <span class="label">Turnaround</span>
+              <div class="segmented">
+                {% for ta in turnarounds %}
+                <label class="seg">
+                  <input type="radio" name="turnaround" value="{{ ta.pk }}" {% if form.turnaround.value|stringformat:"s" == ta.pk|stringformat:"s" %}checked{% endif %}>
+                  {{ ta.name }}{% if ta.surcharge %}<small>+${{ ta.surcharge|floatformat:"-2" }}</small>{% endif %}
+                </label>
+                {% endfor %}
+              </div>
+              {{ form.turnaround.errors }}
+            </div>
+          </div>
+
+          <div data-service-only="digitizing">
+            <span class="label">Required file formats</span>
+            <div class="chips">
+              {% for cb in form.embroidery_formats %}
+              <label class="chip">{{ cb.tag }}{{ cb.choice_label }}</label>
+              {% endfor %}
+            </div>
+            {{ form.embroidery_formats.errors }}
+          </div>
+          <div data-service-only="vector">
+            <span class="label">Required file formats</span>
+            <div class="chips">
+              {% for cb in form.vector_formats %}
+              <label class="chip">{{ cb.tag }}{{ cb.choice_label }}</label>
+              {% endfor %}
+            </div>
+            {{ form.vector_formats.errors }}
+          </div>
+        </div>
+      </div>
+
+      <!-- 04 Patch details -->
+      <div class="order-step" data-service-only="patches">
+        <div class="order-step-title">04 — Patch details</div>
+        <div class="stack-lg">
+          <div>
+            <span class="label">Patch category</span>
+            <div class="options options-3">
+              {% for cat in patch_categories %}
+              <label class="option">
+                <input type="radio" name="patch-category" value="{{ cat.pk }}" {% if patch_form.category.value|stringformat:"s" == cat.pk|stringformat:"s" %}checked{% endif %}>
+                <div class="option-title">{{ cat.name }}</div>
+                <div class="option-note">from ${{ cat.unit_price }} ea{% if cat.description %} · {{ cat.description }}{% endif %}</div>
+              </label>
+              {% endfor %}
+            </div>
+            {{ patch_form.category.errors }}
+          </div>
+
+          <div>
+            <span class="label">Backing</span>
+            <div class="segmented">
+              {% for value, label in backings %}
+              <label class="seg"><input type="radio" name="patch-backing" value="{{ value }}" data-label="{{ label }}" {% if patch_form.backing.value == value %}checked{% endif %}>{{ label }}</label>
+              {% endfor %}
+            </div>
+            {{ patch_form.backing.errors }}
+          </div>
+
+          <div class="grid-2">
+            {% include "partials/field.html" with field=patch_form.quantity label="Quantity" %}
+            <div class="grid-2" style="gap:12px">
+              {% include "partials/field.html" with field=patch_form.width_in label="Width (in)" %}
+              {% include "partials/field.html" with field=patch_form.height_in label="Height (in)" %}
+            </div>
+          </div>
+          <p class="help" style="margin-top:-6px">Minimum {{ site_settings.patch_min_quantity }} pieces · {{ site_settings.patch_production_note }} plus shipping.</p>
+
+          <div class="patch-panel">
+            <div class="sub-title">Shipping address</div>
+            <div class="grid-2">
+              {% include "partials/field.html" with field=patch_form.shipping_name %}
+              {% include "partials/field.html" with field=patch_form.shipping_phone %}
+              {% include "partials/field.html" with field=patch_form.address_line1 span=True %}
+              {% include "partials/field.html" with field=patch_form.address_line2 span=True %}
+              {% include "partials/field.html" with field=patch_form.city %}
+              {% include "partials/field.html" with field=patch_form.state %}
+              {% include "partials/field.html" with field=patch_form.postal_code %}
+              {% include "partials/field.html" with field=patch_form.country %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instructions (all services) -->
+      <div class="order-step">
+        {% include "partials/field.html" with field=form.instructions label="Instruction box — notes for your digitizer" %}
+      </div>
+    </div>
+
+    <aside class="order-summary">
+      <div class="kicker" style="margin-bottom:18px">Order summary</div>
+      <div>
+        <div class="summary-row"><span class="k">Service</span><span class="v" data-summary="service">—</span></div>
+        <div class="summary-row" data-summary-row="tier"><span class="k">Design type</span><span class="v" data-summary="tier">—</span></div>
+        <div class="summary-row" data-summary-row="turnaround"><span class="k">Turnaround</span><span class="v" data-summary="turnaround">—</span></div>
+        <div class="summary-row" data-summary-row="fabric"><span class="k">Fabric</span><span class="v" data-summary="fabric">—</span></div>
+        <div class="summary-row" data-summary-row="placement"><span class="k">Placement</span><span class="v" data-summary="placement">—</span></div>
+        <div class="summary-row" data-summary-row="formats"><span class="k">Formats</span><span class="v" data-summary="formats">—</span></div>
+        <div class="summary-row" data-summary-row="category" hidden><span class="k">Patch</span><span class="v" data-summary="category">—</span></div>
+        <div class="summary-row" data-summary-row="quantity" hidden><span class="k">Quantity</span><span class="v" data-summary="quantity">—</span></div>
+        <div class="summary-row" data-summary-row="backing" hidden><span class="k">Backing</span><span class="v" data-summary="backing">—</span></div>
+        <div class="summary-row" data-summary-row="ship" hidden><span class="k">Ship to</span><span class="v" data-summary="ship">—</span></div>
+      </div>
+      <div class="row" style="justify-content:space-between;align-items:baseline;padding:20px 0 4px">
+        <span class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#eceae7a8">Estimate</span>
+        <span class="estimate" data-summary="estimate">—</span>
+      </div>
+      <p style="font-size:12px;color:#eceae7a1;margin:0 0 20px" data-summary="note">Final price confirmed after we review the artwork. No charge if you don't approve the proof.</p>
+      <button type="submit" class="btn btn-gold btn-lg btn-block">Place order</button>
+      <div class="mono" style="font-size:11px;color:var(--bone-55);margin-top:12px">→ redirects to your dashboard</div>
+    </aside>
+  </form>
+  {{ pricing|json_script:"pricing-data" }}
+
+  <form method="post" id="remove-saved-form" hidden>{% csrf_token %}</form>
+
+  <div class="gate-backdrop" data-login-gate {% if not show_login_gate %}hidden{% endif %}>
+    <div class="gate-card" role="dialog" aria-modal="true" aria-labelledby="gate-title" aria-describedby="gate-copy" tabindex="-1">
+      <div class="kicker">One last step</div>
+      <h2 class="display d-xs" id="gate-title">Sign in to send your order</h2>
+      <p id="gate-copy" class="muted" style="font-size:15px">
+        Orders are delivered to your account, so we need to know who you are. Your details{% if saved_files %} and the {{ saved_files|length }} file{{ saved_files|length|pluralize }} you attached{% endif %} are saved — sign in or create your free account and we'll bring you straight back here with everything filled in.
+      </p>
+      <div class="gate-actions">
+        <a class="btn btn-gold btn-lg" href="{% url 'accounts:login' %}?next={{ login_next|urlencode:"" }}">Log in</a>
+        <a class="btn btn-outline btn-lg" href="{% url 'accounts:signup' %}?next={{ login_next|urlencode:"" }}">Create account</a>
+      </div>
+      <div class="gate-foot">
+        <span class="mono">Free · takes under a minute</span>
+        <button type="button" class="link-btn" data-gate-close>Keep editing</button>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/order.js' %}" defer></script>{% endblock %}

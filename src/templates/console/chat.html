@@ -1,0 +1,105 @@
+{% extends "console/base.html" %}
+{% load static %}
+{% block title %}Live chat{% endblock %}
+{% block content %}
+<div class="chat-ws" data-chat-ws data-active="{{ active.pk|default:'' }}" data-active-name="{{ active.display_name|default:'' }}" data-base-url="{% url 'console:chat' %}">
+  <div class="chat-list-col">
+    <div class="chat-list-head">
+      <div class="row" style="justify-content:space-between;margin-bottom:12px">
+        <h2 class="display" style="font-size:22px;letter-spacing:.05em">Live chat</h2>
+        <span class="ws-status" data-ws-status><span class="dot-live"></span><span> connecting…</span></span>
+      </div>
+      <div class="row" style="gap:6px;margin-bottom:10px">
+        <a class="chip{% if not status %} is-active{% endif %}" href="{% querystring status=None page=None s=None %}">All</a>
+        {% for value, label in statuses %}
+        <a class="chip{% if status == value %} is-active{% endif %}" href="{% querystring status=value page=None s=None %}">{{ label }}{% if value == "waiting" and waiting %} · <span data-waiting>{{ waiting }}</span>{% endif %}</a>
+        {% endfor %}
+      </div>
+      <div class="row" style="gap:10px">
+        <span class="label mb-0">Show</span>
+        <div class="row" style="gap:4px">
+          {% for n in per_page_options %}
+          <a class="chip{% if per_page == n %} is-active{% endif %}" style="padding:5px 10px" href="{% querystring per_page=n page=None %}">{{ n }}</a>
+          {% endfor %}
+        </div>
+        <span class="mono" style="font-size:10.5px;color:var(--bone-55)">of {{ total }}</span>
+      </div>
+    </div>
+    <div class="chat-list" data-chat-list>
+      {% for c in page %}
+      <a class="chat-item{% if active and c.pk == active.pk %} is-active{% endif %}" data-session="{{ c.pk }}" href="{% querystring s=c.pk %}">
+        <div class="row" style="justify-content:space-between;gap:8px;margin-bottom:3px;flex-wrap:nowrap">
+          <span class="name">{{ c.display_name }}</span><span class="time">{{ c.last_message_at|date:"H:i" }}</span>
+        </div>
+        <div class="preview">{{ c.last_message.body|default:"" }}</div>
+        <div class="row" style="gap:8px;margin-top:8px">
+          <span class="tag tag-{{ c.status }}">{{ c.get_status_display }}</span>
+          <span class="time ip">{{ c.ip_address|default:"—" }}</span>
+        </div>
+      </a>
+      {% empty %}
+      <div class="empty" data-empty>No conversations yet. New chats appear here instantly.</div>
+      {% endfor %}
+      {% if page.has_next or page.has_previous %}{% include "partials/pagination.html" %}{% endif %}
+    </div>
+  </div>
+
+  <div class="chat-thread-col">
+    {% if active %}
+    <div class="chat-thread-head">
+      <div>
+        <div class="display" style="font-size:22px;letter-spacing:.04em">{{ active.display_name }}</div>
+        <div class="mono" style="font-size:11px;color:var(--bone-55)">{{ active.ip_address|default:"—" }} · <span data-active-page>{{ active.current_page|default:"—" }}</span></div>
+      </div>
+      <div class="row" style="gap:8px">
+        <form method="post" action="{% url 'console:chat_action' active.pk %}">{% csrf_token %}<input type="hidden" name="action" value="assign"><button class="btn btn-outline" {% if active.assigned_to_id == user.pk %}disabled{% endif %}>{% if active.assigned_to_id == user.pk %}Assigned to you{% else %}Assign to me{% endif %}</button></form>
+        {% if active.status == "resolved" %}
+        <form method="post" action="{% url 'console:chat_action' active.pk %}">{% csrf_token %}<input type="hidden" name="action" value="reopen"><button class="btn btn-outline">Reopen</button></form>
+        {% else %}
+        <form method="post" action="{% url 'console:chat_action' active.pk %}">{% csrf_token %}<input type="hidden" name="action" value="close"><button class="btn btn-outline">Close chat</button></form>
+        {% endif %}
+      </div>
+    </div>
+    <div class="chat-thread" data-thread>
+      {% for m in thread %}
+      <div class="msg {% if m.sender == 'staff' %}from-staff{% else %}from-visitor{% endif %}">
+        <div class="msg-bubble">
+          <div class="msg-text">{{ m.body }}</div>
+          <div class="msg-meta">{% if m.sender == "staff" %}{{ m.staff_user.get_short_name|default:"Staff" }}{% else %}{{ active.display_name }}{% endif %} · {{ m.created_at|date:"H:i" }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <form class="chat-reply" method="post" action="{% url 'console:chat_action' active.pk %}" data-reply-form autocomplete="off">
+      {% csrf_token %}<input type="hidden" name="action" value="reply">
+      <input name="body" placeholder="Type a reply — Enter to send" maxlength="2000" aria-label="Reply">
+      <button type="submit" class="btn btn-gold btn-md">Send</button>
+    </form>
+    {% else %}
+    <div class="empty" style="margin:auto">Select a conversation.</div>
+    {% endif %}
+  </div>
+
+  <div class="chat-info-col">
+    {% if active %}
+    <div class="panel-title">Visitor details</div>
+    {% for k, v in visitor_rows %}
+    <div class="info-row"><div class="k">{{ k }}</div><div class="v">{{ v }}</div></div>
+    {% endfor %}
+    <div class="side-btns">
+      <a class="btn btn-outline" href="{% url 'console:chat_transcript' active.pk %}">Export transcript</a>
+      {% if active.ip_address %}
+      <form method="post" action="{% url 'console:chat_action' active.pk %}">{% csrf_token %}
+        {% if is_blocked %}
+        <input type="hidden" name="action" value="unblock"><button class="btn btn-outline btn-block">Unblock IP</button>
+        {% else %}
+        <input type="hidden" name="action" value="block"><button class="btn btn-danger btn-block" data-confirm="Block {{ active.ip_address }} from live chat?">Block IP</button>
+        {% endif %}
+      </form>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/console-chat.js' %}" defer></script>{% endblock %}

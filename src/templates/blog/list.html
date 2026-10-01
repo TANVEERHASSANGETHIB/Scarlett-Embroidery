@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Journal — Scarlett Embroidery{% endblock %}
+{% block content %}
+<section class="container" style="padding-block:56px 80px">
+  <div class="between" style="margin-bottom:28px;align-items:flex-end">
+    <div>
+      <div class="kicker">Journal</div>
+      <h1 class="display d-l">Notes from the machine floor</h1>
+    </div>
+    {% if categories %}
+    <div class="chips">
+      <a class="chip{% if not active %} is-active{% endif %}" href="{% url 'blog:list' %}">All</a>
+      {% for c in categories %}<a class="chip{% if active == c.slug %} is-active{% endif %}" href="?category={{ c.slug }}">{{ c.name }}</a>{% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  {% if featured %}
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:20px">
+    <a class="card post-card post-featured" href="{{ featured.get_absolute_url }}" style="border-radius:var(--radius-lg)">
+      <div class="post-hero placeholder-img">
+        {% if featured.cover %}<img src="{{ featured.cover.url }}" alt="">{% else %}<span class="placeholder-note">article hero</span>{% endif %}
+      </div>
+      <div class="post-meta"><span>Featured</span><span style="color:var(--ink-60)">{{ featured.reading_minutes }} min read</span></div>
+      <h2 class="display" style="font-size:clamp(30px,3vw,40px);line-height:1.02;margin-bottom:10px;max-width:26ch">{{ featured.title }}</h2>
+      <p class="muted mb-0" style="max-width:60ch">{{ featured.summary }}</p>
+    </a>
+    <div class="stack">
+      {% for po in page %}
+        {% if forloop.counter <= 4 %}
+        <a class="card post-card" href="{{ po.get_absolute_url }}" style="flex:1">
+          <div class="mono" style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-60);margin-bottom:8px">{{ po.category.name|default:"Article" }} · {{ po.published_at|date:"d M" }}</div>
+          <div class="post-title-sm">{{ po.title }}</div>
+        </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% with offset=featured|yesno:"4,0" %}
+  <div class="grid-3 mt-l">
+    {% for po in page %}
+      {% if not featured or forloop.counter > 4 %}
+      <a class="card post-card" href="{{ po.get_absolute_url }}">
+        <div class="post-hero placeholder-img" style="aspect-ratio:16/9">{% if po.cover %}<img src="{{ po.cover.url }}" alt="" loading="lazy">{% endif %}</div>
+        <div class="mono" style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-60);margin-bottom:8px">{{ po.category.name|default:"Article" }} · {{ po.published_at|date:"d M Y" }}</div>
+        <div class="post-title-sm">{{ po.title }}</div>
+      </a>
+      {% endif %}
+    {% empty %}
+      {% if not featured %}<div class="card empty" style="grid-column:1/-1">No articles yet.</div>{% endif %}
+    {% endfor %}
+  </div>
+  {% endwith %}
+  {% include "partials/pagination.html" %}
+</section>
+{% endblock %}

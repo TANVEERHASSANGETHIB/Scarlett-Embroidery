@@ -1,0 +1,131 @@
+{% extends "console/base.html" %}
+{% block title %}Portfolio{% endblock %}
+{% block content %}
+<div class="console-page">
+  <div class="console-head">
+    <div>
+      <h1 class="console-title">Portfolio</h1>
+      <p class="console-sub">{{ total }} photo{{ total|pluralize }} · {{ on_home }} in the home page showcase</p>
+    </div>
+  </div>
+
+  <div class="split-wide">
+    <div class="stack-lg">
+      <div class="row" style="gap:6px">
+        <a class="chip{% if not category %} is-active{% endif %}" href="{% url 'console:portfolio' %}">All ({{ total }})</a>
+        {% for value, label, count in category_filters %}
+        <a class="chip{% if category == value %} is-active{% endif %}" href="?category={{ value }}">{{ label }} ({{ count }})</a>
+        {% endfor %}
+      </div>
+
+      <div class="folio-grid">
+        {% for p in items %}
+        <figure class="folio-tile{% if item and item.pk == p.pk %} is-editing{% endif %}{% if not p.is_published %} is-hidden{% endif %}">
+          <div class="folio-thumb">
+            {% if p.image %}<img src="{{ p.image.url }}" alt="{{ p.name }}" loading="lazy">{% else %}<span class="folio-noimg">No photo</span>{% endif %}
+            <span class="folio-cat">{{ p.get_category_display }}</span>
+            {% if p.show_on_home %}<span class="folio-home" title="Shown in the home page showcase">★ Home</span>{% endif %}
+          </div>
+          <figcaption>
+            <div class="folio-name">{{ p.name }}</div>
+            <div class="folio-meta">{{ p.meta|default:"—" }}</div>
+            <div class="folio-actions">
+              <a class="btn btn-outline" href="{% url 'console:portfolio_edit' p.pk %}">Edit</a>
+              <form method="post">{% csrf_token %}
+                <input type="hidden" name="action" value="toggle_published">
+                <input type="hidden" name="id" value="{{ p.pk }}">
+                <input type="hidden" name="return_to" value="{{ request.get_full_path }}">
+                <button class="btn btn-outline">{% if p.is_published %}Hide{% else %}Show{% endif %}</button>
+              </form>
+              <form method="post">{% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="{{ p.pk }}">
+                <button class="btn btn-danger" data-confirm="Delete “{{ p.name }}” and its photo? This cannot be undone.">Delete</button>
+              </form>
+            </div>
+          </figcaption>
+        </figure>
+        {% empty %}
+        <div class="panel empty" style="grid-column:1/-1;padding:40px">
+          {% if category %}Nothing filed under this category yet.{% else %}No photos yet — add your first ones on the right.{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="stack-lg">
+      {% if item %}
+      <form method="post" enctype="multipart/form-data" class="panel-raised panel-pad stack" style="gap:14px" data-once novalidate>
+        {% csrf_token %}<input type="hidden" name="action" value="save">
+        <div class="row" style="justify-content:space-between">
+          <div class="panel-title mb-0">Edit photo</div>
+          <a class="mono" style="font-size:11px" href="{% url 'console:portfolio' %}">Close ✕</a>
+        </div>
+        {% include "partials/form_errors.html" with form=item_form %}
+        {% if item.image %}<img class="folio-preview" src="{{ item.image.url }}" alt="{{ item.name }}">{% endif %}
+        {% include "partials/field.html" with field=item_form.name hide_required=True %}
+        <div class="grid-2" style="gap:14px">
+          {% include "partials/field.html" with field=item_form.category hide_required=True %}
+          {% include "partials/field.html" with field=item_form.sort_order label="Order" %}
+        </div>
+        <div class="field">
+          <span class="label">Replace photo</span>
+          {{ item_form.image }}{{ item_form.image.errors }}
+          <div class="help">Leave empty to keep the current one.</div>
+        </div>
+        {% include "partials/field.html" with field=item_form.meta %}
+        <label class="checkbox">{{ item_form.is_published }} Visible on the website</label>
+        <label class="checkbox">{{ item_form.show_on_home }} Feature in the home page showcase</label>
+        <details>
+          <summary class="label" style="cursor:pointer">Showcase spec sheet (home page)</summary>
+          <div class="stack mt-s" style="gap:12px">
+            {% include "partials/field.html" with field=item_form.showcase_tag %}
+            {% include "partials/field.html" with field=item_form.placement %}
+            {% include "partials/field.html" with field=item_form.fabric %}
+            {% include "partials/field.html" with field=item_form.stitches %}
+            {% include "partials/field.html" with field=item_form.formats %}
+            {% include "partials/field.html" with field=item_form.turnaround %}
+          </div>
+        </details>
+        <div class="row" style="gap:10px">
+          <button class="btn btn-gold">Save changes</button>
+          <a class="btn btn-outline" href="{% url 'console:portfolio' %}">Cancel</a>
+        </div>
+      </form>
+      {% else %}
+      <form method="post" enctype="multipart/form-data" class="panel-raised panel-pad stack" style="gap:14px" data-once novalidate>
+        {% csrf_token %}<input type="hidden" name="action" value="upload">
+        <div class="panel-title mb-0">Add photos</div>
+        {% include "partials/form_errors.html" with form=upload_form %}
+
+        <div class="dropzone" data-dropzone data-max-bytes="{{ max_image_bytes }}" style="padding:20px">
+          <div>
+            <div class="h4" style="margin-bottom:2px">Drop photos here</div>
+            <div class="muted" style="font-size:12.5px">JPG, PNG, WEBP or GIF — up to {{ max_image_bytes|filesizeformat }} each. Pick several at once.</div>
+          </div>
+          <label class="btn btn-ink" data-browse for="{{ upload_form.images.id_for_label }}">Browse</label>
+          {{ upload_form.images }}
+        </div>
+        {{ upload_form.images.errors }}
+        <div data-file-list></div>
+
+        {% include "partials/field.html" with field=upload_form.category hide_required=True %}
+        {% include "partials/field.html" with field=upload_form.name hide_required=True %}
+        {% include "partials/field.html" with field=upload_form.meta hide_required=True %}
+        <label class="checkbox">{{ upload_form.is_published }} Visible on the website</label>
+        <label class="checkbox">{{ upload_form.show_on_home }} Feature in the home page showcase</label>
+        <button class="btn btn-gold" style="align-self:flex-start">Add to portfolio</button>
+      </form>
+      {% endif %}
+
+      <div class="panel panel-pad">
+        <div class="panel-title">Where these show up</div>
+        <p class="muted mb-0" style="font-size:13.5px">
+          Every visible photo appears on the public <a href="{% url 'core:portfolio' %}" target="_blank" rel="noopener">portfolio page</a>, filed under its category filter.
+          Tick “feature in the home page showcase” to also put it in the sew-out showcase on the home page, where the spec sheet is shown.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

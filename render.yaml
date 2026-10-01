@@ -1,0 +1,77 @@
+# Render Blueprint: Dashboard > New > Blueprint > pick this repo.
+# Creates the web service, PostgreSQL and Redis (Key Value). Free-plan notes are in DEPLOY_RENDER.md.
+databases:
+  - name: scarlett-db
+    plan: free
+    databaseName: scarlett
+    user: scarlett
+
+services:
+  - type: keyvalue
+    name: scarlett-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []          # internal connections only
+
+  - type: web
+    name: scarlett-embroidery
+    runtime: docker
+    plan: free               # change to "starter" to avoid sleeping and to attach a disk
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz/
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: PORT
+        value: "8000"
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: scarlett-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: scarlett-redis
+          property: connectionString
+      - key: RUN_MIGRATIONS
+        value: "1"
+      - key: RUN_SEED
+        value: "1"
+      - key: SERVE_MEDIA
+        value: "True"
+      - key: SECURE_SSL_REDIRECT
+        value: "True"
+      - key: SECURE_COOKIES
+        value: "True"
+      - key: SECURE_HSTS_SECONDS
+        value: "0"
+      # ── Fill these in on the Render dashboard (sync: false = asked on first deploy) ──
+      - key: SITE_URL
+        sync: false          # e.g. https://scarlett-embroidery.onrender.com or your own domain
+      - key: ALLOWED_HOSTS
+        sync: false          # your custom domain(s), comma separated; the onrender.com host is added automatically
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false          # https://yourdomain.com (leave "https://example.com" if none yet)
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: STAFF_NOTIFY_EMAIL
+        sync: false
+      - key: EMAIL_HOST
+        sync: false          # smtp.gmail.com
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false          # Gmail App Password
+      - key: DEFAULT_FROM_EMAIL
+        sync: false

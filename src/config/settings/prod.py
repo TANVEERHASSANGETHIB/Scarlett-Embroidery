@@ -3,6 +3,15 @@ from .base import env
 
 DEBUG = False
 
+# Render injects the service's public hostname; trust it without extra setup.
+_render_host = env("RENDER_EXTERNAL_HOSTNAME", default="")
+if _render_host:
+    ALLOWED_HOSTS = [*ALLOWED_HOSTS, _render_host]  # noqa: F405
+    CSRF_TRUSTED_ORIGINS = [*CSRF_TRUSTED_ORIGINS, f"https://{_render_host}"]  # noqa: F405
+
+# Where there is no nginx to serve /media/ (Render), let Django do it.
+SERVE_MEDIA = env.bool("SERVE_MEDIA", default=False)
+
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=False)

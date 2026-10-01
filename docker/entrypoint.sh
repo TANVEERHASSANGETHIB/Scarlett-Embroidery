@@ -22,4 +22,10 @@ if [ "${RUN_MIGRATIONS:-0}" = "1" ]; then
   python manage.py migrate --noinput
 fi
 
+# Hosts without a shell (e.g. Render's free plan) set RUN_SEED=1 to create the
+# pricing and first admin on boot. Safe to repeat: it never overwrites anything.
+if [ "${RUN_SEED:-0}" = "1" ]; then
+  python manage.py seed --no-demo
+fi
+
 exec "$@"

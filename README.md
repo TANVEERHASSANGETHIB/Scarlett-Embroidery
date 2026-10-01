@@ -147,4 +147,6 @@ make prod-up       # daphne (ASGI) behind nginx on port 80 (change with HTTP_POR
 make prod-seed     # pricing + first admin (no demo content)
 ```
 
+The production stack listens on **http://localhost** (port 80), not the dev port, and keeps its **own database** — separate from development. On a fresh production database nothing exists yet, so `make prod-seed` is required before you can sign in to the console; without it the login will reject every password because no admin account exists. Content (portfolio, reviews, settings) is likewise per-stack.
+
 In production, nginx serves public media and proxies `/ws/` WebSockets. Static files are served by WhiteNoise, and customer files are streamed only after a permission check. Put TLS in front of nginx, for example with a load balancer, Cloudflare or certbot.

@@ -2,6 +2,7 @@ SHELL := /bin/sh
 -include .env
 WEB_PORT ?= 8000
 MAILPIT_PORT ?= 8025
+HTTP_PORT ?= 80
 .DEFAULT_GOAL := help
 
 COMPOSE      := docker compose
@@ -86,6 +87,10 @@ prod-build: ## Build production images
 
 prod-up: ## Start production stack behind nginx
 	$(COMPOSE_PROD) up -d --build
+	@echo ""
+	@echo "Site:    http://localhost:$(HTTP_PORT)      (nginx — NOT the dev port)"
+	@echo "Console: http://localhost:$(HTTP_PORT)/console/"
+	@echo "First run on a fresh database? 'make prod-seed' creates the pricing and the admin login."
 
 prod-down: ## Stop production stack
 	$(COMPOSE_PROD) down

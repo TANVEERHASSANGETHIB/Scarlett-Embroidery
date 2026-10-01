@@ -21,9 +21,6 @@
     <a class="chip{% if status == 'open' %} is-active{% endif %}" href="{% querystring status='open' page=None %}">Open</a>
     <a class="chip{% if status == 'all' %} is-active{% endif %}" href="{% querystring status='all' page=None %}">All</a>
     <a class="chip{% if status == 'quotes' %} is-active{% endif %}" href="{% querystring status='quotes' page=None %}">Quotes</a>
-    {% for value, label in statuses %}
-    <a class="chip{% if status == value %} is-active{% endif %}" href="{% querystring status=value page=None %}">{{ label }}</a>
-    {% endfor %}
   </div>
 
   <div class="panel table-wrap">

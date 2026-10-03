@@ -11,7 +11,7 @@
         <a class="btn btn-ghost-light btn-lg" href="{% url 'core:portfolio' %}">View portfolio</a>
       </div>
     </div>
-    <div class="hero-media">
+    <div class="hero-media{% if not photos.home_hero %} is-empty{% endif %}">
       {% if photos.home_hero %}<img class="hero-photo" src="{{ photos.home_hero }}" alt="Embroidery on the machine">{% else %}{% include "partials/img_note.html" with label="home hero photo" size="1200 × 1260 px" %}{% endif %}
       {% if showcase %}{% with latest=showcase.0 %}
       <div class="hero-callout">

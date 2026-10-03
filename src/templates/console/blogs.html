@@ -56,7 +56,12 @@
         {% if post.cover %}<img src="{{ post.cover.url }}" alt="" style="max-height:120px;border-radius:6px;margin-bottom:8px">{% endif %}
         {{ form.cover }}{{ form.cover.errors }}
       </div>
-      {% include "partials/field.html" with field=form.body hide_required=True %}
+      <div class="field">
+        <span class="label">Article</span>
+        <textarea name="body" id="{{ form.body.id_for_label }}" rows="14" data-rich-editor data-upload-url="{% url 'console:blog_image' %}">{{ form.body.value|default:"" }}</textarea>
+        {{ form.body.errors }}
+        <p class="help mb-0">Use the toolbar for headings, bold text, links and images, or open the <b>HTML</b> tab to paste your own markup, like in WordPress.</p>
+      </div>
       <label class="checkbox">{{ form.is_featured }} Feature on the blog page</label>
       <input type="hidden" name="status" value="{{ form.status.value|default:'draft' }}">
       <div class="row" style="gap:10px">
@@ -69,3 +74,4 @@
   </div>
 </div>
 {% endblock %}
+{% block scripts %}{% if editor_open %}{% load static %}<script src="{% static 'js/rich-editor.js' %}" defer></script>{% endif %}{% endblock %}

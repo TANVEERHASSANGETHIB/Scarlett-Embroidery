@@ -1,3 +1,4 @@
+import markdown
 from django import forms
 from django.conf import settings
 from django.contrib.auth import password_validation
@@ -5,7 +6,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.core.validators import validate_email
 
 from apps.accounts.models import User
-from apps.blog.models import Category, Post
+from apps.blog.models import Category, Post, looks_like_html
 from apps.core.models import (
     BeforeAfter,
     PageService,
@@ -78,14 +79,16 @@ class PostForm(forms.ModelForm):
             "title": forms.TextInput(attrs={"placeholder": "Choosing stabiliser by fabric"}),
             "slug": forms.TextInput(attrs={"placeholder": "choosing-stabiliser (auto if blank)"}),
             "excerpt": forms.Textarea(attrs={"rows": 2}),
-            "body": forms.Textarea(
-                attrs={"rows": 14, "placeholder": "Write the article… (Markdown supported)"}
-            ),
+            "body": forms.Textarea(attrs={"rows": 14, "data-rich-editor": "1"}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["slug"].required = False
+        # Older posts were written in Markdown: show them as HTML in the visual editor.
+        body = self.instance.body if self.instance.pk else ""
+        if body and not looks_like_html(body):
+            self.initial["body"] = markdown.markdown(body, extensions=["extra", "sane_lists"])
         self.fields["category"].queryset = Category.objects.all()
         self.fields["category"].required = False
 

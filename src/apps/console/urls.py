@@ -22,6 +22,7 @@ urlpatterns = [
     path("media/", views.media, name="media"),
     path("testimonials/", views.testimonials, name="testimonials"),
     path("testimonials/<int:pk>/", views.testimonials, name="testimonial_edit"),
+    path("blogs/image/", views.blog_image, name="blog_image"),
     path("blogs/", views.blogs, name="blogs"),
     path("blogs/<int:pk>/", views.blogs, name="blog_edit"),
     path("settings/", views.settings_view, name="settings"),

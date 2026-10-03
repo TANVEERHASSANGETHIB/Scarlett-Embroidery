@@ -1,4 +1,4 @@
 {% load static %}<figure class="pic {{ cls }}">
-  {% if url %}<img src="{{ url }}" alt="{{ alt|default:'' }}" loading="lazy">{% else %}<div class="pic-art" role="img" aria-label="{{ alt|default:'Embroidery' }}"><img src="{% static 'img/demo/hoop.svg' %}" alt="" loading="lazy"></div>{% endif %}
+  {% if url %}<img src="{{ url }}" alt="{{ alt|default:'' }}" loading="lazy">{% else %}<div class="pic-art" role="img" aria-label="{{ alt|default:'Embroidery' }}"><img src="{% static 'img/demo/hoop.svg' %}" alt="" loading="lazy">{% include "partials/img_note.html" with label=alt|default:"picture" size=size|default:"1200 × 900 px" %}</div>{% endif %}
   {% if caption %}<figcaption>{{ caption }}</figcaption>{% endif %}
 </figure>

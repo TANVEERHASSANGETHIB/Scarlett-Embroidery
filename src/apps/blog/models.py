@@ -1,4 +1,5 @@
 import math
+import re
 
 import markdown
 import nh3
@@ -11,31 +12,42 @@ from django.utils.text import slugify
 from apps.core.models import TimeStampedModel
 
 ALLOWED_TAGS = {
-    "p",
-    "br",
-    "strong",
-    "em",
-    "b",
-    "i",
-    "a",
-    "ul",
-    "ol",
-    "li",
-    "h2",
-    "h3",
-    "h4",
-    "blockquote",
-    "code",
-    "pre",
-    "hr",
-    "img",
-    "table",
-    "thead",
-    "tbody",
-    "tr",
-    "th",
-    "td",
+    "p", "br", "strong", "em", "b", "i", "u", "s", "del", "mark", "sub", "sup", "small",
+    "a", "ul", "ol", "li", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "code", "pre",
+    "hr", "img", "figure", "figcaption", "div", "span", "table", "thead", "tbody", "tfoot",
+    "tr", "th", "td", "iframe", "video", "source",
+}  # fmt: skip
+ALLOWED_ATTRS = {
+    "*": {"class", "id", "style", "title"},
+    "a": {"href", "target", "name"},
+    "img": {"src", "alt", "width", "height", "loading"},
+    "td": {"colspan", "rowspan"},
+    "th": {"colspan", "rowspan"},
+    "iframe": {"src", "width", "height", "allowfullscreen", "frameborder", "allow"},
+    "video": {"src", "controls", "poster", "width", "height"},
+    "source": {"src", "type"},
 }
+ALLOWED_STYLES = {
+    "color", "background-color", "text-align", "font-weight", "font-style", "text-decoration",
+    "font-size", "width", "max-width", "height", "margin", "padding", "float", "border-radius",
+    "line-height",
+}  # fmt: skip
+EMBED_HOSTS = {"www.youtube.com", "www.youtube-nocookie.com", "player.vimeo.com"}
+HTML_HINT = re.compile(r"</?(p|h[1-6]|div|ul|ol|li|img|figure|blockquote|table|br|span|strong|em|a)\b", re.I)
+
+
+def looks_like_html(text):
+    return bool(HTML_HINT.search(text or ""))
+
+
+def _safe_embed(tag, attr, value):
+    """nh3 attribute filter: iframes may only point at YouTube/Vimeo."""
+    if tag == "iframe" and attr == "src":
+        from urllib.parse import urlparse
+
+        parsed = urlparse(value)
+        return value if parsed.scheme == "https" and parsed.netloc in EMBED_HOSTS else None
+    return value
 
 
 class Category(models.Model):
@@ -75,7 +87,9 @@ class Post(TimeStampedModel):
     )
     author_title = models.CharField(max_length=80, blank=True, default="Head Digitizer")
     excerpt = models.CharField(max_length=300, blank=True)
-    body = models.TextField(help_text="Markdown supported: ## headings, **bold**, lists, > quotes.")
+    body = models.TextField(
+        help_text="Write visually, or switch to HTML to paste your own markup. Markdown from older posts still works."
+    )
     cover = models.ImageField(upload_to="blog/", blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT, db_index=True)
     is_featured = models.BooleanField(default=False)
@@ -107,17 +121,21 @@ class Post(TimeStampedModel):
 
     @property
     def body_html(self):
-        html = markdown.markdown(self.body or "", extensions=["extra", "sane_lists"])
+        raw = self.body or ""
+        html = raw if looks_like_html(raw) else markdown.markdown(raw, extensions=["extra", "sane_lists"])
         return nh3.clean(
             html,
             tags=ALLOWED_TAGS,
-            attributes={"a": {"href", "title"}, "img": {"src", "alt"}},
+            attributes=ALLOWED_ATTRS,
+            filter_style_properties=ALLOWED_STYLES,
+            attribute_filter=_safe_embed,
             link_rel="noopener noreferrer",
+            url_schemes={"http", "https", "mailto", "tel"},
         )
 
     @property
     def reading_minutes(self):
-        words = len((self.body or "").split())
+        words = len(nh3.clean(self.body or "", tags=set()).split())
         return max(1, math.ceil(words / 220))
 
     @property

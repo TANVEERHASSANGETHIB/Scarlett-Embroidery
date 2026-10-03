@@ -19,7 +19,7 @@
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:20px">
     <a class="card post-card post-featured" href="{{ featured.get_absolute_url }}" style="border-radius:var(--radius-lg)">
       <div class="post-hero placeholder-img">
-        {% if featured.cover %}<img src="{{ featured.cover.url }}" alt="">{% else %}<span class="placeholder-note">article hero</span>{% endif %}
+        {% if featured.cover %}<img src="{{ featured.cover.url }}" alt="">{% elif site_photos.blog_default %}<img src="{{ site_photos.blog_default }}" alt="">{% else %}{% include "partials/img_note.html" with label="article cover" size="1600 × 900 px" %}{% endif %}
       </div>
       <div class="post-meta"><span>Featured</span><span style="color:var(--ink-60)">{{ featured.reading_minutes }} min read</span></div>
       <h2 class="display" style="font-size:clamp(30px,3vw,40px);line-height:1.02;margin-bottom:10px;max-width:26ch">{{ featured.title }}</h2>
@@ -43,7 +43,7 @@
     {% for po in page %}
       {% if not featured or forloop.counter > 4 %}
       <a class="card post-card" href="{{ po.get_absolute_url }}">
-        <div class="post-hero placeholder-img" style="aspect-ratio:16/9">{% if po.cover %}<img src="{{ po.cover.url }}" alt="" loading="lazy">{% endif %}</div>
+        <div class="post-hero placeholder-img" style="aspect-ratio:16/9">{% if po.cover %}<img src="{{ po.cover.url }}" alt="" loading="lazy">{% elif site_photos.blog_default %}<img src="{{ site_photos.blog_default }}" alt="" loading="lazy">{% else %}{% include "partials/img_note.html" with label="article cover" size="1600 × 900 px" %}{% endif %}</div>
         <div class="mono" style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-60);margin-bottom:8px">{{ po.category.name|default:"Article" }} · {{ po.published_at|date:"d M Y" }}</div>
         <div class="post-title-sm">{{ po.title }}</div>
       </a>

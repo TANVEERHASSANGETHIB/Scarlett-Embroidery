@@ -21,16 +21,15 @@
           {% if before_after %}
             {% include "partials/before_after.html" with before_url=before_after.before_image.url after_url=before_after.after_image.url before_label=before_after.before_label after_label=before_after.after_label %}
           {% elif slug == "embroidery" %}
-            {% static "img/demo/embroidery-before.svg" as b_src %}{% static "img/demo/embroidery-after.svg" as a_src %}
+            {% static "img/demo/labubu-vector.jpg" as b_src %}{% static "img/demo/labubu-embroidery.jpg" as a_src %}
             {% include "partials/before_after.html" with before_url=b_src after_url=a_src before_label="Artwork" after_label="Stitched" %}
           {% else %}
-            {% static "img/demo/vector-before.svg" as b_src %}{% static "img/demo/vector-after.svg" as a_src %}
-            {% include "partials/before_after.html" with before_url=b_src after_url=a_src before_label="Before" after_label="Vector" %}
+            {% static "img/demo/labubu-embroidery.jpg" as b_src %}{% static "img/demo/labubu-vector.jpg" as a_src %}
+            {% include "partials/before_after.html" with before_url=b_src after_url=a_src before_label="Source" after_label="Vector" %}
           {% endif %}
         </div>
-        <p class="ba-hint mono">← drag the handle to compare →</p>
       {% else %}
-        {% include "partials/pic.html" with url=pictures.0.image.url alt=page.title cls="pic-hero" %}
+        {% include "partials/pic.html" with url=pictures.0.image.url alt=page.title cls="pic-hero" size="1200 × 900 px" %}
       {% endif %}
     </div>
   </div>

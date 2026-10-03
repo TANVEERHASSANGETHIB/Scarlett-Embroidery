@@ -312,3 +312,36 @@ body.console { background: var(--night-deep); color: var(--bone); min-height: 10
 .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
 .media-card { display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1px solid var(--night-line); border-radius: var(--radius-md); background: var(--night-raised); }
 .media-thumb { width: 100%; max-height: 120px; object-fit: contain; border-radius: var(--radius-sm); background: #fff; }
+.media-empty { display: flex; align-items: center; justify-content: center; height: 120px; font-size: 12px; color: var(--bone-55); border: 1px dashed var(--night-line-strong); background: transparent; }
+
+/* Blog visual editor */
+.rte { border: 1px solid var(--night-line-strong); border-radius: var(--radius-md); overflow: hidden; background: var(--night-card); }
+.rte-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 8px; border-bottom: 1px solid var(--night-line); background: var(--night-raised); position: sticky; top: 0; z-index: 3; }
+.rte-btn, .rte-block, .rte-tabs button { font-size: 12.5px; padding: 6px 10px; min-height: 32px; border-radius: 6px; border: 1px solid var(--night-line); background: transparent; color: var(--bone); cursor: pointer; }
+.rte-block { background: var(--night-card); }
+.rte-btn:hover, .rte-tabs button:hover { border-color: var(--gold); }
+.rte-sep { width: 1px; height: 22px; background: var(--night-line-strong); margin: 0 4px; }
+.rte-tabs { margin-left: auto; display: inline-flex; }
+.rte-tabs button.is-on { background: var(--gold); color: #1c1a17; border-color: var(--gold); }
+.rte-surface { min-height: 380px; max-height: 70vh; overflow: auto; padding: 22px 24px; background: #fffdfa; color: #1c1a17; font-size: 16px; line-height: 1.7; outline: none; }
+.rte-surface:empty::before { content: attr(data-placeholder); color: #1c1a1799; }
+.rte-surface h1, .rte-surface h2, .rte-surface h3, .rte-surface h4 { font-weight: 700; line-height: 1.25; margin: 1.2em 0 .4em; }
+.rte-surface h2 { font-size: 26px; } .rte-surface h3 { font-size: 21px; } .rte-surface h4 { font-size: 18px; }
+.rte-surface img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 14px auto; }
+.rte-surface blockquote { border-left: 4px solid var(--gold); background: #fdf1dc; margin: 18px 0; padding: 12px 18px; border-radius: 6px; }
+.rte-surface a { color: #8a5f16; text-decoration: underline; }
+.rte-surface figure { margin: 18px 0; }
+.rte-html { width: 100%; min-height: 380px; font-family: ui-monospace, Menlo, Consolas, monospace !important; font-size: 13px; line-height: 1.55; border: 0; border-radius: 0; resize: vertical; }
+.rte-status { min-height: 0; padding: 0 12px; font-size: 12px; color: var(--bone-70); }
+.rte-status:not(:empty) { padding: 8px 12px; border-top: 1px solid var(--night-line); }
+
+/* Poppins sizing: sentence-case headings, lighter tracking so text fits its box */
+.console-brand { font-size: 17px; letter-spacing: .04em; }
+.console-nav a { font-size: 14px; letter-spacing: 0; text-transform: none; }
+.console-title { font-size: 28px; letter-spacing: -.01em; text-transform: none; }
+.panel-title { letter-spacing: .08em; }
+.settings-tab-label { font-size: 14.5px; letter-spacing: 0; text-transform: none; }
+.settings-card-title { font-size: 21px; letter-spacing: -.005em; text-transform: none; }
+.folio-name { font-size: 14.5px; letter-spacing: 0; text-transform: none; }
+.theme-toggle-text, .info-row .k { letter-spacing: .06em; }
+.rte .rte-block { width: auto; min-height: 32px; padding: 4px 8px; font-size: 12.5px; }

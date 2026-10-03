@@ -13,7 +13,7 @@
     <!-- Before / after -->
     <div class="panel panel-pad stack" style="gap:16px">
       <div class="panel-title mb-0">Before / after slider</div>
-      <p class="muted mb-0" style="font-size:13.5px">Shown in the hero of the Embroidery and Vector service pages. Visitors drag a handle to compare the two photos. Use two photos of the same size and framing.</p>
+      <p class="muted mb-0" style="font-size:13.5px">Shown in the hero of the Embroidery and Vector service pages. Visitors drag a handle to compare the two photos. Use two photos of the same size and framing (about 1000 × 1200 px, portrait works best).</p>
       <div class="media-grid">
         {% for pair in pairs %}
         <div class="media-card">
@@ -49,7 +49,7 @@
     <!-- Service pictures -->
     <div class="panel panel-pad stack" style="gap:16px">
       <div class="panel-title mb-0">Service pictures</div>
-      <p class="muted mb-0" style="font-size:13.5px">The first two pictures of a service fill its feature sections; any others appear in its gallery. Patches uses these as its hero picture.</p>
+      <p class="muted mb-0" style="font-size:13.5px">Recommended 1200 × 900 px. The first two pictures of a service fill its feature sections; any others appear in its gallery. Patches uses these as its hero picture.</p>
       <div class="folio-grid">
         {% for img in service_images %}
         <figure class="folio-tile{% if not img.is_published %} is-hidden{% endif %}">
@@ -87,25 +87,22 @@
     <!-- Site photos -->
     <div class="panel panel-pad stack" style="gap:16px">
       <div class="panel-title mb-0">Site photos</div>
-      <p class="muted mb-0" style="font-size:13.5px">Single photos for fixed places: the home page hero and the About page.</p>
+      <p class="muted mb-0" style="font-size:13.5px">Every main picture on the site. Upload the recommended size so it fits without cropping. Until you do, visitors see built-in artwork and staff see an “Image missing” tag on that spot.</p>
       <div class="media-grid">
-        {% for obj in site_images %}
+        {% for s in slots %}
         <div class="media-card">
-          <img class="media-thumb" src="{{ obj.image.url }}" alt="">
-          <div class="review-name">{{ obj.get_slot_display }}</div>
-          <form method="post">{% csrf_token %}<input type="hidden" name="action" value="site_image_delete"><input type="hidden" name="id" value="{{ obj.pk }}"><button class="btn btn-danger" data-confirm="Remove this photo?">Remove</button></form>
+          {% if s.obj %}<img class="media-thumb" src="{{ s.obj.image.url }}" alt="">{% else %}<div class="media-thumb media-empty">No image yet</div>{% endif %}
+          <div class="review-name">{{ s.label }}</div>
+          <div class="help mb-0">Recommended: <b>{{ s.size }}</b></div>
+          <form method="post" enctype="multipart/form-data" class="stack" style="gap:8px" data-progress data-once novalidate>
+            {% csrf_token %}<input type="hidden" name="action" value="site_image"><input type="hidden" name="slot" value="{{ s.slot }}">
+            <input type="file" name="image" accept="image/*" required>
+            <button class="btn btn-gold" style="align-self:flex-start">{% if s.obj %}Replace{% else %}Upload{% endif %}</button>
+          </form>
+          {% if s.obj %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="site_image_delete"><input type="hidden" name="id" value="{{ s.obj.pk }}"><button class="btn btn-danger" data-confirm="Remove this photo?">Remove</button></form>{% endif %}
         </div>
         {% endfor %}
       </div>
-      <form method="post" enctype="multipart/form-data" class="stack" style="gap:12px" data-progress data-once novalidate>
-        {% csrf_token %}<input type="hidden" name="action" value="site_image">
-        {% include "partials/form_errors.html" with form=site_form %}
-        <div class="grid-2" style="gap:14px">
-          {% include "partials/field.html" with field=site_form.slot hide_required=True %}
-          <div class="field"><span class="label">Photo</span>{{ site_form.image }}{{ site_form.image.errors }}</div>
-        </div>
-        <button class="btn btn-gold" style="align-self:flex-start">Save photo</button>
-      </form>
     </div>
   </div>
 </div>

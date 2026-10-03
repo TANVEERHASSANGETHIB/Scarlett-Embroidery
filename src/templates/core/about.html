@@ -15,7 +15,7 @@
       </div>
     </div>
     <div class="about-media-wrap">
-      {% include "partials/pic.html" with url=photos.about_hero alt="Scarlett Embroidery studio" cls="pic-tall" %}
+      {% include "partials/pic.html" with url=photos.about_hero alt="Scarlett Embroidery studio" cls="pic-tall" size="1000 × 1250 px" %}
       <div class="about-logo"><img src="{% static 'img/logo.png' %}" alt="Scarlett Embroidery"></div>
     </div>
   </div>
@@ -77,8 +77,8 @@
       <div class="row mt-m" style="gap:28px">{% for b in brands %}<span class="brand-name">{{ b }}</span>{% endfor %}</div>
     </div>
     <div class="pic-pair">
-      {% include "partials/pic.html" with url=photos.about_studio alt="Our machine floor" %}
-      {% include "partials/pic.html" with url=photos.about_team alt="The digitizing team" %}
+      {% include "partials/pic.html" with url=photos.about_studio alt="Our machine floor" size="900 × 1200 px" %}
+      {% include "partials/pic.html" with url=photos.about_team alt="The digitizing team" size="900 × 1200 px" %}
     </div>
   </div>
 </section>

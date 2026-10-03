@@ -3,6 +3,8 @@ import os
 from django.conf import settings as django_settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.core.exceptions import ValidationError
+from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, F, Max, Q, Sum
@@ -30,6 +32,7 @@ from apps.core.models import (
 from apps.core.utils import get_client_ip, rate_limited, reset_rate_limit, send_templated_email
 from apps.orders.models import Order, OrderEvent, OrderFile
 from apps.orders.services import attach_files, change_status, order_url
+from apps.orders.validators import validate_upload
 
 from .decorators import staff_required
 from .forms import (
@@ -486,6 +489,21 @@ def blogs(request, pk=None):
     )
 
 
+@staff_required
+@require_POST
+def blog_image(request):
+    """Upload one picture from the blog editor; returns its URL so it can be inserted into the article."""
+    upload = request.FILES.get("image")
+    if not upload:
+        return JsonResponse({"error": "No file received."}, status=400)
+    try:
+        validate_upload(upload, django_settings.IMAGE_EXTENSIONS, django_settings.PORTFOLIO_IMAGE_MAX_BYTES)
+    except ValidationError as exc:
+        return JsonResponse({"error": " ".join(exc.messages)}, status=400)
+    name = default_storage.save(f"blog/inline/{upload.name}", upload)
+    return JsonResponse({"url": default_storage.url(name)})
+
+
 # ── Portfolio ────────────────────────────────────────────
 @staff_required
 @require_http_methods(["GET", "POST"])
@@ -739,6 +757,7 @@ def media(request):
             messages.success(request, "Photo removed — the built-in artwork is shown again.")
             return redirect("console:media")
 
+    existing = {obj.slot: obj for obj in SiteImage.objects.all()}
     return render(
         request,
         "console/media.html",
@@ -749,7 +768,10 @@ def media(request):
             "site_form": site_form,
             "pairs": BeforeAfter.objects.all(),
             "service_images": ServiceImage.objects.all(),
-            "site_images": SiteImage.objects.all(),
+            "slots": [
+                {"slot": v, "label": label, "size": SiteImage.SIZES.get(v, ""), "obj": existing.get(v)}
+                for v, label in SiteImage.Slot.choices
+            ],
             "max_image_bytes": django_settings.PORTFOLIO_IMAGE_MAX_BYTES,
         },
     )

@@ -332,12 +332,29 @@ class SiteImage(models.Model):
         ABOUT_STORY = "about_story", "About — story photo"
         ABOUT_STUDIO = "about_studio", "About — studio photo"
         ABOUT_TEAM = "about_team", "About — team photo"
+        BLOG_DEFAULT = "blog_default", "Blog — default cover (posts without one)"
+        PORTFOLIO_DEFAULT = "portfolio_default", "Portfolio — fallback sew-out photo"
+
+    # Recommended pixel size for each place, shown to the admin and on empty spots.
+    SIZES = {
+        "home_hero": "1200 × 1260 px",
+        "about_hero": "1000 × 1250 px",
+        "about_story": "1200 × 900 px",
+        "about_studio": "900 × 1200 px",
+        "about_team": "900 × 1200 px",
+        "blog_default": "1600 × 900 px",
+        "portfolio_default": "1000 × 1000 px",
+    }
 
     slot = models.CharField(max_length=30, unique=True, choices=Slot.choices)
     image = models.ImageField(upload_to="site/")
 
     def __str__(self):
         return self.get_slot_display()
+
+    @property
+    def size(self):
+        return self.SIZES.get(self.slot, "")
 
     @classmethod
     def urls(cls):

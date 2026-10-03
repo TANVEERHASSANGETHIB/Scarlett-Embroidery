@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="hero-media">
-      {% if photos.home_hero %}<img class="hero-photo" src="{{ photos.home_hero }}" alt="Embroidery on the machine">{% else %}<span class="placeholder-note">hero photograph — cap on the machine</span>{% endif %}
+      {% if photos.home_hero %}<img class="hero-photo" src="{{ photos.home_hero }}" alt="Embroidery on the machine">{% else %}{% include "partials/img_note.html" with label="home hero photo" size="1200 × 1260 px" %}{% endif %}
       {% if showcase %}{% with latest=showcase.0 %}
       <div class="hero-callout">
         <div class="mono" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-dark)">latest delivery</div>

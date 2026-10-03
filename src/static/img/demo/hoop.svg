@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Embroidery hoop">
-<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a2234"/><stop offset="1" stop-color="#3f1322"/></linearGradient>
-<pattern id="st" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><rect width="6" height="6" fill="#e0a53c"/><rect width="6" height="2.600" fill="#f2c877"/></pattern></defs>
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0a848"/><stop offset="1" stop-color="#f8e8b0"/></linearGradient>
+<pattern id="st" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><rect width="6" height="6" fill="#f0a848"/><rect width="6" height="2.600" fill="#f2c877"/></pattern></defs>
 <rect width="400" height="300" fill="url(#g)"/>
-<circle cx="200" cy="150" r="104" fill="#2f0d19" stroke="#8a5f16" stroke-width="10"/>
-<circle cx="200" cy="150" r="92" fill="#fbf5ec"/>
+<circle cx="200" cy="150" r="104" fill="#111111" stroke="#8a5f16" stroke-width="10"/>
+<circle cx="200" cy="150" r="92" fill="#fffaec"/>
 <path d="M200 96l14.700 30.600 33.300 4.500-24.500 23.300 6.300 33.100L200 170.800l-29.800 16.700 6.300-33.100-24.500-23.300 33.300-4.500z" fill="url(#st)"/>
 <rect x="188" y="40" width="24" height="18" rx="4" fill="#8a5f16"/>
-<path d="M300 232c-34 6-52-18-82-14" fill="none" stroke="#e0a53c" stroke-width="3" stroke-dasharray="4 5" stroke-linecap="round"/>
+<path d="M300 232c-34 6-52-18-82-14" fill="none" stroke="#f0a848" stroke-width="3" stroke-dasharray="4 5" stroke-linecap="round"/>
 </svg>

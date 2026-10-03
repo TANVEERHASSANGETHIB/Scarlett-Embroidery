@@ -1,0 +1,4 @@
+{% load static %}<figure class="pic {{ cls }}">
+  {% if url %}<img src="{{ url }}" alt="{{ alt|default:'' }}" loading="lazy">{% else %}<div class="pic-art" role="img" aria-label="{{ alt|default:'Embroidery' }}"><img src="{% static 'img/demo/hoop.svg' %}" alt="" loading="lazy"></div>{% endif %}
+  {% if caption %}<figcaption>{{ caption }}</figcaption>{% endif %}
+</figure>

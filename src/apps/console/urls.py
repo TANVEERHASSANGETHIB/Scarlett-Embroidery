@@ -19,6 +19,7 @@ urlpatterns = [
     path("inbox/", views.inbox, name="inbox"),
     path("portfolio/", views.portfolio, name="portfolio"),
     path("portfolio/<int:pk>/", views.portfolio, name="portfolio_edit"),
+    path("media/", views.media, name="media"),
     path("testimonials/", views.testimonials, name="testimonials"),
     path("testimonials/<int:pk>/", views.testimonials, name="testimonial_edit"),
     path("blogs/", views.blogs, name="blogs"),

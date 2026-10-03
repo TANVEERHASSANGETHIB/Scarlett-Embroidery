@@ -1,0 +1,112 @@
+{% extends "console/base.html" %}
+{% block title %}Media{% endblock %}
+{% block content %}
+<div class="console-page">
+  <div class="console-head">
+    <div>
+      <h1 class="console-title">Media</h1>
+      <p class="console-sub">Pictures for the service pages, the before/after sliders and the About page. Empty spots show built-in artwork.</p>
+    </div>
+  </div>
+
+  <div class="stack-lg">
+    <!-- Before / after -->
+    <div class="panel panel-pad stack" style="gap:16px">
+      <div class="panel-title mb-0">Before / after slider</div>
+      <p class="muted mb-0" style="font-size:13.5px">Shown in the hero of the Embroidery and Vector service pages. Visitors drag a handle to compare the two photos. Use two photos of the same size and framing.</p>
+      <div class="media-grid">
+        {% for pair in pairs %}
+        <div class="media-card">
+          <div class="row" style="gap:8px;flex-wrap:nowrap">
+            <img class="media-thumb" src="{{ pair.before_image.url }}" alt="Before"><img class="media-thumb" src="{{ pair.after_image.url }}" alt="After">
+          </div>
+          <div class="review-name">{{ pair.get_service_display }}</div>
+          <form method="post">{% csrf_token %}<input type="hidden" name="action" value="before_after_delete"><input type="hidden" name="id" value="{{ pair.pk }}">
+            <button class="btn btn-danger" data-confirm="Remove this before/after pair?">Remove</button></form>
+        </div>
+        {% endfor %}
+      </div>
+      <form method="post" enctype="multipart/form-data" class="stack" style="gap:12px" data-progress data-once novalidate>
+        {% csrf_token %}<input type="hidden" name="action" value="before_after">
+        {% include "partials/form_errors.html" with form=ba_form %}
+        <div class="grid-2" style="gap:14px">
+          {% include "partials/field.html" with field=ba_form.service label="Service" hide_required=True %}
+          <label class="checkbox" style="align-self:end">{{ ba_form.is_active }} Show on the page</label>
+        </div>
+        <div class="grid-2" style="gap:14px">
+          <div class="field"><span class="label">Before photo</span>{{ ba_form.before_image }}{{ ba_form.before_image.errors }}</div>
+          <div class="field"><span class="label">After photo</span>{{ ba_form.after_image }}{{ ba_form.after_image.errors }}</div>
+        </div>
+        <div class="grid-2" style="gap:14px">
+          {% include "partials/field.html" with field=ba_form.before_label label="Left label" %}
+          {% include "partials/field.html" with field=ba_form.after_label label="Right label" %}
+        </div>
+        <button class="btn btn-gold" style="align-self:flex-start">Save before / after</button>
+        <p class="help mb-0">Saving for a service that already has a pair replaces it. Leave a photo empty to keep the current one.</p>
+      </form>
+    </div>
+
+    <!-- Service pictures -->
+    <div class="panel panel-pad stack" style="gap:16px">
+      <div class="panel-title mb-0">Service pictures</div>
+      <p class="muted mb-0" style="font-size:13.5px">The first two pictures of a service fill its feature sections; any others appear in its gallery. Patches uses these as its hero picture.</p>
+      <div class="folio-grid">
+        {% for img in service_images %}
+        <figure class="folio-tile{% if not img.is_published %} is-hidden{% endif %}">
+          <div class="folio-thumb"><img src="{{ img.image.url }}" alt="" loading="lazy"><span class="folio-cat">{{ img.get_service_display }}</span></div>
+          <figcaption>
+            <div class="folio-meta">{{ img.caption|default:"—" }}</div>
+            <div class="folio-actions">
+              <form method="post">{% csrf_token %}<input type="hidden" name="action" value="service_image_toggle"><input type="hidden" name="id" value="{{ img.pk }}"><button class="btn btn-outline">{% if img.is_published %}Hide{% else %}Show{% endif %}</button></form>
+              <form method="post">{% csrf_token %}<input type="hidden" name="action" value="service_image_delete"><input type="hidden" name="id" value="{{ img.pk }}"><button class="btn btn-danger" data-confirm="Delete this picture?">Delete</button></form>
+            </div>
+          </figcaption>
+        </figure>
+        {% empty %}
+        <div class="empty" style="grid-column:1/-1;padding:24px">No pictures yet — the service pages show built-in artwork.</div>
+        {% endfor %}
+      </div>
+      <form method="post" enctype="multipart/form-data" class="stack" style="gap:12px" data-progress data-once novalidate>
+        {% csrf_token %}<input type="hidden" name="action" value="service_images">
+        {% include "partials/form_errors.html" with form=upload_form %}
+        <div class="dropzone" data-dropzone data-max-bytes="{{ max_image_bytes }}" style="padding:20px">
+          <div><div class="h4" style="margin-bottom:2px">Drop pictures here</div><div class="muted" style="font-size:12.5px">JPG, PNG, WEBP or GIF — up to {{ max_image_bytes|filesizeformat }} each.</div></div>
+          <label class="btn btn-ink" data-browse for="{{ upload_form.images.id_for_label }}">Browse</label>
+          {{ upload_form.images }}
+        </div>
+        {{ upload_form.images.errors }}
+        <div data-file-list></div>
+        <div class="grid-2" style="gap:14px">
+          {% include "partials/field.html" with field=upload_form.service label="Service" hide_required=True %}
+          {% include "partials/field.html" with field=upload_form.caption hide_required=True %}
+        </div>
+        <button class="btn btn-gold" style="align-self:flex-start">Add pictures</button>
+      </form>
+    </div>
+
+    <!-- Site photos -->
+    <div class="panel panel-pad stack" style="gap:16px">
+      <div class="panel-title mb-0">Site photos</div>
+      <p class="muted mb-0" style="font-size:13.5px">Single photos for fixed places: the home page hero and the About page.</p>
+      <div class="media-grid">
+        {% for obj in site_images %}
+        <div class="media-card">
+          <img class="media-thumb" src="{{ obj.image.url }}" alt="">
+          <div class="review-name">{{ obj.get_slot_display }}</div>
+          <form method="post">{% csrf_token %}<input type="hidden" name="action" value="site_image_delete"><input type="hidden" name="id" value="{{ obj.pk }}"><button class="btn btn-danger" data-confirm="Remove this photo?">Remove</button></form>
+        </div>
+        {% endfor %}
+      </div>
+      <form method="post" enctype="multipart/form-data" class="stack" style="gap:12px" data-progress data-once novalidate>
+        {% csrf_token %}<input type="hidden" name="action" value="site_image">
+        {% include "partials/form_errors.html" with form=site_form %}
+        <div class="grid-2" style="gap:14px">
+          {% include "partials/field.html" with field=site_form.slot hide_required=True %}
+          <div class="field"><span class="label">Photo</span>{{ site_form.image }}{{ site_form.image.errors }}</div>
+        </div>
+        <button class="btn btn-gold" style="align-self:flex-start">Save photo</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

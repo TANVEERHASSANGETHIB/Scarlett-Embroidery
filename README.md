@@ -160,3 +160,5 @@ In production, nginx serves public media and proxies `/ws/` WebSockets. Static f
 - **Footer social icons**: Console → Settings → Social links.
 - **Admin password change**: Console → Settings → My account.
 - Uploads show a progress bar and per-file "Attached / Uploaded" status; hero numbers count up on page load.
+- **Media** (Console → Media): before/after sliders for the Embroidery and Vector pages, service pictures, and photos for Home/About. Empty spots show built-in artwork. Testimonials accept an optional photo.
+- Site font is Poppins (self-hosted in `static/fonts`). The live-chat button is now a round icon.

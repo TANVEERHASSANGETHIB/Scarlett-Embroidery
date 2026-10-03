@@ -231,6 +231,12 @@ class Testimonial(models.Model):
     quote = models.TextField()
     name = models.CharField(max_length=80)
     role = models.CharField(max_length=120, blank=True)
+    image = models.ImageField(
+        "photo",
+        upload_to="testimonials/",
+        blank=True,
+        help_text="Optional photo or logo shown with the review.",
+    )
     rating = models.PositiveSmallIntegerField(default=5)
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
@@ -271,3 +277,69 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f"{self.name} — {self.subject or 'No subject'}"
+
+
+class PageService(models.TextChoices):
+    EMBROIDERY = "embroidery", "Embroidery digitizing"
+    VECTOR = "vector", "Vector art"
+    PATCHES = "patches", "Patches"
+
+
+class BeforeAfter(models.Model):
+    """The draggable before/after comparison in the hero of a service page (embroidery and vector)."""
+
+    service = models.CharField(
+        max_length=20,
+        unique=True,
+        choices=[c for c in PageService.choices if c[0] != PageService.PATCHES],
+    )
+    before_image = models.ImageField(upload_to="before-after/")
+    after_image = models.ImageField(upload_to="before-after/")
+    before_label = models.CharField(max_length=20, default="Before")
+    after_label = models.CharField(max_length=20, default="After")
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "before / after"
+        verbose_name_plural = "before / after pairs"
+
+    def __str__(self):
+        return f"Before/after · {self.get_service_display()}"
+
+
+class ServiceImage(TimeStampedModel):
+    """Pictures shown on a service page (gallery and feature sections)."""
+
+    service = models.CharField(max_length=20, choices=PageService.choices, db_index=True)
+    image = models.ImageField(upload_to="services/")
+    caption = models.CharField(max_length=120, blank=True)
+    is_published = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["sort_order", "-created_at"]
+
+    def __str__(self):
+        return f"{self.get_service_display()} · {self.caption or self.image.name}"
+
+
+class SiteImage(models.Model):
+    """One named photo slot on a page (About, Home hero…). Empty slots show built-in artwork."""
+
+    class Slot(models.TextChoices):
+        HOME_HERO = "home_hero", "Home — hero photo"
+        ABOUT_HERO = "about_hero", "About — main photo"
+        ABOUT_STORY = "about_story", "About — story photo"
+        ABOUT_STUDIO = "about_studio", "About — studio photo"
+        ABOUT_TEAM = "about_team", "About — team photo"
+
+    slot = models.CharField(max_length=30, unique=True, choices=Slot.choices)
+    image = models.ImageField(upload_to="site/")
+
+    def __str__(self):
+        return self.get_slot_display()
+
+    @classmethod
+    def urls(cls):
+        """{slot: url} for every slot that has a photo."""
+        return {row.slot: row.image.url for row in cls.objects.all() if row.image}

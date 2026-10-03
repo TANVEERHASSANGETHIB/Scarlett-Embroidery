@@ -92,6 +92,32 @@
     window.requestAnimationFrame(frame);
   });
 
+  // Before / after sliders: the invisible range input does the dragging (mouse, touch, keyboard).
+  document.querySelectorAll("[data-before-after]").forEach(function (box) {
+    var range = box.querySelector(".ba-range");
+    if (!range) return;
+    var set = function (v) { box.style.setProperty("--pos", v + "%"); };
+    range.addEventListener("input", function () { set(range.value); });
+    set(range.value);
+    // A short nudge on first view so visitors see it is draggable.
+    if (!reduceMotion && "IntersectionObserver" in window) {
+      var played = false;
+      new IntersectionObserver(function (entries, obs) {
+        if (played || !entries[0].isIntersecting) return;
+        played = true; obs.disconnect();
+        var t0 = null;
+        (function step(ts) {
+          if (t0 === null) t0 = ts;
+          var t = Math.min(1, (ts - t0) / 1400);
+          if (document.activeElement === range) return;
+          var v = 50 + Math.sin(t * Math.PI * 2) * 18 * (1 - t);
+          range.value = v; set(v);
+          if (t < 1) window.requestAnimationFrame(step);
+        })(performance.now());
+      }, { threshold: 0.6 }).observe(box);
+    }
+  });
+
   // Flash messages: dismiss + auto-hide
   document.querySelectorAll("[data-flash]").forEach(function (el) {
     var close = function () { el.remove(); };

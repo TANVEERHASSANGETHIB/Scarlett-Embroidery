@@ -6,7 +6,16 @@ from django.views.decorators.http import require_http_methods
 from apps.orders.models import PatchCategory, PricingTier, Service
 
 from .forms import ContactForm
-from .models import FAQ, PortfolioCategory, PortfolioItem, SiteSettings, Testimonial
+from .models import (
+    FAQ,
+    BeforeAfter,
+    PortfolioCategory,
+    PortfolioItem,
+    ServiceImage,
+    SiteImage,
+    SiteSettings,
+    Testimonial,
+)
 from .utils import get_client_ip, rate_limited, send_templated_email
 
 HERO_STATS = [
@@ -66,6 +75,19 @@ ABOUT_VALUES = [
     ),
 ]
 
+
+PROCESS_STEPS = [
+    ("01", "Brief", "You send artwork, fabric, placement and size. Nothing else to fill in."),
+    ("02", "Punch", "A digitizer builds the file by hand — no auto-trace, no preset."),
+    ("03", "Test-sew", "We run it on a real machine, on your fabric class, and photograph it."),
+    ("04", "Deliver", "Proof first, payment after approval, every machine format included."),
+]
+SERVICE_PERKS = [
+    ("Under 4 hours", "Standard turnaround on most designs, with rush options when you need it sooner."),
+    ("Free revisions", "Changes inside the original scope are turned around the same day."),
+    ("Live humans", "Chat with the digitizer working on your file, any time of day."),
+    ("You own the files", "Machine and source formats delivered together. No licence, no lock-in."),
+]
 
 SERVICE_PAGES = {
     "embroidery": {
@@ -194,6 +216,14 @@ def _services_overview():
     ]
 
 
+def _service_thumbs():
+    """{slug: url} — the first published picture of each service, for the home page rows."""
+    thumbs = {}
+    for img in ServiceImage.objects.filter(is_published=True):
+        thumbs.setdefault(img.service, img.image.url)
+    return thumbs
+
+
 def home(request):
     showcase = list(PortfolioItem.objects.filter(is_published=True, show_on_home=True)[:6])
     showcase_data = [
@@ -218,6 +248,8 @@ def home(request):
         "why_us": WHY_US,
         "testimonials": Testimonial.objects.filter(is_published=True),
         "faqs": FAQ.objects.filter(is_published=True),
+        "photos": SiteImage.urls(),
+        "service_thumbs": _service_thumbs(),
     }
     return render(request, "core/home.html", context)
 
@@ -248,7 +280,20 @@ def testimonials(request):
 
 
 def services(request):
-    return render(request, "core/services.html", {"services": _services_overview()})
+    thumbs = _service_thumbs()
+    services_list = _services_overview()
+    for sv in services_list:
+        sv["thumb"] = thumbs.get(sv["slug"], "")
+    return render(
+        request,
+        "core/services.html",
+        {
+            "services": services_list,
+            "process": PROCESS_STEPS,
+            "perks": SERVICE_PERKS,
+            "photos": SiteImage.urls(),
+        },
+    )
 
 
 def service_page(request, slug):
@@ -256,6 +301,10 @@ def service_page(request, slug):
     if page is None:
         raise Http404
     overview = {sv["service"]: sv for sv in _services_overview()}
+    pictures = list(ServiceImage.objects.filter(service=slug, is_published=True))
+    before_after = (
+        BeforeAfter.objects.filter(service=slug, is_active=True).first() if slug != "patches" else None
+    )
     return render(
         request,
         "core/service_detail.html",
@@ -265,12 +314,28 @@ def service_page(request, slug):
             "price_line": overview[page["service"]]["price"],
             "others": [(k, v["title"]) for k, v in SERVICE_PAGES.items() if k != slug],
             "faqs": FAQ.objects.filter(is_published=True)[:4],
+            "pictures": pictures,
+            "gallery": pictures[2:],
+            "before_after": before_after,
+            "has_slider": slug != "patches",
+            "stats": HERO_STATS[:3],
         },
     )
 
 
 def about(request):
-    return render(request, "core/about.html", {"facts": ABOUT_FACTS, "values": ABOUT_VALUES})
+    return render(
+        request,
+        "core/about.html",
+        {
+            "facts": ABOUT_FACTS,
+            "values": ABOUT_VALUES,
+            "process": PROCESS_STEPS,
+            "brands": BRANDS,
+            "photos": SiteImage.urls(),
+            "perks": SERVICE_PERKS,
+        },
+    )
 
 
 @require_http_methods(["GET", "POST"])

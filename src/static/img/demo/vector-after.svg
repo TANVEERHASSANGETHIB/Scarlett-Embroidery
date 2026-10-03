@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="800" height="640" role="img" aria-label="vec after demo artwork">
+<defs></defs>
+<rect width="400" height="320" fill="#ffffff"/>
+<g>
+<circle cx="200" cy="160" r="122" fill="#1c1a17"/>
+<circle cx="200" cy="160" r="104" fill="#b3261e"/>
+<circle cx="200" cy="160" r="98" fill="none" stroke="#f2c877" stroke-width="3" stroke-dasharray="0"/>
+<path d="M200 70l17.6 36.600 40.200 5.400-29.400 28 7.600 39.800L200 160.200l-36 19.600 7.600-39.800-29.400-28 40.200-5.400z" fill="#e0a53c"/>
+<path d="M92 214h216l-14 30H106z" fill="#e0a53c"/>
+<text x="200" y="237" text-anchor="middle" font-family="Poppins,Arial,sans-serif" font-weight="800" font-size="19" letter-spacing="3" fill="#1c1a17">SCARLETT</text>
+</g><g fill="none" stroke="#2f6bff" stroke-width="1" opacity=".75"><circle cx="200" cy="160" r="122"/><circle cx="200" cy="160" r="104"/><path d="M92 214h216l-14 30H106z"/></g><rect x="196" y="34" width="8" height="8" fill="#fff" stroke="#2f6bff" stroke-width="1.5"/><rect x="196" y="278" width="8" height="8" fill="#fff" stroke="#2f6bff" stroke-width="1.5"/><rect x="74" y="156" width="8" height="8" fill="#fff" stroke="#2f6bff" stroke-width="1.5"/><rect x="318" y="156" width="8" height="8" fill="#fff" stroke="#2f6bff" stroke-width="1.5"/><rect x="196" y="66" width="8" height="8" fill="#fff" stroke="#2f6bff" stroke-width="1.5"/><rect x="253.8" y="108" width="8" height="8" fill="#fff" stroke="#2f6bff" stroke-width="1.5"/><rect x="138.2" y="108" width="8" height="8" fill="#fff" stroke="#2f6bff" stroke-width="1.5"/><rect x="290" y="240" width="8" height="8" fill="#fff" stroke="#2f6bff" stroke-width="1.5"/><rect x="102" y="240" width="8" height="8" fill="#fff" stroke="#2f6bff" stroke-width="1.5"/>
+</svg>

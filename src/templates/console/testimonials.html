@@ -17,9 +17,12 @@
         <div class="review-stars" aria-label="{{ t.rating }} out of 5">{% for _ in ""|rjust:t.rating %}★{% endfor %}</div>
         <blockquote class="review-quote">“{{ t.quote }}”</blockquote>
         <div class="review-foot">
-          <div>
-            <div class="review-name">{{ t.name }}</div>
-            <div class="review-role">{{ t.role|default:"—" }}</div>
+          <div class="row" style="gap:10px;flex-wrap:nowrap">
+            {% if t.image %}<img class="avatar-img" src="{{ t.image.url }}" alt="">{% endif %}
+            <div>
+              <div class="review-name">{{ t.name }}</div>
+              <div class="review-role">{{ t.role|default:"—" }}</div>
+            </div>
           </div>
           <div class="row" style="gap:6px">
             {% if not t.is_published %}<span class="badge badge-muted">Hidden</span>{% endif %}
@@ -42,13 +45,19 @@
       {% endfor %}
     </div>
 
-    <form method="post" class="panel-raised panel-pad stack" style="gap:14px" data-once novalidate>
+    <form method="post" enctype="multipart/form-data" class="panel-raised panel-pad stack" style="gap:14px" data-progress data-once novalidate>
       {% csrf_token %}
       <div class="panel-title mb-0">{% if item %}Edit review{% else %}Add a review{% endif %}</div>
       {% include "partials/form_errors.html" %}
       {% include "partials/field.html" with field=form.quote hide_required=True %}
       {% include "partials/field.html" with field=form.name hide_required=True %}
       {% include "partials/field.html" with field=form.role hide_required=True %}
+      <div class="field">
+        <span class="label">Photo (optional)</span>
+        {% if item and item.image %}<img class="avatar-img" style="width:56px;height:56px;margin-bottom:8px" src="{{ item.image.url }}" alt="">{% endif %}
+        {{ form.image }}{{ form.image.errors }}
+        <div class="help">Shown next to the review on the website. Leave empty to keep the current one.</div>
+      </div>
       <div class="grid-2" style="gap:14px">
         {% include "partials/field.html" with field=form.rating label="Stars (1–5)" %}
         {% include "partials/field.html" with field=form.sort_order %}

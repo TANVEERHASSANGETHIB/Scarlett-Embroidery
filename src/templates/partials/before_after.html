@@ -1,0 +1,12 @@
+{% comment %}Draggable before/after. Needs: before_url, after_url. Optional: before_label, after_label.{% endcomment %}
+<div class="ba" data-before-after style="--pos:50%">
+  <img class="ba-img ba-after" src="{{ after_url }}" alt="{{ after_label|default:'After' }}" draggable="false">
+  <img class="ba-img ba-before" src="{{ before_url }}" alt="{{ before_label|default:'Before' }}" draggable="false">
+  <span class="ba-tag ba-tag-before">{{ before_label|default:"Before" }}</span>
+  <span class="ba-tag ba-tag-after">{{ after_label|default:"After" }}</span>
+  <span class="ba-line" aria-hidden="true"></span>
+  <span class="ba-handle" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M3 12h18"/></svg>
+  </span>
+  <input class="ba-range" type="range" min="0" max="100" value="50" step="0.1" aria-label="Drag to compare before and after">
+</div>

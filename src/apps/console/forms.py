@@ -6,7 +6,15 @@ from django.core.validators import validate_email
 
 from apps.accounts.models import User
 from apps.blog.models import Category, Post
-from apps.core.models import PortfolioCategory, PortfolioItem, SiteSettings, Testimonial
+from apps.core.models import (
+    BeforeAfter,
+    PageService,
+    PortfolioCategory,
+    PortfolioItem,
+    SiteImage,
+    SiteSettings,
+    Testimonial,
+)
 from apps.orders.forms import MultipleFileField
 from apps.orders.models import Order, OrderFile, PatchCategory, PricingTier, TurnaroundOption
 from apps.orders.validators import validate_upload
@@ -187,7 +195,7 @@ class TestimonialForm(forms.ModelForm):
 
     class Meta:
         model = Testimonial
-        fields = ["quote", "name", "role", "rating", "is_published", "sort_order"]
+        fields = ["quote", "name", "role", "image", "rating", "is_published", "sort_order"]
         widgets = {
             "quote": forms.Textarea(
                 attrs={"rows": 5, "placeholder": "What the customer said — no quote marks needed."}
@@ -197,6 +205,16 @@ class TestimonialForm(forms.ModelForm):
             "rating": forms.NumberInput(attrs={"min": "1", "max": "5", "step": "1"}),
         }
         labels = {"role": "Role / company", "sort_order": "Order"}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["image"].required = False
+
+    def clean_image(self):
+        image = self.cleaned_data.get("image")
+        if image and hasattr(image, "size"):
+            validate_upload(image, settings.IMAGE_EXTENSIONS, settings.PORTFOLIO_IMAGE_MAX_BYTES)
+        return image
 
     def clean_rating(self):
         rating = self.cleaned_data["rating"]
@@ -392,3 +410,94 @@ class InviteAdminForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+def _validated_image(field_name):
+    def clean(self):
+        image = self.cleaned_data.get(field_name)
+        if image and hasattr(image, "size"):
+            validate_upload(image, settings.IMAGE_EXTENSIONS, settings.PORTFOLIO_IMAGE_MAX_BYTES)
+        return image
+
+    return clean
+
+
+class BeforeAfterForm(forms.ModelForm):
+    """Upload (or replace) the before/after pair for embroidery or vector. One pair per service."""
+
+    class Meta:
+        model = BeforeAfter
+        fields = ["service", "before_image", "after_image", "before_label", "after_label", "is_active"]
+        labels = {
+            "before_image": "Before photo",
+            "after_image": "After photo",
+            "is_active": "Show on the page",
+        }
+
+    clean_before_image = _validated_image("before_image")
+    clean_after_image = _validated_image("after_image")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["before_image"].required = False
+        self.fields["after_image"].required = False
+
+    def clean(self):
+        cleaned = super().clean()
+        service = cleaned.get("service")
+        existing = BeforeAfter.objects.filter(service=service).first() if service else None
+        for name in ("before_image", "after_image"):
+            if not cleaned.get(name) and not (existing and getattr(existing, name)):
+                self.add_error(name, "Choose a photo.")
+        return cleaned
+
+    def validate_unique(self):
+        pass  # saving replaces the existing pair for that service
+
+    def save(self, commit=True):
+        service = self.cleaned_data["service"]
+        pair = BeforeAfter.objects.filter(service=service).first() or BeforeAfter(service=service)
+        for name in ("before_image", "after_image"):
+            if self.cleaned_data.get(name):
+                setattr(pair, name, self.cleaned_data[name])
+        pair.before_label = self.cleaned_data.get("before_label") or "Before"
+        pair.after_label = self.cleaned_data.get("after_label") or "After"
+        pair.is_active = self.cleaned_data.get("is_active", False)
+        pair.save()
+        return pair
+
+
+class ServiceImageUploadForm(forms.Form):
+    """Add one or many pictures to a service page."""
+
+    service = forms.ChoiceField(choices=PageService.choices)
+    images = MultipleFileField(
+        label="Photos",
+        allowed_extensions=settings.IMAGE_EXTENSIONS,
+        max_bytes=settings.PORTFOLIO_IMAGE_MAX_BYTES,
+    )
+    caption = forms.CharField(
+        required=False, max_length=120, widget=forms.TextInput(attrs={"placeholder": "Optional caption"})
+    )
+
+
+class SiteImageForm(forms.ModelForm):
+    """Set the photo for a named place on the site (About page, Home hero…)."""
+
+    class Meta:
+        model = SiteImage
+        fields = ["slot", "image"]
+        labels = {"slot": "Where it appears", "image": "Photo"}
+
+    clean_image = _validated_image("image")
+
+    def validate_unique(self):
+        pass
+
+    def save(self, commit=True):
+        obj = SiteImage.objects.filter(slot=self.cleaned_data["slot"]).first() or SiteImage(
+            slot=self.cleaned_data["slot"]
+        )
+        obj.image = self.cleaned_data["image"]
+        obj.save()
+        return obj

@@ -1,12 +1,13 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Services — Scarlett Embroidery{% endblock %}
 {% block meta_description %}Embroidery digitizing, vector art and custom patches — see what each service includes and start an order or ask for a quote.{% endblock %}
 {% block content %}
 <section class="dark page-hero">
   <div class="container">
     <div class="kicker">Services</div>
-    <h1 class="display d-xl" style="margin-bottom:14px;max-width:22ch">Three services, one production standard</h1>
-    <p class="lead" style="max-width:56ch;margin-bottom:28px">Every file is built by hand and checked before it reaches you. Pick a service to see exactly what's included.</p>
+    <h1 class="display d-xl" style="margin-bottom:14px;max-width:20ch">Three services, one production standard</h1>
+    <p class="lead" style="margin-bottom:28px">Every file is built by hand and checked before it reaches you. Pick a service to see exactly what's included.</p>
     <div class="row">
       <a class="btn btn-gold btn-lg" href="{% url 'orders:place' %}">Place order</a>
       <a class="btn btn-ghost-light btn-lg" href="{% url 'orders:quote' %}">Get a quote</a>
@@ -15,19 +16,45 @@
 </section>
 
 <section class="container section">
-  <div class="grid-3 service-cards">
+  <div class="stack" style="gap:56px">
     {% for sv in services %}
-    <article class="card card-pad service-card">
-      <div class="service-no">{{ sv.no }}</div>
-      <h2 class="display d-xs">{{ sv.title }}</h2>
-      <p class="muted">{{ sv.body }}</p>
-      <ul class="tick-list">{% for p in sv.points %}<li>{{ p }}</li>{% endfor %}</ul>
-      {% if sv.price %}<div class="mono service-price">{{ sv.price }}</div>{% endif %}
-      <div class="row" style="margin-top:auto;gap:10px">
-        <a class="btn btn-ink btn-md" href="{% url 'core:service' sv.slug %}">Learn more</a>
-        <a class="btn btn-outline btn-md" href="{% url 'orders:place' %}?service={{ sv.service }}">Order</a>
+    <article class="split-feature{% if forloop.counter|divisibleby:2 %} split-reverse{% endif %}">
+      {% include "partials/pic.html" with url=sv.thumb alt=sv.title %}
+      <div>
+        <div class="service-no">{{ sv.no }}</div>
+        <h2 class="display d-s" style="margin-bottom:12px">{{ sv.title }}</h2>
+        <p class="muted">{{ sv.body }}</p>
+        <ul class="tick-list">{% for p in sv.points %}<li>{{ p }}</li>{% endfor %}</ul>
+        {% if sv.price %}<div class="mono service-price">{{ sv.price }}</div>{% endif %}
+        <div class="row" style="gap:10px">
+          <a class="btn btn-ink btn-md" href="{% url 'core:service' sv.slug %}">Learn more</a>
+          <a class="btn btn-outline btn-md" href="{% url 'orders:place' %}?service={{ sv.service }}">Place order</a>
+          <a class="btn btn-outline btn-md" href="{% url 'orders:quote' %}?service={{ sv.service }}">Get a quote</a>
+        </div>
       </div>
     </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="band-dark">
+  <div class="container" style="padding-block:72px">
+    <div class="kicker">Why Scarlett</div>
+    <h2 class="display d-m mb-l" style="color:var(--bone);max-width:22ch">The same standard on every job</h2>
+    <div class="grid-4">
+      {% for title, body in perks %}
+      <div class="step-card"><h3 class="h3" style="color:var(--bone);margin-bottom:8px">{{ title }}</h3><p class="mb-0" style="font-size:14px;color:var(--bone-70)">{{ body }}</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="container section">
+  <div class="kicker">Process</div>
+  <h2 class="display d-m mb-l">From artwork to finished file</h2>
+  <div class="timeline">
+    {% for no, title, body in process %}
+    <div class="timeline-step"><div class="timeline-no">{{ no }}</div><h3 class="h3" style="margin-bottom:6px">{{ title }}</h3><p class="muted mb-0" style="font-size:14px">{{ body }}</p></div>
     {% endfor %}
   </div>
 </section>
@@ -35,7 +62,7 @@
 <section class="cta-band">
   <div class="container">
     <div>
-      <h2 class="display" style="font-size:clamp(34px,4vw,52px);line-height:1;margin-bottom:8px;max-width:22ch">Not sure which one you need?</h2>
+      <h2 class="display" style="font-size:clamp(28px,3.4vw,42px);margin-bottom:8px;max-width:22ch">Not sure which one you need?</h2>
       <p class="mb-0" style="font-size:16px;color:var(--ink-80)">Tell us about the job and we'll price it for free.</p>
     </div>
     <div class="row">

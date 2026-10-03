@@ -17,7 +17,16 @@ from apps.accounts.models import User
 from apps.blog.models import Post
 from apps.chat import services as chat_services
 from apps.chat.models import BlockedIP, ChatSession
-from apps.core.models import ContactMessage, PortfolioCategory, PortfolioItem, SiteSettings, Testimonial
+from apps.core.models import (
+    BeforeAfter,
+    ContactMessage,
+    PortfolioCategory,
+    PortfolioItem,
+    ServiceImage,
+    SiteImage,
+    SiteSettings,
+    Testimonial,
+)
 from apps.core.utils import get_client_ip, rate_limited, reset_rate_limit, send_templated_email
 from apps.orders.models import Order, OrderEvent, OrderFile
 from apps.orders.services import attach_files, change_status, order_url
@@ -25,6 +34,7 @@ from apps.orders.services import attach_files, change_status, order_url
 from .decorators import staff_required
 from .forms import (
     AdminPasswordChangeForm,
+    BeforeAfterForm,
     ConsoleLoginForm,
     InviteAdminForm,
     NotificationSettingsForm,
@@ -37,6 +47,8 @@ from .forms import (
     PortfolioUploadForm,
     PostForm,
     PricingTierFormSet,
+    ServiceImageUploadForm,
+    SiteImageForm,
     SiteSettingsForm,
     SocialLinksForm,
     TestimonialForm,
@@ -632,7 +644,7 @@ def testimonials(request, pk=None):
             target.save(update_fields=["is_published"])
             return redirect("console:testimonials")
 
-        form = TestimonialForm(request.POST, instance=item)
+        form = TestimonialForm(request.POST, request.FILES, instance=item)
         if form.is_valid():
             saved = form.save(commit=False)
             if item is None and not saved.sort_order:
@@ -651,6 +663,94 @@ def testimonials(request, pk=None):
             "item": item,
             "form": form,
             "published_count": Testimonial.objects.filter(is_published=True).count(),
+        },
+    )
+
+
+# ── Media (service pictures, before/after, site photos) ──
+@staff_required
+@require_http_methods(["GET", "POST"])
+def media(request):
+    ba_form = BeforeAfterForm()
+    upload_form = ServiceImageUploadForm()
+    site_form = SiteImageForm()
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+
+        if action == "before_after":
+            ba_form = BeforeAfterForm(request.POST, request.FILES)
+            if ba_form.is_valid():
+                pair = ba_form.save()
+                messages.success(request, f"Before/after for {pair.get_service_display().lower()} saved.")
+                return redirect("console:media")
+            messages.error(request, "Please check the before/after form.")
+
+        elif action == "before_after_delete":
+            pair = get_object_or_404(BeforeAfter, pk=request.POST.get("id"))
+            pair.before_image.delete(save=False)
+            pair.after_image.delete(save=False)
+            pair.delete()
+            messages.success(request, "Before/after removed — the demo artwork is shown again.")
+            return redirect("console:media")
+
+        elif action == "service_images":
+            upload_form = ServiceImageUploadForm(request.POST, request.FILES)
+            if upload_form.is_valid():
+                data = upload_form.cleaned_data
+                start = (ServiceImage.objects.aggregate(top=Max("sort_order"))["top"] or 0) + 1
+                for offset, image in enumerate(data["images"]):
+                    ServiceImage.objects.create(
+                        service=data["service"],
+                        image=image,
+                        caption=data["caption"],
+                        sort_order=start + offset,
+                    )
+                count = len(data["images"])
+                messages.success(request, f"Added {count} picture{'s' if count != 1 else ''}.")
+                return redirect("console:media")
+            messages.error(request, "Please check the upload.")
+
+        elif action == "service_image_delete":
+            img = get_object_or_404(ServiceImage, pk=request.POST.get("id"))
+            img.image.delete(save=False)
+            img.delete()
+            messages.success(request, "Picture deleted.")
+            return redirect("console:media")
+
+        elif action == "service_image_toggle":
+            img = get_object_or_404(ServiceImage, pk=request.POST.get("id"))
+            img.is_published = not img.is_published
+            img.save(update_fields=["is_published"])
+            return redirect("console:media")
+
+        elif action == "site_image":
+            site_form = SiteImageForm(request.POST, request.FILES)
+            if site_form.is_valid():
+                obj = site_form.save()
+                messages.success(request, f"“{obj.get_slot_display()}” updated.")
+                return redirect("console:media")
+            messages.error(request, "Please check the photo.")
+
+        elif action == "site_image_delete":
+            obj = get_object_or_404(SiteImage, pk=request.POST.get("id"))
+            obj.image.delete(save=False)
+            obj.delete()
+            messages.success(request, "Photo removed — the built-in artwork is shown again.")
+            return redirect("console:media")
+
+    return render(
+        request,
+        "console/media.html",
+        {
+            "nav": "media",
+            "ba_form": ba_form,
+            "upload_form": upload_form,
+            "site_form": site_form,
+            "pairs": BeforeAfter.objects.all(),
+            "service_images": ServiceImage.objects.all(),
+            "site_images": SiteImage.objects.all(),
+            "max_image_bytes": django_settings.PORTFOLIO_IMAGE_MAX_BYTES,
         },
     )
 

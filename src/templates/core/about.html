@@ -6,34 +6,105 @@
   <div class="about-grid">
     <div>
       <div class="kicker">About us</div>
-      <h1 class="display d-xl" style="font-size:clamp(44px,5.4vw,72px);margin-bottom:20px;max-width:22ch">A digitizing studio run by embroiderers</h1>
+      <h1 class="display d-xl" style="margin-bottom:20px;max-width:20ch">A digitizing studio run by embroiderers</h1>
       <p class="lead">Scarlett Embroidery started on two commercial heads in a back room. We were the shop that kept getting bad files — thread breaks, blown-out density, caps that puckered — so we learned to punch our own.</p>
       <p class="muted" style="max-width:60ch">Today we digitize for uniform shops, promotional distributors and brands across the US, Canada, UK and Australia. Every file still passes the same test it did on day one: it has to sew clean, first pass, on the fabric it was made for.</p>
-      <div class="grid-4 mt-l" style="gap:14px">
-        {% for n, l in facts %}
-        <div class="card" style="padding:18px">
-          <div class="fact-n">{{ n }}</div>
-          <div class="mono" style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-60)">{{ l }}</div>
-        </div>
-        {% endfor %}
+      <div class="row mt-m" style="gap:12px">
+        <a class="btn btn-gold btn-md" href="{% url 'orders:place' %}">Place order</a>
+        <a class="btn btn-outline btn-md" href="{% url 'core:services' %}">Our services</a>
       </div>
     </div>
-    <div class="about-media">
-      <span class="placeholder-note">studio photograph — machine floor</span>
+    <div class="about-media-wrap">
+      {% include "partials/pic.html" with url=photos.about_hero alt="Scarlett Embroidery studio" cls="pic-tall" %}
       <div class="about-logo"><img src="{% static 'img/logo.png' %}" alt="Scarlett Embroidery"></div>
     </div>
   </div>
 </section>
-<section class="container section section-last" style="padding-top:64px">
-  <h2 class="display d-s mb-m">How we work</h2>
+
+<section class="band-dark" style="margin-top:72px">
+  <div class="container" style="padding-block:56px">
+    <div class="grid-4">
+      {% for n, l in facts %}
+      <div class="fact-dark"><div class="fact-n">{{ n }}</div><div class="mono">{{ l }}</div></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="container section">
+  <div class="split-feature">
+    {% include "partials/pic.html" with url=photos.about_story alt="Our story" %}
+    <div>
+      <div class="kicker">Our story</div>
+      <h2 class="display d-m" style="margin-bottom:14px">From a back room to 34 countries</h2>
+      <p class="muted">We began in 2016 with two machines and one rule: if it doesn't sew clean on the test head, it doesn't ship. That rule built a reputation with uniform shops, and word of mouth did the rest.</p>
+      <p class="muted">Today eleven digitizers work across time zones, so a real person is on live chat around the clock — the same person who punched your file answers your questions about it.</p>
+      <ul class="tick-list mt-m"><li>Hand-punched files, never auto-traced</li><li>Test-sewn on the fabric you name</li><li>Source and machine formats delivered together</li></ul>
+    </div>
+  </div>
+</section>
+
+<section class="container section">
+  <div class="kicker">How we work</div>
+  <h2 class="display d-m mb-l">Three rules we don't bend</h2>
   <div class="grid-3" style="gap:18px">
     {% for no, title, body in values %}
     <div class="card card-accent-top" style="padding:26px 24px">
       <div class="mono" style="font-size:11px;letter-spacing:.16em;color:var(--gold-dark);margin-bottom:14px">{{ no }}</div>
-      <h3 class="h3" style="font-size:26px;margin-bottom:8px">{{ title }}</h3>
+      <h3 class="h3" style="margin-bottom:8px">{{ title }}</h3>
       <p class="muted mb-0" style="font-size:14px">{{ body }}</p>
     </div>
     {% endfor %}
+  </div>
+</section>
+
+<section class="container section">
+  <div class="kicker">Our process</div>
+  <h2 class="display d-m mb-l">From artwork to finished file</h2>
+  <div class="timeline">
+    {% for no, title, body in process %}
+    <div class="timeline-step"><div class="timeline-no">{{ no }}</div><h3 class="h3" style="margin-bottom:6px">{{ title }}</h3><p class="muted mb-0" style="font-size:14px">{{ body }}</p></div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="container section">
+  <div class="split-feature split-reverse">
+    <div>
+      <div class="kicker">The studio</div>
+      <h2 class="display d-m" style="margin-bottom:14px">Real machines, real fabric, real people</h2>
+      <p class="muted">Our test floor runs the same machine classes you do. Caps, flats, jackets, towels — each file is sewn out and photographed before it leaves us.</p>
+      <div class="row mt-m" style="gap:28px">{% for b in brands %}<span class="brand-name">{{ b }}</span>{% endfor %}</div>
+    </div>
+    <div class="pic-pair">
+      {% include "partials/pic.html" with url=photos.about_studio alt="Our machine floor" %}
+      {% include "partials/pic.html" with url=photos.about_team alt="The digitizing team" %}
+    </div>
+  </div>
+</section>
+
+<section class="band-dark">
+  <div class="container" style="padding-block:72px">
+    <div class="kicker">Why shops stay</div>
+    <h2 class="display d-m mb-l" style="color:var(--bone);max-width:22ch">The same standard on every job</h2>
+    <div class="grid-4">
+      {% for title, body in perks %}
+      <div class="step-card"><h3 class="h3" style="color:var(--bone);margin-bottom:8px">{{ title }}</h3><p class="mb-0" style="font-size:14px;color:var(--bone-70)">{{ body }}</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="container">
+    <div>
+      <h2 class="display" style="font-size:clamp(28px,3.4vw,42px);margin-bottom:8px;max-width:22ch">Send artwork. Get a sewn proof today.</h2>
+      <p class="mb-0" style="font-size:16px;color:var(--ink-80)">Start an order or ask for a free quote.</p>
+    </div>
+    <div class="row">
+      <a class="btn btn-night btn-lg" href="{% url 'orders:place' %}">Place order</a>
+      <a class="btn btn-ghost-ink btn-lg" href="{% url 'orders:quote' %}">Get a quote</a>
+    </div>
   </div>
 </section>
 {% endblock %}

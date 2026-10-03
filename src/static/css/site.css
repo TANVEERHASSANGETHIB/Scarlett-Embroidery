@@ -928,3 +928,7 @@ a:hover { color: var(--gold-mid); }
 .band-dark .step-card, .band-dark .card, .band-dark .card-dark { --bone: #0a0a0a; --bone-80: #0a0a0acc; --bone-70: #0a0a0a99; --bone-55: #0a0a0a9e; color: var(--ink); }
 .band-dark .step-card h3, .band-dark .card h3, .band-dark .step-card .h3, .band-dark .card .h3 { color: var(--ink); }
 .band-dark .step-card p, .band-dark .card p { color: var(--ink-70); }
+/* Pricing card feature rows: a clear divider line under each row */
+.plan-features li { border-bottom: 1px solid #0a0a0a1f; }
+.plan-features li:last-child { border-bottom: 0; }
+.plan.is-featured .plan-features li { border-bottom-color: #f0a84c80; }

@@ -390,3 +390,6 @@ body.console { background: var(--night-deep); color: var(--bone); min-height: 10
   .console-page [style*="nowrap"] { flex-wrap: wrap !important; }
   .console-page [style*="nowrap"] > input { flex: 1 1 140px; min-width: 0; }
 }
+
+/* Console keeps its own neutral dark palette, independent of the public colour theme */
+body.console { --night: #121314; --night-deep: #0d0e0f; --night-raised: #17181a; --night-card: #1b1d1f; --bone: #eceae7; --bone-80: #eceae7c4; --bone-70: #eceae7ab; --bone-55: #eceae78c; --night-line: #ffffff1a; --night-line-strong: #ffffff33; --ink: #1c1a17; --paper: #f7f4ef; --card: #fffdfa; --sand: #e5dfd5; }

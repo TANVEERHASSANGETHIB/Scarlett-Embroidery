@@ -7,6 +7,6 @@
 <circle cx="200" cy="160" r="98" fill="none" stroke="#f2c877" stroke-width="3" stroke-dasharray="3 4"/>
 <path d="M200 70l17.6 36.600 40.200 5.400-29.400 28 7.600 39.800L200 160.200l-36 19.600 7.600-39.800-29.400-28 40.200-5.400z" fill="url(#sGold)" stroke="#ffffff55" stroke-width="1.2" stroke-dasharray="2 3"/>
 <path d="M92 214h216l-14 30H106z" fill="url(#sGold)" stroke="#ffffff55" stroke-width="1.2" stroke-dasharray="2 3"/>
-<text x="200" y="237" text-anchor="middle" font-family="Poppins,Arial,sans-serif" font-weight="800" font-size="19" letter-spacing="3" fill="#1c1a17">SCARLETT</text>
+<text x="200" y="237" text-anchor="middle" font-family="Poppins,Arial,sans-serif" font-weight="800" font-size="19" letter-spacing="3" fill="#2f0d19">SCARLETT</text>
 </g>
 </svg>

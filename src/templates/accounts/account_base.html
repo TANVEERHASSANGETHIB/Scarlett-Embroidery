@@ -1,22 +1,38 @@
 {% extends "base.html" %}
-{% block footer %}{% endblock %}
 {% block content %}
 <section class="account">
   <aside class="account-side">
-    <div class="account-user">
-      <div class="avatar">{{ user.initials }}</div>
-      <div style="min-width:0">
-        <div style="font-weight:700;font-size:14px">{{ user.full_name }}</div>
-        <div style="font-size:11px;color:var(--bone-55);overflow:hidden;text-overflow:ellipsis">{{ user.email }}</div>
+    <div class="account-sticky">
+      <div class="account-user">
+        <div class="avatar">{{ user.initials }}</div>
+        <div style="min-width:0">
+          <div class="account-hello">Welcome back</div>
+          <div class="account-name">{{ user.full_name|default:user.email }}</div>
+          <div class="account-email">{{ user.email }}</div>
+        </div>
       </div>
+      <div class="account-label">Menu</div>
+      <nav class="account-nav" aria-label="Account">
+        <a href="{% url 'accounts:dashboard' %}" class="{% if nav == 'dash' %}is-active{% endif %}"><svg class="nav-ico" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Dashboard</span></a>
+        <a href="{% url 'accounts:orders' %}" class="{% if nav == 'orders' %}is-active{% endif %}"><svg class="nav-ico" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h8"/></svg><span>My orders</span></a>
+        <a href="{% url 'accounts:profile' %}" class="{% if nav == 'profile' %}is-active{% endif %}"><svg class="nav-ico" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profile</span></a>
+      </nav>
+      <div class="account-label">Quick actions</div>
+      <nav class="account-nav" aria-label="Quick actions">
+        <a href="{% url 'orders:place' %}"><svg class="nav-ico" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span>Place an order</span></a>
+        <a href="{% url 'orders:quote' %}"><svg class="nav-ico" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 01-2 2H8l-5 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 9h8M8 13h5"/></svg><span>Get a free quote</span></a>
+      </nav>
+      <div class="account-promo">
+        <svg class="nav-ico" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg>
+        <div class="account-promo-t">Need something stitched?</div>
+        <p>Flat prices, a sewn proof before delivery, and a real digitizer on your file.</p>
+        <a class="btn btn-gold btn-md btn-block" href="{% url 'orders:place' %}">Place order</a>
+      </div>
+      <nav class="account-nav account-nav-end" aria-label="Sign out">
+        <a href="{% url 'accounts:logout' %}" class="{% if nav == 'logout' %}is-active{% endif %}"><svg class="nav-ico" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>Log out</span></a>
+      </nav>
+      <div class="account-since">Member since {{ user.date_joined|date:"M Y" }}</div>
     </div>
-    <nav class="account-nav" aria-label="Account">
-      <a href="{% url 'accounts:dashboard' %}" class="{% if nav == 'dash' %}is-active{% endif %}">Dashboard</a>
-      <a href="{% url 'accounts:orders' %}" class="{% if nav == 'orders' %}is-active{% endif %}">Orders</a>
-      <a href="{% url 'accounts:profile' %}" class="{% if nav == 'profile' %}is-active{% endif %}">Profile</a>
-      <a href="{% url 'accounts:logout' %}" class="{% if nav == 'logout' %}is-active{% endif %}">Logout</a>
-    </nav>
-    <div style="padding:20px 22px" class="mono"><span style="font-size:11px;color:var(--bone-55)">Member since {{ user.date_joined|date:"M Y" }}</span></div>
   </aside>
   <div class="account-main">
     {% block account %}{% endblock %}

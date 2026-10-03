@@ -3,7 +3,7 @@
 {% block account %}
 <div class="between" style="margin-bottom:24px;gap:24px">
   <div>
-    <h1 class="display" style="font-size:44px;letter-spacing:.02em;margin-bottom:2px">{% if show_all %}Orders{% else %}Dashboard{% endif %}</h1>
+    <h1 class="account-title">{% if show_all %}My orders{% else %}Hello, {{ user.get_short_name }} 👋{% endif %}</h1>
     <p class="muted mb-0" style="font-size:14px">{% if stats.0.1 %}You have open orders — proofs land in your inbox.{% else %}Place an order and track it here, start to finish.{% endif %}</p>
   </div>
   <a class="btn btn-gold btn-md" href="{% url 'orders:place' %}">Place order</a>
@@ -12,13 +12,13 @@
 {% if not show_all %}
 <div class="grid-4" style="margin-bottom:28px">
   {% for k, v in stats %}
-  <div class="card stat-tile"><div class="label" style="margin-bottom:4px">{{ k }}</div><div class="v">{{ v }}</div></div>
+  <div class="card stat-tile"><div class="stat-ico">{% if forloop.counter == 1 %}<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>{% elif forloop.counter == 2 %}<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>{% elif forloop.counter == 3 %}<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>{% else %}<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>{% endif %}</div><div class="label" style="margin-bottom:4px">{{ k }}</div><div class="v">{{ v }}</div></div>
   {% endfor %}
 </div>
 {% endif %}
 
 <div class="between" style="margin-bottom:12px;align-items:center">
-  <h2 class="h3" style="font-size:26px">{% if show_all %}All orders{% else %}Recent orders{% endif %}</h2>
+  <h2 class="h3" style="font-size:19px">{% if show_all %}All orders{% else %}Recent orders{% endif %}</h2>
   <form method="get" role="search">
     <input class="input" type="search" name="q" value="{{ query }}" placeholder="Search orders…" aria-label="Search orders" style="width:240px;max-width:100%;background:var(--card);padding:10px 14px;font-size:13px">
   </form>

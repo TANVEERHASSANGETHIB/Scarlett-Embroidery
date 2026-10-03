@@ -379,3 +379,14 @@ body.console { background: var(--night-deep); color: var(--bone); min-height: 10
 }
 @media (max-width: 380px) { .folio-grid, .media-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 960px) { .console-side { height: auto; min-height: 0; } }
+@media (max-width: 640px) {
+  .folio-tile, .folio-tile * { min-width: 0; }
+  .folio-tile .row, .folio-actions, .folio-actions form { flex-wrap: wrap !important; }
+  .folio-tile input[type=text], .folio-tile select { max-width: 100%; width: 100%; }
+}
+@media (max-width: 1200px) { .split, .split-wide { grid-template-columns: minmax(0, 1fr); } }
+.split > *, .split-wide > * { min-width: 0; }
+@media (max-width: 640px) {
+  .console-page [style*="nowrap"] { flex-wrap: wrap !important; }
+  .console-page [style*="nowrap"] > input { flex: 1 1 140px; min-width: 0; }
+}

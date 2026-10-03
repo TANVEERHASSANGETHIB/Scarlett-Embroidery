@@ -127,9 +127,21 @@
 {% endif %}
 
 <section class="container section">
-  <div class="kicker">Other services</div>
-  <div class="row" style="gap:12px;margin-top:6px">
-    {% for key, title in others %}<a class="btn btn-outline btn-md" href="{% url 'core:service' key %}">{{ title }}</a>{% endfor %}
+  <div class="kicker">Keep exploring</div>
+  <h2 class="display d-s mb-l" style="max-width:24ch">Other ways we can help</h2>
+  <div class="other-grid">
+    {% for o in others %}
+    <a class="other-card" href="{% url 'core:service' o.key %}">
+      <span class="other-thumb">{% if o.thumb %}<img src="{{ o.thumb }}" alt="" loading="lazy">{% else %}<img src="{% static o.art %}" alt="" loading="lazy">{% endif %}</span>
+      <span class="other-body">
+        <span class="other-kicker">{{ o.kicker }}</span>
+        <span class="other-title">{{ o.title }}</span>
+        <span class="other-lead">{{ o.lead|truncatechars:110 }}</span>
+        <span class="other-go">Explore {{ o.title|lower }}
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </span>
+    </a>
+    {% endfor %}
   </div>
 </section>
 

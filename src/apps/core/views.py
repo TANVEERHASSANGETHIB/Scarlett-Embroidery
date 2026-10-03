@@ -224,6 +224,30 @@ def _service_thumbs():
     return thumbs
 
 
+_OTHER_ART = {
+    "embroidery": "img/demo/labubu-embroidery.jpg",
+    "vector": "img/demo/labubu-vector.jpg",
+    "patches": "img/demo/hoop.svg",
+}
+
+
+def _other_services(current):
+    """Cards for the other service pages: admin picture if there is one, else built-in artwork."""
+    thumbs = _service_thumbs()
+    return [
+        {
+            "key": key,
+            "title": page["title"],
+            "lead": page["lead"],
+            "kicker": page["kicker"],
+            "thumb": thumbs.get(key),
+            "art": _OTHER_ART[key],
+        }
+        for key, page in SERVICE_PAGES.items()
+        if key != current
+    ]
+
+
 def home(request):
     showcase = list(PortfolioItem.objects.filter(is_published=True, show_on_home=True)[:6])
     showcase_data = [
@@ -312,7 +336,7 @@ def service_page(request, slug):
             "page": page,
             "slug": slug,
             "price_line": overview[page["service"]]["price"],
-            "others": [(k, v["title"]) for k, v in SERVICE_PAGES.items() if k != slug],
+            "others": _other_services(slug),
             "faqs": FAQ.objects.filter(is_published=True)[:4],
             "pictures": pictures,
             "gallery": pictures[2:],

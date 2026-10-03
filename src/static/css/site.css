@@ -711,3 +711,27 @@ a.chip.is-active { background: var(--ink); color: var(--bone); border-color: var
 .missing-note b { color: var(--gold-light); font-weight: 600; }
 .missing-note:hover { background: #000; }
 .hero-media .missing-note, .placeholder-img .missing-note { position: absolute; }
+
+/* Logo: the full wordmark image only, on a light plate so its black outlines read on the dark header */
+.brand-plate { display: flex; align-items: center; background: #fffdfa; border-radius: 10px; padding: 3px 8px; flex: none; box-shadow: 0 2px 10px #0006; }
+.brand-plate img { height: 54px; width: auto; display: block; }
+.footer-logo { padding: 10px 14px; }
+.footer-logo img { width: auto; height: 76px; }
+.auth-logo { padding: 12px 18px; }
+.auth-logo img { width: auto; height: 96px; }
+@media (max-width: 640px) { .brand-plate img { height: 38px; } }
+
+/* Other services cards */
+.other-grid { margin-bottom: 64px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.other-card { display: grid; grid-template-columns: 150px 1fr; background: var(--card); border: 1px solid var(--ink-line-soft); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-card); color: var(--ink); transition: transform .2s, box-shadow .2s, border-color .2s; }
+.other-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-raised); border-color: var(--gold); color: var(--ink); }
+.other-thumb { background: linear-gradient(160deg, var(--gold-wash), #fff); display: flex; align-items: center; justify-content: center; padding: 10px; min-height: 170px; }
+.other-thumb img { width: 100%; height: 100%; object-fit: contain; max-height: 190px; border-radius: 8px; }
+.other-body { display: flex; flex-direction: column; gap: 6px; padding: 20px 22px; }
+.other-kicker { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-dark); }
+.other-title { font-size: 19px; font-weight: 700; line-height: 1.25; }
+.other-lead { font-size: 13.5px; color: var(--ink-70); line-height: 1.6; }
+.other-go { margin-top: auto; padding-top: 8px; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--gold-dark); }
+.other-card:hover .other-go svg { transform: translateX(4px); }
+.other-go svg { transition: transform .2s; }
+@media (max-width: 520px) { .other-card { grid-template-columns: 1fr; } .other-thumb { min-height: 150px; } }

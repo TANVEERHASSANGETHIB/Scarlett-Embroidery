@@ -345,3 +345,37 @@ body.console { background: var(--night-deep); color: var(--bone); min-height: 10
 .folio-name { font-size: 14.5px; letter-spacing: 0; text-transform: none; }
 .theme-toggle-text, .info-row .k { letter-spacing: .06em; }
 .rte .rte-block { width: auto; min-height: 32px; padding: 4px 8px; font-size: 12.5px; }
+
+/* ── Console on phones and tablets ─────────────────────── */
+@media (max-width: 960px) {
+  .console-shell { grid-template-columns: minmax(0, 1fr); }
+  .console-side { position: sticky; top: 0; z-index: 40; background: var(--night-deep); flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .console-brand { border-bottom: 0; padding: 12px 16px; font-size: 16px; }
+  .console-theme { margin-left: auto; padding: 8px 12px; }
+  .theme-toggle-text { display: none; }
+  .console-nav { order: 3; width: 100%; padding: 4px 10px 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .console-nav::-webkit-scrollbar { display: none; }
+  .console-nav a { padding: 9px 13px; font-size: 13.5px; gap: 8px; }
+  .console-title { font-size: 24px; }
+  .console-head { flex-wrap: wrap; gap: 12px; }
+  .table-wrap { overflow-x: auto; }
+  .table { min-width: 560px; }
+}
+@media (max-width: 640px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: minmax(0, 1fr); }
+  .console-page { padding: 16px 12px 40px; }
+  .panel-pad, .panel-raised.panel-pad { padding: 16px; }
+  .rte-bar { gap: 3px; padding: 6px; }
+  .rte-tabs { margin-left: 0; width: 100%; }
+  .rte-surface { padding: 16px; max-height: 60vh; }
+  input, textarea, select { font-size: 16px; }
+  .media-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .folio-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+}
+@media (max-width: 640px) {
+  .folio-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .console-page .row { flex-wrap: wrap; }
+  .console-page .panel, .console-page form, .review-row { min-width: 0; max-width: 100%; }
+}
+@media (max-width: 380px) { .folio-grid, .media-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 960px) { .console-side { height: auto; min-height: 0; } }

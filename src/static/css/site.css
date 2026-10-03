@@ -11,31 +11,31 @@
 
 /* ── Tokens ────────────────────────────────────────────────────────────── */
 :root {
-  --ink: #111111;
+  --ink: #0a0a0a;
   --ink-80: #111111c4;
   --ink-70: #111111ab;
   --ink-60: #11111199;
   --ink-line: #11111121;
   --ink-line-soft: #11111114;
-  --paper: #fffaec;
+  --paper: #f4f6f8;
   --card: #ffffff;
-  --sand: #f8e8b0;
-  --sand-2: #f3dc94;
-  --gold: #f0a848;
-  --gold-light: #f8c97e;
-  --gold-mid: #d8912d;
-  --gold-dark: #9a5a0c;
-  --gold-wash: #fdf1cf;
-  --night: #f8e8b0;
+  --sand: #eceff2;
+  --sand-2: #e4e4e4;
+  --gold: #f0a84c;
+  --gold-light: #f7c27f;
+  --gold-mid: #f99a26;
+  --gold-dark: #b9791f;
+  --gold-wash: #fff3de;
+  --night: #f4f6f8;
   --night-deep: #ffffff;
-  --night-raised: #fbefc4;
+  --night-raised: #eceff2;
   --night-card: #ffffff;
-  --bone: #111111;
-  --bone-80: #111111d9;
-  --bone-70: #111111b3;
-  --bone-55: #11111180;
-  --night-line: #1111111f;
-  --night-line-strong: #11111133;
+  --bone: #0a0a0a;
+  --bone-80: #0a0a0acc;
+  --bone-70: #0a0a0a99;
+  --bone-55: #0a0a0a80;
+  --night-line: #0a0a0a1a;
+  --night-line-strong: #0a0a0a2e;
   --danger: #b3261e;
   --danger-wash: #fbe9e7;
   --ok: #2f6b3a;
@@ -113,7 +113,7 @@ p { margin: 0 0 1em; }
 .h3 { font-family: var(--f-display); font-weight: 600; font-size: 19px; letter-spacing: -.01em; text-transform: none; line-height: 1.25; }
 .h4 { font-family: var(--f-display); font-weight: 600; font-size: 16px; letter-spacing: -.005em; text-transform: none; line-height: 1.3; }
 .lead { font-size: 17px; color: var(--ink-80); max-width: 58ch; }
-.dark .lead { color: #111111c7; }
+.dark .lead { color: #555b61; }
 .accent { color: var(--gold); }
 .brand-word { font-family: var(--f-display); font-weight: 700; text-transform: none; letter-spacing: -.01em; }
 .brand-word span { color: var(--gold); }
@@ -837,58 +837,65 @@ img, video, svg, iframe, canvas { max-width: 100%; }
   .section { padding-bottom: 8px; }
 }
 
-/* ── Colour theme: only the logo colours — orange #F0A848, butter #F8E8B0, white and black ── */
-.dark { background: radial-gradient(900px 460px at 90% -10%, #f0a84866, transparent 62%), linear-gradient(160deg, #fff8e3 0%, #f8e8b0 100%); color: var(--ink); }
-.site-header { background: #ffffff; border-bottom: 3px solid var(--gold); color: var(--ink); box-shadow: 0 4px 18px #1111110d; }
-.site-header .btn-ghost-light { border-color: #11111140; color: var(--ink); }
-.site-footer { background: var(--gold); color: var(--ink); }
-.band-dark { background: linear-gradient(135deg, #f0a848, #f8c97e); color: var(--ink); }
+/* ── Colour theme (reference: clean white and cool grey, brand orange #F0A84C, deep gold #C98A3D, black type) ── */
 body { background: var(--paper); }
-.accent { color: var(--ink); background: linear-gradient(transparent 62%, var(--gold) 62% 92%, transparent 92%); padding-inline: 2px; }
-.kicker, .dark .kicker, .band-dark .kicker, .kicker-gold { color: var(--gold-dark); }
-.hero-flag { background: var(--ink); color: var(--gold); }
-.hero-flag i { background: var(--gold); }
-.stat-n { color: var(--ink); }
-.dark .stat-n, .band-dark .stat-n, .fact-dark .fact-n { color: var(--ink); }
-.hero-stats { border-top-color: #11111133; }
-.brand-word span { color: var(--gold-dark); }
-.btn-ink { background: var(--ink); color: #fff; }
-.btn-ink:hover { background: var(--gold); color: var(--ink); }
-.btn-night { background: var(--ink); color: var(--gold); }
-.btn-ghost-light { border-color: #11111155; color: var(--ink); }
-.btn-ghost-light:hover { background: #fff; border-color: var(--ink); color: var(--ink); }
-.card { border-color: #f0a84847; }
-.card:hover { border-color: var(--gold); }
-a:hover { color: var(--gold-dark); }
-.brands-bar { background: #ffffff; }
-.brand-name { color: #11111166; }
-.pic { background: var(--sand); }
-.brand-plate { background: transparent; box-shadow: none; padding: 0; }
-.footer-logo { background: #fff; }
-.site-footer .footer-col-title { color: var(--ink); }
-.site-footer a { color: #111111d9; } .site-footer a:hover { color: #fff; }
-.site-footer .footer-bottom, .site-footer .footer-bar { border-top-color: #11111133; }
-.account-side { background: #fff; color: var(--ink); border: 1px solid #f0a84866; box-shadow: 0 14px 40px #f0a84833; }
-.account-user { background: linear-gradient(180deg, var(--sand), #fff); }
-.account-nav a.is-active { background: var(--sand); color: var(--ink); }
-.account-nav a:hover { background: #fdf1cf; color: var(--ink); }
-.account-promo { background: linear-gradient(135deg, #f8e8b0, #f0a848); border-color: var(--gold); }
-.account-promo p, .account-promo-t { color: var(--ink); }
-.account-promo > svg { color: var(--ink); }
-.account-wrap { background: #fdf1cf; }
-.account-main { background: #fffaec; border-color: #f0a84847; }
-.price-tablist { background: #fff; border-color: #f0a84866; }
-.price-tab.is-active { background: var(--ink); color: var(--gold); }
-.chat-launch { background: var(--ink); color: var(--gold); }
-.ba-tag-before { color: #fff; }
-.svc-price, .account-hello { color: var(--gold-dark); }
-.site-header .nav a.is-active, .site-header nav a.is-active, .site-header [aria-current] { color: var(--gold-dark); }
-.brand-plate img { height: 60px; }
-@media (max-width: 760px) { .brand-plate img { height: 46px; } }
-.cta-band { background: linear-gradient(120deg, #f0a848, #f8e8b0 55%, #f0a848); color: var(--ink); }
-.cta-band h2, .cta-band p { color: var(--ink) !important; }
+.dark { background: linear-gradient(180deg, #f4f6f8, #ffffff 140%); color: var(--ink); }
+.site-header { background: #fff; border-bottom: 1px solid #e4e4e4; box-shadow: 0 4px 20px #0a0a0a0f; color: var(--ink); }
+.site-header a { color: #3a3f45; }
+.site-header a:hover, .site-header a.is-active, .site-header [aria-current] { color: var(--gold); }
+.site-header .btn-ghost-light { border-color: #0a0a0a33; color: var(--ink); }
+.site-header .btn-gold, .site-header .btn-gold:hover { color: #fff; }
+.site-footer { background: #f7f7f7; color: #3a3f45; border-top: 1px solid #e4e4e4; }
+.site-footer a { color: #555b61; } .site-footer a:hover { color: var(--gold-mid); }
+.site-footer .footer-col-title { color: var(--ink); font-weight: 600; letter-spacing: .04em; }
+.footer-logo { background: transparent; padding: 0; }
+.footer-logo img { height: 96px; }
+.band-dark { --bone: #fff; --bone-80: #ffffffe6; --bone-70: #ffffffcc; --bone-55: #ffffffb3; --night-line: #ffffff40; background: #c98a3d; color: #fff; }
+.band-dark .kicker, .band-dark .fact-n, .band-dark .stat-n { color: #fff; }
+.cta-band { background: linear-gradient(120deg, #f0a84c, #f99a26); color: var(--ink); }
 .cta-band .btn-ink { background: var(--ink); color: #fff; }
-.cta-band .btn-ghost-ink { border-color: #11111199; color: var(--ink); }
-.plan-name, .plan .plan-title, .price-plan-name { color: var(--gold-dark); }
-.plan.is-featured .plan-label { color: var(--gold-dark); }
-.plan.is-featured .plan-card { box-shadow: 0 16px 40px #f0a84859; }
+.cta-band .btn-ghost-ink { border-color: #0a0a0a88; color: var(--ink); }
+.accent { color: #f89e28; background: none; padding: 0; }
+.kicker, .dark .kicker, .kicker-gold { color: var(--gold-dark); }
+.hero-flag { background: #fff; color: var(--ink); border: 1px solid #e4e4e4; box-shadow: 0 2px 8px #0a0a0a0f; }
+.hero-flag i { background: var(--gold-mid); }
+.stat-n, .dark .stat-n { color: var(--ink); }
+.hero-stats { border-top-color: #e4e4e4; }
+.btn { border-radius: 6px; }
+.btn-gold, .btn-ink, .btn-night, .btn-lg.btn-gold, .btn-md.btn-gold { clip-path: none; }
+.btn-gold { background: var(--gold); color: #fff; }
+.btn-gold:hover { background: var(--gold-mid); color: #fff; }
+.hero-grid .btn-lg { border-radius: 999px; padding-inline: 32px; }
+.btn-ink { background: var(--ink); color: #fff; } .btn-ink:hover { background: var(--gold); color: #fff; }
+.btn-night { background: var(--ink); color: #fff; }
+.btn-ghost-light, .btn-outline { border-color: #0a0a0a2e; color: var(--ink); background: #fff; }
+.btn-ghost-light:hover, .btn-outline:hover { border-color: var(--gold); color: var(--gold-mid); background: #fff; }
+.cta-band .btn-gold { background: var(--ink); color: #fff; }
+.card { border-color: #e9ecef; box-shadow: 0 2px 14px #0a0a0a0a; }
+.card:hover { border-color: #f0a84c99; }
+a:hover { color: var(--gold-mid); }
+.brands-bar { background: #fff; border-bottom: 1px solid #e9ecef; }
+.brand-name { color: #0a0a0a59; }
+.pic { background: var(--sand); }
+.brand-plate img { height: 60px; }
+.price-tablist { background: #fff; border-color: #e4e4e4; }
+.price-tab { color: #3a3f45; }
+.price-tab.is-active { background: var(--gold); color: #fff; }
+.chat-launch { background: var(--gold); color: #fff; box-shadow: 0 8px 24px #f0a84c66; }
+.plan.is-featured .plan-label { color: var(--gold-mid); }
+.plan-head { background: var(--gold); color: #fff; }
+.plan-card { border-color: #e4e4e4; box-shadow: 0 2px 16px #0a0a0a0d; }
+.ba-tag-before { background: var(--ink); color: #fff; } .ba-tag-after { background: var(--gold); color: #fff; }
+.ba-handle { background: #fff; color: var(--gold-mid); }
+.svc-price, .account-hello { color: var(--gold-dark); }
+.account-wrap { background: #eef1f4; }
+.account-side { background: #fff; color: var(--ink); border: 1px solid #e4e4e4; box-shadow: 0 10px 34px #0a0a0a12; }
+.account-user { background: linear-gradient(180deg, #f4f6f8, #fff); }
+.account-nav a.is-active { background: var(--gold-wash); color: var(--gold-dark); }
+.account-nav a:hover { background: #f4f6f8; color: var(--ink); }
+.account-promo { background: linear-gradient(135deg, #f0a84c, #f99a26); border: 0; }
+.account-promo-t, .account-promo p, .account-promo > svg { color: #fff; }
+.account-promo .btn-gold { background: #fff; color: var(--ink); }
+.account-main { background: #fff; border-color: #e4e4e4; }
+.stat-tile::after { background: var(--gold-wash); }
+.brand-plate { background: transparent; box-shadow: none; padding: 0; }

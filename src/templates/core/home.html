@@ -39,29 +39,26 @@
 </section>
 
 <section class="container section" id="services">
-  <div class="between mb-l">
+  <div class="svc-head">
     <div>
-      <div class="kicker">01 — Services</div>
-      <h2 class="display d-m" style="max-width:20ch">Three services, one production standard</h2>
+      <div class="kicker">What we do</div>
+      <h2 class="display d-m">Embroidery, vector art and patches</h2>
+      <p class="svc-sub">Send us your artwork. We return production-ready files and finished patches — punched by hand, test-sewn before delivery.</p>
     </div>
-    <p class="muted mb-0" style="max-width:34ch">Every file is punched manually — no auto-trace — then test-sewn on the fabric you named before it is released.</p>
+    <a class="svc-link" href="#pricing">See pricing <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></a>
   </div>
-  <div style="border-top:1px solid var(--ink-line)">
+  <div class="svc-list">
     {% for sv in services %}
-    <div class="service-row">
-      <div class="service-no">{{ sv.no }}</div>
-      <div>
-        <h3 class="service-title">{{ sv.title }}</h3>
-        <p class="muted mb-0" style="max-width:42ch">{{ sv.body }}</p>
-      </div>
-      <div class="row" style="gap:8px;padding-top:6px;align-items:flex-start">
-        {% for p in sv.points %}<span class="pill">{{ p }}</span>{% endfor %}
-      </div>
-      <div class="stack" style="align-items:flex-start;gap:14px;padding-top:4px">
-        <span class="mono" style="font-size:12.5px;font-weight:500">{{ sv.price }}</span>
-        <a class="btn btn-ink" href="{% url 'core:service' sv.slug %}">Learn more</a>
-      </div>
-    </div>
+    <a class="svc-item" href="{% url 'core:service' sv.slug %}">
+      <span class="svc-no">{{ sv.no }}</span>
+      <h3 class="svc-title">{{ sv.title }}</h3>
+      <span class="svc-info">
+        <span class="svc-body">{{ sv.body }}</span>
+        {% if sv.points %}<span class="svc-points">{% for p in sv.points %}{{ p }}{% if not forloop.last %} / {% endif %}{% endfor %}</span>{% endif %}
+        <span class="svc-cost">{{ sv.price }}</span>
+      </span>
+      <span class="svc-go" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+    </a>
     {% endfor %}
   </div>
 </section>

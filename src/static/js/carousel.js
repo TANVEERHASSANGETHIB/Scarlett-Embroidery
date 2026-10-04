@@ -108,6 +108,7 @@
     root.addEventListener("focusout", play);
     track.addEventListener("pointerdown", pause);
     track.addEventListener("touchstart", pause, { passive: true });
+    track.addEventListener("touchend", function () { window.setTimeout(play, 1500); }, { passive: true });
     document.addEventListener("visibilitychange", function () {
       if (document.hidden) pause(); else play();
     });

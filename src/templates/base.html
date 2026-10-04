@@ -24,12 +24,12 @@
       <nav class="site-nav" id="site-nav" aria-label="Main">
         <a href="{% url 'core:home' %}" class="{% if ns == 'core' and url == 'home' %}is-active{% endif %}">Home</a>
         <div class="nav-drop{% if url == 'services' or url == 'service' %} is-active{% endif %}" data-dropdown>
-          <button type="button" class="nav-drop-btn" aria-haspopup="true" aria-expanded="false">Services <svg viewBox="0 0 12 8" width="10" height="7" aria-hidden="true"><path d="M1 1l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+          <a class="nav-drop-btn" href="{% url 'core:services' %}">Services</a>
+          <button type="button" class="nav-drop-toggle" aria-haspopup="true" aria-expanded="false" aria-label="Show services menu"><svg viewBox="0 0 12 8" width="10" height="7" aria-hidden="true"><path d="M1 1l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
           <div class="nav-drop-menu">
             <a href="{% url 'core:service' 'embroidery' %}">Embroidery Digitizing</a>
             <a href="{% url 'core:service' 'vector' %}">Vector Art</a>
             <a href="{% url 'core:service' 'patches' %}">Patches</a>
-            <a href="{% url 'core:services' %}" class="nav-drop-all">All services</a>
           </div>
         </div>
         <a href="{% url 'core:portfolio' %}" class="{% if url == 'portfolio' %}is-active{% endif %}">Portfolio</a>
@@ -59,6 +59,7 @@
           <a class="btn btn-ghost-light" href="{% url 'accounts:login' %}">Log in</a>
         {% endif %}
         <a class="btn btn-gold" href="{% url 'orders:place' %}">Place order</a>
+        <a class="btn btn-quote" href="{% url 'orders:quote' %}">Get a quote</a>
         <button type="button" class="nav-toggle" data-nav-toggle aria-controls="site-nav" aria-expanded="false" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>

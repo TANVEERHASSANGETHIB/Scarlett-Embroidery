@@ -965,3 +965,32 @@ a:hover { color: var(--gold-mid); }
   .svc-go { grid-column: 2; grid-row: 1 / span 2; width: 44px; height: 44px; align-self: center; }
   .svc-info { grid-column: 1 / -1; grid-row: 3; font-size: 14px; }
 }
+
+/* ── Header dropdowns: steady on hover (no gap, short grace delay), Services is a real link ── */
+.nav-drop { display: inline-flex; align-items: center; }
+.nav-drop-toggle { display: inline-flex; align-items: center; justify-content: center; background: none; border: 0; padding: 9px 8px 9px 2px; margin-left: -4px; color: var(--bone-80); border-radius: var(--radius-sm); cursor: pointer; }
+.nav-drop-toggle svg { transition: transform .15s; }
+.nav-drop:hover .nav-drop-toggle, .nav-drop.is-open .nav-drop-toggle { color: #b86100; }
+.nav-drop-menu::before { content: ""; position: absolute; left: 0; right: 0; top: -14px; height: 14px; }
+.nav-drop-menu { display: flex; visibility: hidden; opacity: 0; transform: translateY(6px); pointer-events: none; transition: opacity .16s ease .22s, transform .16s ease .22s, visibility 0s linear .38s; }
+.nav-drop.is-open .nav-drop-menu { visibility: visible; opacity: 1; transform: none; pointer-events: auto; transition-delay: 0s; }
+@media (min-width: 961px) and (hover: hover) {
+  .nav-drop:hover .nav-drop-menu, .nav-drop:focus-within .nav-drop-menu { visibility: visible; opacity: 1; transform: none; pointer-events: auto; transition-delay: 0s; }
+  .nav-drop:hover .nav-drop-toggle svg, .nav-drop:hover .nav-drop-btn svg { transform: rotate(180deg); }
+}
+.nav-drop.is-open .nav-drop-toggle svg { transform: rotate(180deg); }
+.nav-drop-menu a:hover { background: var(--gold-wash); color: #b86100; }
+
+/* Header "Get a quote" */
+.btn-quote { background: transparent; color: var(--ink); border: 1.5px solid var(--gold); border-radius: 6px; white-space: nowrap; }
+.btn-quote:hover { background: var(--gold-wash); color: var(--ink); }
+.header-actions .btn { white-space: nowrap; }
+@media (max-width: 1260px) { .header-actions .btn-quote { display: none; } }
+@media (max-width: 960px) {
+  .nav-drop { display: flex; width: 100%; flex-wrap: wrap; }
+  .nav-drop > .nav-drop-btn { flex: 1; width: auto; }
+  .nav-drop-toggle { width: 48px; margin: 0; justify-content: center; }
+  .nav-drop-menu { width: 100%; display: none; visibility: visible; opacity: 1; transform: none; pointer-events: auto; transition: none; }
+  .nav-drop.is-open .nav-drop-menu { display: flex; }
+  .nav-drop-menu::before { display: none; }
+}

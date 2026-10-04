@@ -22,7 +22,7 @@
     });
   }
   dropdowns.forEach(function (d) {
-    var btn = d.querySelector(".nav-drop-btn");
+    var btn = d.querySelector(".nav-drop-toggle, button.nav-drop-btn");
     if (!btn) return;
     btn.addEventListener("click", function (e) {
       e.stopPropagation();

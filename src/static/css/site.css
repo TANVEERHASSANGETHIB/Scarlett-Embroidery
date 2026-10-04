@@ -453,7 +453,7 @@ a.chip.is-active { background: var(--ink); color: #fff; border-color: var(--ink)
 .chat-identity { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 12px 0; border-top: 1px solid var(--ink-line-soft); }
 .chat-identity input, .chat-compose input { width: 100%; padding: 10px; border: 1px solid #11111129; border-radius: var(--radius); background: var(--paper); font-size: 13px; }
 .chat-compose { padding: 12px; display: flex; gap: 8px; }
-.chat-compose button { background: var(--ink); border: 0; border-radius: var(--radius); color: var(--bone); font-family: var(--f-display); font-weight: 700; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; padding: 11px 15px; }
+.chat-compose button { background: var(--gold); border: 0; border-radius: var(--radius); color: #111; font-family: var(--f-display); font-weight: 700; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; padding: 11px 15px; }
 .chat-state { font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-60); text-align: center; padding: 4px 12px 0; }
 
 /* ── Errors ────────────────────────────────────────────────────────────── */
@@ -1014,3 +1014,5 @@ a:hover { color: var(--gold-mid); }
 .post-date { position: absolute; right: 12px; bottom: 12px; z-index: 2; background: #0a0a0ad9; color: #fff; font-size: 12px; font-weight: 500; letter-spacing: .02em; padding: 6px 12px; border-radius: 999px; opacity: 0; transform: translateY(6px); transition: opacity .2s ease, transform .2s ease; pointer-events: none; }
 .post-card:hover .post-date, .post-hero:hover .post-date, .post-hero:focus-within .post-date { opacity: 1; transform: none; }
 @media (hover: none) { .post-date { opacity: 1; transform: none; } }
+
+.chat-compose button:hover { background: var(--gold-mid); }

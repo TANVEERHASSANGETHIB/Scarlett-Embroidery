@@ -994,3 +994,23 @@ a:hover { color: var(--gold-mid); }
   .nav-drop.is-open .nav-drop-menu { display: flex; }
   .nav-drop-menu::before { display: none; }
 }
+
+/* ── Call-to-action band with a photo on the right ── */
+.cta-grid { display: grid !important; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 56px; align-items: center; }
+.cta-copy { display: flex; flex-direction: column; gap: 28px; align-items: flex-start; }
+.cta-copy .row { gap: 12px; }
+.cta-media { display: flex; justify-content: flex-end; }
+.cta-pic { position: relative; margin: 0; width: 100%; max-width: 520px; aspect-ratio: 9 / 7; border-radius: 20px; overflow: hidden; border: 6px solid #fff; background: var(--sand); box-shadow: 0 24px 56px #0a0a0a38; transform: rotate(1.5deg); }
+.cta-pic > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cta-pic .cta-art { object-fit: contain; padding: 14px; }
+@media (max-width: 960px) {
+  .cta-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .cta-media { justify-content: center; }
+  .cta-pic { max-width: 100%; aspect-ratio: 4 / 3; transform: none; }
+}
+
+/* ── Blog images: publish date appears bottom-right on hover ── */
+.post-hero { position: relative; overflow: hidden; }
+.post-date { position: absolute; right: 12px; bottom: 12px; z-index: 2; background: #0a0a0ad9; color: #fff; font-size: 12px; font-weight: 500; letter-spacing: .02em; padding: 6px 12px; border-radius: 999px; opacity: 0; transform: translateY(6px); transition: opacity .2s ease, transform .2s ease; pointer-events: none; }
+.post-card:hover .post-date, .post-hero:hover .post-date, .post-hero:focus-within .post-date { opacity: 1; transform: none; }
+@media (hover: none) { .post-date { opacity: 1; transform: none; } }

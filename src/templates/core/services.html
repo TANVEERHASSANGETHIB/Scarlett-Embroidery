@@ -60,7 +60,8 @@
 </section>
 
 <section class="cta-band">
-  <div class="container">
+  <div class="container cta-grid">
+    <div class="cta-copy">
     <div>
       <h2 class="display" style="font-size:clamp(28px,3.4vw,42px);margin-bottom:8px;max-width:22ch">Not sure which one you need?</h2>
       <p class="mb-0" style="font-size:16px;color:var(--ink-80)">Tell us about the job and we'll price it for free.</p>
@@ -69,6 +70,8 @@
       <a class="btn btn-night btn-lg" href="{% url 'orders:quote' %}">Get a quote</a>
       <a class="btn btn-ghost-ink btn-lg" href="{% url 'core:contact' %}">Talk to a digitizer</a>
     </div>
+    </div>
+    {% include "partials/cta_image.html" %}
   </div>
 </section>
 {% endblock %}

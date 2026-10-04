@@ -334,6 +334,7 @@ class SiteImage(models.Model):
         ABOUT_TEAM = "about_team", "About — team photo"
         BLOG_DEFAULT = "blog_default", "Blog — default cover (posts without one)"
         PORTFOLIO_DEFAULT = "portfolio_default", "Portfolio — fallback sew-out photo"
+        CTA_PHOTO = "cta_photo", "Call-to-action banner (bottom of pages)"
 
     # Recommended pixel size for each place, shown to the admin and on empty spots.
     SIZES = {
@@ -344,6 +345,7 @@ class SiteImage(models.Model):
         "about_team": "900 × 1200 px",
         "blog_default": "1600 × 900 px",
         "portfolio_default": "1000 × 1000 px",
+        "cta_photo": "900 × 700 px",
     }
 
     slot = models.CharField(max_length=30, unique=True, choices=Slot.choices)

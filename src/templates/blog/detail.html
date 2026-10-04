@@ -23,7 +23,8 @@
       <div class="kicker">{{ post.category.name|default:"Article" }}</div>
       <h1 class="display" style="font-size:clamp(38px,4.6vw,60px);line-height:.98;margin-bottom:22px;max-width:26ch">{{ post.title }}</h1>
       <div class="post-hero placeholder-img" style="border-radius:var(--radius-md);margin-bottom:28px">
-        {% if post.cover %}<img src="{{ post.cover.url }}" alt="">{% elif site_photos.blog_default %}<img src="{{ site_photos.blog_default }}" alt="">{% else %}{% include "partials/img_note.html" with label="article cover" size="1600 × 900 px" %}{% endif %}
+        {% if post.cover %}<img src="{{ post.cover.url }}" alt="" onerror="this.remove()">{% elif site_photos.blog_default %}<img src="{{ site_photos.blog_default }}" alt="">{% else %}{% include "partials/img_note.html" with label="article cover" size="1600 × 900 px" %}{% endif %}
+        {% if post.published_at %}<span class="post-date">{{ post.published_at|date:"j M Y" }}</span>{% endif %}
       </div>
       <div class="prose">{{ post.body_html|safe }}</div>
       <div class="card card-pad mt-l row" style="justify-content:space-between;max-width:70ch">

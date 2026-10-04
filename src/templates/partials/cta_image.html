@@ -1,0 +1,5 @@
+{% load static %}<div class="cta-media">
+  <figure class="cta-pic">
+    {% if site_photos.cta_photo %}<img src="{{ site_photos.cta_photo }}" alt="Scarlett Embroidery work" loading="lazy">{% else %}<img class="cta-art" src="{% static 'img/demo/hoop.svg' %}" alt="" loading="lazy">{% include "partials/img_note.html" with label="call-to-action banner photo" size="900 × 700 px" %}{% endif %}
+  </figure>
+</div>

@@ -257,7 +257,8 @@
 {% endif %}
 
 <section class="cta-band">
-  <div class="container">
+  <div class="container cta-grid">
+    <div class="cta-copy">
     <div>
       <h2 class="display" style="font-size:clamp(38px,4.4vw,58px);line-height:.98;margin-bottom:8px;max-width:22ch">Send artwork. Get a sewn proof today.</h2>
       <p class="mb-0" style="font-size:16px;color:var(--ink-80)">First design digitized free for new uniform shops.</p>
@@ -267,6 +268,8 @@
       <a class="btn btn-ghost-ink btn-lg" href="{% url 'orders:quote' %}">Get a quote</a>
       <a class="btn btn-ghost-ink btn-lg" href="{% url 'core:contact' %}">Talk to a digitizer</a>
     </div>
+    </div>
+    {% include "partials/cta_image.html" %}
   </div>
 </section>
 {% endblock %}

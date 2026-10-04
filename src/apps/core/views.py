@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.db.models import Avg, Count
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
@@ -12,6 +13,7 @@ from .models import (
     PortfolioCategory,
     PortfolioItem,
     ServiceImage,
+    SewOut,
     SiteImage,
     SiteSettings,
     Testimonial,
@@ -298,8 +300,13 @@ def portfolio(request):
 
 
 def testimonials(request):
+    quotes = Testimonial.objects.filter(is_published=True)
+    agg = quotes.aggregate(avg=Avg("rating"), n=Count("id"))
+    stats = {"count": agg["n"], "avg": round(agg["avg"], 1) if agg["avg"] else None}
     return render(
-        request, "core/testimonials.html", {"testimonials": Testimonial.objects.filter(is_published=True)}
+        request,
+        "core/testimonials.html",
+        {"testimonials": quotes, "sewouts": SewOut.objects.filter(is_published=True), "stats": stats},
     )
 
 

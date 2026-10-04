@@ -393,3 +393,10 @@ body.console { background: var(--night-deep); color: var(--bone); min-height: 10
 
 /* Console keeps its own neutral dark palette, independent of the public colour theme */
 body.console { --night: #121314; --night-deep: #0d0e0f; --night-raised: #17181a; --night-card: #1b1d1f; --bone: #eceae7; --bone-80: #eceae7c4; --bone-70: #eceae7ab; --bone-55: #eceae78c; --night-line: #ffffff1a; --night-line-strong: #ffffff33; --ink: #1c1a17; --paper: #f7f4ef; --card: #fffdfa; --sand: #e5dfd5; }
+
+.sewout-admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 14px; align-content: start; min-width: 0; }
+.sewout-admin { overflow: hidden; padding: 0; min-width: 0; }
+.sewout-admin img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: #ddd; }
+.sewout-admin-body { padding: 12px 14px 14px; }
+.sewout-admin.is-hidden { opacity: .6; }
+.sewout-admin.is-editing { outline: 2px solid var(--gold); }

@@ -58,6 +58,12 @@
         {{ form.image }}{{ form.image.errors }}
         <div class="help">Shown next to the review on the website. Leave empty to keep the current one.</div>
       </div>
+      <div class="field">
+        <span class="label">Sew-out photo (optional)</span>
+        {% if item and item.work_photo %}<img style="width:120px;border-radius:8px;margin-bottom:8px" src="{{ item.work_photo.url }}" alt="">{% endif %}
+        {{ form.work_photo }}{{ form.work_photo.errors }}
+        <div class="help">Photo of the finished embroidery, shown on top of this review (about 800 × 600 px). For a gallery of photos, use Client sew-outs.</div>
+      </div>
       <div class="grid-2" style="gap:14px">
         {% include "partials/field.html" with field=form.rating label="Stars (1–5)" %}
         {% include "partials/field.html" with field=form.sort_order %}

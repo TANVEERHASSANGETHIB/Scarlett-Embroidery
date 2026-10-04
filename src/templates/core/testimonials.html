@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Testimonials — Scarlett Embroidery{% endblock %}
 {% block content %}
 <section class="dark page-hero">
@@ -8,10 +9,18 @@
     <p class="lead mb-0" style="max-width:56ch">What uniform shops, brands and decorators say after running our files.</p>
   </div>
 </section>
-<section class="container" style="padding-block:40px 72px">
+<section class="container" style="padding-block:40px 24px">
+  {% if stats.count %}
+  <div class="proof-strip">
+    <div><strong>{{ stats.avg }}<small>/5</small></strong><span>Average rating</span></div>
+    <div><strong>{{ stats.count }}</strong><span>Client reviews</span></div>
+    <div><strong>{{ sewouts|length }}</strong><span>Sew-outs shown below</span></div>
+  </div>
+  {% endif %}
   <div class="grid-3 testimonial-grid">
     {% for q in testimonials %}
     <figure class="card quote-card" style="margin:0">
+      {% if q.work_photo %}<button type="button" class="quote-photo" data-lightbox="{{ q.work_photo.url }}" data-caption="{{ q.name }}{% if q.role %} · {{ q.role }}{% endif %}" aria-label="View sew-out photo from {{ q.name }}"><img src="{{ q.work_photo.url }}" alt="Sew-out for {{ q.name }}" loading="lazy" onerror="this.closest('.quote-photo').remove()"></button>{% endif %}
       <div class="stars" aria-label="{{ q.rating }} out of 5 stars">{% for _ in ""|rjust:q.rating %}★{% endfor %}</div>
       <blockquote class="quote-text" style="margin:0 0 22px">“{{ q.quote }}”</blockquote>
       <figcaption class="quote-by">
@@ -26,9 +35,31 @@
     <div class="card empty" style="grid-column:1/-1">No reviews yet.</div>
     {% endfor %}
   </div>
-  <div class="row" style="margin-top:36px;gap:12px">
+</section>
+{% if sewouts %}
+<section class="container sewout-section" id="sew-outs" style="padding-block:24px 72px">
+  <div class="kicker">Client sew-outs</div>
+  <h2 class="display d-lg" style="margin-bottom:10px">Real garments, real stitches</h2>
+  <p class="lead" style="max-width:60ch;margin-bottom:28px">Photos our clients send back after running our files. Tap any photo to enlarge it.</p>
+  <div class="sewout-grid">
+    {% for s in sewouts %}
+    <button type="button" class="sewout-card" data-lightbox="{{ s.image.url }}" data-caption="{{ s.title }}{% if s.client %} · {{ s.client }}{% endif %}{% if s.details %} — {{ s.details }}{% endif %}" aria-label="Enlarge: {{ s.title }}">
+      <img src="{{ s.image.url }}" alt="{{ s.title }}" loading="lazy" onerror="this.closest('.sewout-card').remove()">
+      <span class="sewout-cap"><b>{{ s.title }}</b>{% if s.client %}<i>{{ s.client }}</i>{% endif %}</span>
+    </button>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+<section class="container" style="padding-block:0 72px">
+  <div class="row" style="gap:12px">
     <a class="btn btn-gold btn-lg" href="{% url 'orders:place' %}">Place order</a>
     <a class="btn btn-outline btn-lg" href="{% url 'orders:quote' %}">Get a quote</a>
   </div>
 </section>
+<div class="lightbox" data-lightbox-root hidden role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button type="button" class="lightbox-close" data-lightbox-close aria-label="Close">✕</button>
+  <figure><img alt="" data-lightbox-img><figcaption data-lightbox-cap></figcaption></figure>
+</div>
+<script src="{% static 'js/lightbox.js' %}" defer></script>
 {% endblock %}

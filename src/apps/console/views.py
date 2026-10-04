@@ -25,6 +25,7 @@ from apps.core.models import (
     PortfolioCategory,
     PortfolioItem,
     ServiceImage,
+    SewOut,
     SiteImage,
     SiteSettings,
     Testimonial,
@@ -51,6 +52,7 @@ from .forms import (
     PostForm,
     PricingTierFormSet,
     ServiceImageUploadForm,
+    SewOutForm,
     SiteImageForm,
     SiteSettingsForm,
     SocialLinksForm,
@@ -681,6 +683,50 @@ def testimonials(request, pk=None):
             "item": item,
             "form": form,
             "published_count": Testimonial.objects.filter(is_published=True).count(),
+        },
+    )
+
+
+# ── Client sew-outs ──────────────────────────────────────
+@staff_required
+@require_http_methods(["GET", "POST"])
+def sewouts(request, pk=None):
+    """Add, edit, hide or delete the client sew-out photos on the testimonials page."""
+    item = get_object_or_404(SewOut, pk=pk) if pk else None
+    form = SewOutForm(instance=item)
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+
+        if action in ("delete", "toggle_published"):
+            target = get_object_or_404(SewOut, pk=request.POST.get("id"))
+            if action == "delete":
+                target.delete()
+                messages.success(request, "Sew-out deleted.")
+            else:
+                target.is_published = not target.is_published
+                target.save(update_fields=["is_published"])
+            return redirect("console:sewouts")
+
+        form = SewOutForm(request.POST, request.FILES, instance=item)
+        if form.is_valid():
+            saved = form.save(commit=False)
+            if item is None and not saved.sort_order:
+                saved.sort_order = (SewOut.objects.aggregate(top=Max("sort_order"))["top"] or 0) + 1
+            saved.save()
+            messages.success(request, "Sew-out updated." if item else "Sew-out added.")
+            return redirect("console:sewouts")
+        messages.error(request, "Please fix the highlighted fields.")
+
+    return render(
+        request,
+        "console/sewouts.html",
+        {
+            "nav": "sewouts",
+            "items": SewOut.objects.all(),
+            "item": item,
+            "form": form,
+            "published_count": SewOut.objects.filter(is_published=True).count(),
         },
     )
 

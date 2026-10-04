@@ -237,6 +237,12 @@ class Testimonial(models.Model):
         blank=True,
         help_text="Optional photo or logo shown with the review.",
     )
+    work_photo = models.ImageField(
+        "sew-out photo",
+        upload_to="testimonials/work/",
+        blank=True,
+        help_text="Optional photo of the sewn result, shown on top of the review (about 800 × 600 px).",
+    )
     rating = models.PositiveSmallIntegerField(default=5)
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
@@ -246,6 +252,26 @@ class Testimonial(models.Model):
 
     def __str__(self):
         return f"{self.name}: {self.quote[:40]}"
+
+
+class SewOut(models.Model):
+    """A photo of a client's finished embroidery, shown in the gallery on the testimonials page."""
+
+    image = models.ImageField("photo", upload_to="sewouts/", help_text="Recommended 1000 × 1000 px.")
+    title = models.CharField(max_length=120, help_text="e.g. Left-chest logo on polo")
+    client = models.CharField(max_length=80, blank=True, help_text="Client or shop name (optional).")
+    details = models.CharField(
+        max_length=160, blank=True, help_text="e.g. Pique polo · 3.5 in · 8,200 stitches"
+    )
+    is_published = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["sort_order", "-id"]
+        verbose_name = "client sew-out"
+
+    def __str__(self):
+        return self.title
 
 
 class FAQ(models.Model):

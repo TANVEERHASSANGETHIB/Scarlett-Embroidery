@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import FAQ, ContactMessage, PortfolioItem, SiteSettings, Testimonial
+from .models import FAQ, ContactMessage, PortfolioItem, SewOut, SiteSettings, Testimonial
 
 
 @admin.register(SiteSettings)
@@ -34,3 +34,9 @@ class ContactMessageAdmin(admin.ModelAdmin):
     list_display = ["name", "email", "subject", "is_read", "created_at"]
     list_filter = ["is_read"]
     search_fields = ["name", "email", "subject", "message"]
+
+
+@admin.register(SewOut)
+class SewOutAdmin(admin.ModelAdmin):
+    list_display = ["title", "client", "is_published", "sort_order"]
+    list_editable = ["is_published", "sort_order"]

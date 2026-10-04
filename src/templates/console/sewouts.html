@@ -1,0 +1,62 @@
+{% extends "console/base.html" %}
+{% block title %}Client sew-outs{% endblock %}
+{% block content %}
+<div class="console-page">
+  <div class="console-head">
+    <div>
+      <h1 class="console-title">Client sew-outs</h1>
+      <p class="console-sub">{{ items|length }} photo{{ items|length|pluralize }} · {{ published_count }} shown on the Testimonials page</p>
+    </div>
+    {% if item %}<a class="btn btn-outline btn-md" href="{% url 'console:sewouts' %}">Close editor</a>{% endif %}
+  </div>
+
+  <div class="split-wide">
+    <div class="sewout-admin-grid">
+      {% for s in items %}
+      <div class="panel sewout-admin{% if item and item.pk == s.pk %} is-editing{% endif %}{% if not s.is_published %} is-hidden{% endif %}">
+        <img src="{{ s.image.url }}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+        <div class="sewout-admin-body">
+          <div class="review-name">{{ s.title }}</div>
+          <div class="review-role">{{ s.client|default:"—" }}{% if s.details %} · {{ s.details }}{% endif %}</div>
+          <div class="row" style="gap:6px;margin-top:10px">
+            {% if not s.is_published %}<span class="badge badge-muted">Hidden</span>{% endif %}
+            <a class="btn btn-outline" href="{% url 'console:sewout_edit' s.pk %}">Edit</a>
+            <form method="post">{% csrf_token %}
+              <input type="hidden" name="action" value="toggle_published"><input type="hidden" name="id" value="{{ s.pk }}">
+              <button class="btn btn-outline">{% if s.is_published %}Hide{% else %}Show{% endif %}</button>
+            </form>
+            <form method="post">{% csrf_token %}
+              <input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ s.pk }}">
+              <button class="btn btn-danger" data-confirm="Delete this sew-out photo? This cannot be undone.">Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="panel empty" style="padding:40px;grid-column:1/-1">No sew-outs yet — add your first photo on the right.</div>
+      {% endfor %}
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="panel-raised panel-pad stack" style="gap:14px" data-progress data-once novalidate>
+      {% csrf_token %}
+      <div class="panel-title mb-0">{% if item %}Edit sew-out{% else %}Add a sew-out{% endif %}</div>
+      {% include "partials/form_errors.html" %}
+      <div class="field">
+        <span class="label">Photo</span>
+        {% if item and item.image %}<img style="width:120px;border-radius:8px;margin-bottom:8px" src="{{ item.image.url }}" alt="">{% endif %}
+        {{ form.image }}{{ form.image.errors }}
+        <div class="help">Recommended 1000 × 1000 px (square). {% if item %}Leave empty to keep the current one.{% endif %}</div>
+      </div>
+      {% include "partials/field.html" with field=form.title hide_required=True %}
+      {% include "partials/field.html" with field=form.client hide_required=True %}
+      {% include "partials/field.html" with field=form.details hide_required=True %}
+      {% include "partials/field.html" with field=form.sort_order %}
+      <label class="checkbox">{{ form.is_published }} Show on the Testimonials page</label>
+      <div class="row" style="gap:10px">
+        <button class="btn btn-gold">{% if item %}Save changes{% else %}Add sew-out{% endif %}</button>
+        {% if item %}<a class="btn btn-outline" href="{% url 'console:sewouts' %}">Cancel</a>{% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

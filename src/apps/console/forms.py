@@ -12,6 +12,7 @@ from apps.core.models import (
     PageService,
     PortfolioCategory,
     PortfolioItem,
+    SewOut,
     SiteImage,
     SiteSettings,
     Testimonial,
@@ -198,7 +199,7 @@ class TestimonialForm(forms.ModelForm):
 
     class Meta:
         model = Testimonial
-        fields = ["quote", "name", "role", "image", "rating", "is_published", "sort_order"]
+        fields = ["quote", "name", "role", "image", "work_photo", "rating", "is_published", "sort_order"]
         widgets = {
             "quote": forms.Textarea(
                 attrs={"rows": 5, "placeholder": "What the customer said — no quote marks needed."}
@@ -212,6 +213,13 @@ class TestimonialForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["image"].required = False
+        self.fields["work_photo"].required = False
+
+    def clean_work_photo(self):
+        photo = self.cleaned_data.get("work_photo")
+        if photo and hasattr(photo, "size"):
+            validate_upload(photo, settings.IMAGE_EXTENSIONS, settings.PORTFOLIO_IMAGE_MAX_BYTES)
+        return photo
 
     def clean_image(self):
         image = self.cleaned_data.get("image")
@@ -224,6 +232,34 @@ class TestimonialForm(forms.ModelForm):
         if not 1 <= rating <= 5:
             raise forms.ValidationError("Choose a rating between 1 and 5 stars.")
         return rating
+
+
+class SewOutForm(forms.ModelForm):
+    """A client sew-out photo for the testimonials gallery."""
+
+    class Meta:
+        model = SewOut
+        fields = ["image", "title", "client", "details", "is_published", "sort_order"]
+        widgets = {
+            "title": forms.TextInput(attrs={"placeholder": "Left-chest logo on polo"}),
+            "client": forms.TextInput(attrs={"placeholder": "Stitch Perfect"}),
+            "details": forms.TextInput(attrs={"placeholder": "Pique polo · 3.5 in · 8,200 stitches"}),
+        }
+        labels = {"sort_order": "Order"}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["image"].required = self.instance.pk is None
+        self.fields["sort_order"].required = False
+
+    def clean_sort_order(self):
+        return self.cleaned_data.get("sort_order") or 0
+
+    def clean_image(self):
+        image = self.cleaned_data.get("image")
+        if image and hasattr(image, "size"):
+            validate_upload(image, settings.IMAGE_EXTENSIONS, settings.PORTFOLIO_IMAGE_MAX_BYTES)
+        return image
 
 
 class SiteSettingsForm(forms.ModelForm):

@@ -1,4 +1,4 @@
-# Deploy on a Namecheap VPS (Ubuntu + Docker + Caddy)
+# Deploy on a Namecheap VPS (Ubuntu or AlmaLinux + Docker + Caddy)
 
 You end up with: `https://yourdomain.com` served by Caddy (free auto-renewing HTTPS) → the Django app (Daphne) → PostgreSQL + Redis, all in Docker on your VPS. Nothing else needs installing by hand.
 
@@ -17,10 +17,11 @@ If the domain's nameservers are "Namecheap BasicDNS" (the default) this is all y
 ## 2. Prepare the server (once)
 ```bash
 ssh root@YOUR_VPS_IP
+# fresh server has no git yet:  Ubuntu: apt update && apt install -y git     AlmaLinux: dnf install -y git
 git clone https://github.com/tanveerhassangethib/scarlett-embroidery.git /opt/scarlett-embroidery
 cd /opt/scarlett-embroidery
 git checkout main
-bash deploy/setup-vps.sh        # Docker, firewall (22/80/443), swap, auto security updates
+bash deploy/setup-vps.sh        # Docker, make, firewall (22/80/443), swap, auto security updates (Ubuntu or AlmaLinux)
 ```
 
 ## 3. Configure

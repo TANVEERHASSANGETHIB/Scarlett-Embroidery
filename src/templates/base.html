@@ -6,6 +6,14 @@
   <title>{% block title %}Scarlett Embroidery — Digitizing, Vector Art & Patches{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}Hand-punched embroidery digitizing, clean vector art and custom patches — test-sewn before delivery.{% endblock %}">
   <meta name="theme-color" content="#f0a84c">
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Scarlett Embroidery">
+  <meta property="og:title" content="{% block og_title %}Scarlett Embroidery — Digitizing, Vector Art & Patches{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Hand-punched embroidery digitizing, clean vector art and custom patches — test-sewn before delivery.{% endblock %}">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/logo-wide.png' %}{% endblock %}">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
   <link rel="preload" href="{% static 'fonts/poppins-600.woff2' %}" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{% static 'css/site.css' %}">

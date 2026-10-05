@@ -204,3 +204,10 @@ def test_home_shows_every_published_review_in_a_carousel(client):
     assert body.count("carousel-item") == 5  # all five, not just the first three
     assert "Review number 4" in body
     assert "Not Shown" not in body
+
+
+def test_robots_and_sitemap(client, db):
+    r = client.get("/robots.txt")
+    assert r.status_code == 200 and b"Disallow: /console/" in r.content and b"sitemap.xml" in r.content
+    s = client.get("/sitemap.xml")
+    assert s.status_code == 200 and b"/services/embroidery/" in s.content

@@ -9,7 +9,7 @@ if _render_host:
     ALLOWED_HOSTS = [*ALLOWED_HOSTS, _render_host]  # noqa: F405
     CSRF_TRUSTED_ORIGINS = [*CSRF_TRUSTED_ORIGINS, f"https://{_render_host}"]  # noqa: F405
 
-# Where there is no nginx to serve /media/ (Render), let Django do it.
+# Where there is no Caddy to serve /media/ (Render), let Django do it.
 SERVE_MEDIA = env.bool("SERVE_MEDIA", default=False)
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

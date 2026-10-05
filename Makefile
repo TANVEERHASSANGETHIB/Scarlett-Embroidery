@@ -2,7 +2,6 @@ SHELL := /bin/sh
 -include .env
 WEB_PORT ?= 8000
 MAILPIT_PORT ?= 8025
-HTTP_PORT ?= 80
 .DEFAULT_GOAL := help
 
 COMPOSE      := docker compose
@@ -85,18 +84,18 @@ clean: ## Stop dev stack and DELETE its volumes (database, uploads)
 prod-build: ## Build production images
 	$(COMPOSE_PROD) build
 
-prod-up: ## Start production stack behind nginx
+prod-up: ## Start production stack (Caddy + HTTPS)
 	$(COMPOSE_PROD) up -d --build
 	@echo ""
-	@echo "Site:    http://localhost:$(HTTP_PORT)      (nginx — NOT the dev port)"
-	@echo "Console: http://localhost:$(HTTP_PORT)/console/"
+	@echo "Site:    https://$(DOMAIN)"
+	@echo "Console: https://$(DOMAIN)/console/"
 	@echo "First run on a fresh database? 'make prod-seed' creates the pricing and the admin login."
 
 prod-down: ## Stop production stack
 	$(COMPOSE_PROD) down
 
 prod-logs: ## Tail production logs
-	$(COMPOSE_PROD) logs -f web nginx
+	$(COMPOSE_PROD) logs -f web caddy
 
 prod-migrate: ## Apply migrations in production
 	$(COMPOSE_PROD) exec web python manage.py migrate

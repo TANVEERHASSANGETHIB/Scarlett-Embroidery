@@ -1,0 +1,22 @@
+# Caddy gets and renews the HTTPS certificate by itself. DOMAIN comes from .env.
+{$DOMAIN} {
+	encode zstd gzip
+	request_body {
+		max_size 110MB
+	}
+
+	# Public uploads only. Customer order files live in private_media and are
+	# streamed by Django after a permission check.
+	handle_path /media/* {
+		root * /srv/media
+		header Cache-Control "public, max-age=2592000"
+		file_server
+	}
+
+	# Everything else (pages, static files, /ws/ live chat) goes to Django.
+	reverse_proxy web:8000
+}
+
+www.{$DOMAIN} {
+	redir https://{$DOMAIN}{uri} permanent
+}

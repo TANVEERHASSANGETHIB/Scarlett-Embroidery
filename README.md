@@ -115,7 +115,7 @@ There is no payment gateway. Orders are quoted and invoiced: the admin sets the 
 
 ```
 Dockerfile, docker-compose.yml, docker-compose.prod.yml, Makefile
-docker/            entrypoint (waits for DB and Redis, runs migrations) and nginx config
+docker/            entrypoint (waits for DB and Redis, runs migrations) and the Caddy config
 requirements/      base / dev / prod
 src/
   config/          settings (base, dev, prod, test), urls, asgi (HTTP + WebSocket routing)
@@ -143,13 +143,13 @@ src/
 3. Run:
 
 ```bash
-make prod-up       # daphne (ASGI) behind nginx on port 80 (change with HTTP_PORT)
+make prod-up       # daphne (ASGI) behind Caddy with automatic HTTPS (80/443)
 make prod-seed     # pricing + first admin (no demo content)
 ```
 
 The production stack listens on **http://localhost** (port 80), not the dev port, and keeps its **own database** — separate from development. On a fresh production database nothing exists yet, so `make prod-seed` is required before you can sign in to the console; without it the login will reject every password because no admin account exists. Content (portfolio, reviews, settings) is likewise per-stack.
 
-In production, nginx serves public media and proxies `/ws/` WebSockets. Static files are served by WhiteNoise, and customer files are streamed only after a permission check. Put TLS in front of nginx, for example with a load balancer, Cloudflare or certbot.
+In production, Caddy serves public media, proxies `/ws/` WebSockets and gets the HTTPS certificate. Static files are served by WhiteNoise, and customer files are streamed only after a permission check.
 
 ## Recent additions
 

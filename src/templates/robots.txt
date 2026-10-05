@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /console/
+Disallow: /django-admin/
+Disallow: /account/
+Disallow: /order/
+Disallow: /chat/
+
+Sitemap: {{ request.scheme }}://{{ request.get_host }}/sitemap.xml

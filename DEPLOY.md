@@ -1,3 +1,5 @@
+> **Namecheap VPS?** Follow [DEPLOY_NAMECHEAP.md](DEPLOY_NAMECHEAP.md) — it covers DNS, server setup, HTTPS and backups step by step.
+
 # Deploying Scarlett Embroidery to production
 
 Needs a Linux server (Ubuntu 22.04+ is fine) with Docker and Docker Compose, and a domain pointing at the server's IP.
@@ -20,12 +22,8 @@ make prod-seed      # FIRST RUN ONLY: pricing, patch categories, first admin
 No `make`? Use: `docker compose -f docker-compose.prod.yml up -d --build`, then
 `docker compose -f docker-compose.prod.yml exec web python manage.py seed --no-demo`.
 
-## 3. HTTPS (required for logins and chat)
-Nginx in this stack listens on plain HTTP. Put TLS in front of it, either:
-- **Cloudflare** (easiest): point the domain at the server through Cloudflare, SSL mode "Full"; or
-- **Caddy / certbot** on the server proxying to port 80.
-
-When https://yourdomain.com works, make sure `.env` has `SECURE_SSL_REDIRECT=True` and `SECURE_COOKIES=True`, then `make prod-up` again. After a few days raise `SECURE_HSTS_SECONDS` to `31536000`.
+## 3. HTTPS
+Caddy (part of the stack) gets the certificate automatically once `DOMAIN` in `.env` points at the server and ports 80/443 are open. Keep `SECURE_SSL_REDIRECT=True` and `SECURE_COOKIES=True`. After a few days raise `SECURE_HSTS_SECONDS` to `31536000`.
 
 ## 4. Check it
 ```bash

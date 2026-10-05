@@ -1046,3 +1046,10 @@ a:hover { color: var(--gold-mid); }
   .proof-strip span { font-size: 10px; letter-spacing: .04em; }
   .sewout-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
 }
+
+/* ── Sign-in / sign-up: white logo plate and a boxed form card ─────────── */
+.auth-logo { background: var(--card); border: 1px solid var(--ink-line); box-shadow: 0 6px 20px #0a0a0a14; padding: 10px 18px; }
+.auth-grid { align-items: stretch; }
+.auth-form { align-self: center; margin: 40px auto; max-width: 500px; background: var(--card); border: 1px solid var(--ink-line); border-radius: var(--radius-lg); box-shadow: 0 14px 40px #0a0a0a1a; padding: 36px 36px 32px; }
+@media (max-width: 960px) { .auth-form { margin: 28px 16px 40px; max-width: none; width: auto; padding: 26px 20px; } }
+.tab { display: flex; align-items: center; justify-content: center; }

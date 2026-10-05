@@ -4,8 +4,6 @@
 **/*.pyc
 .pytest_cache
 .ruff_cache
-Figmas
-Notess
 media
 private_media
 staticfiles

@@ -79,12 +79,15 @@ Nothing is shown until an address is entered. The map loads from Google, so it a
 
 ## Order alert emails
 
-When a customer places an order, an alert is emailed with their details, the full specification (including the patch category, size, quantity, backing and shipping address) and a link to the order in the console. Replying to the alert goes straight to the customer.
+Order emails are routed by purpose:
+- **Order details and artwork** — `scarletsembroidery@gmail.com` receives the complete order specification in a structured email, the submitted artwork as attachments, and a link to the order in the console. Replies go to the customer.
+- **New-order notice** — `info@sedigitizer.com` receives a short notice when an order is submitted. This notice can be switched off without stopping delivery of the full order details.
+- **Contact form** — `support@sedigitizer.com` receives the form submission and can reply directly to the sender.
 
 Manage this in **Console → Settings → Notifications**:
-- **Email me about new orders** — turn alerts on or off.
-- **Order alerts go to** — one or more addresses, separated by commas. No config file editing needed.
-- **Send test email** — delivers a sample alert so you can confirm it arrives.
+- **New-order notice recipients**, **Order details and artwork recipients**, and **Contact form recipients** — configure each route independently; separate multiple addresses with commas.
+- **Email me about new orders** — turn the short notice on or off; full order details continue to be sent.
+- **Send yourself a test** — delivers a sample notice to the new-order notice recipients.
 
 The tab also shows which mail server is in use, the sending account and whether the password is stored — but never the password itself.
 

@@ -184,13 +184,17 @@ def test_notification_recipients_can_be_edited(client, staff):
         {
             "section": "notifications",
             "notify_on_new_order": "on",
-            "order_notification_emails": " shop@gmail.com ,  second@shop.com ",
+            "order_notification_emails": " info@shop.com ",
+            "order_details_emails": " shop@gmail.com ,  second@shop.com ",
+            "contact_notification_emails": " support@shop.com ",
         },
     )
     assert resp.status_code == 302
     assert resp.url.endswith("tab=notifications")
     site = SiteSettings.load()
-    assert site.notification_recipients == ["shop@gmail.com", "second@shop.com"]
+    assert site.notification_recipients == ["info@shop.com"]
+    assert site.order_details_recipients == ["shop@gmail.com", "second@shop.com"]
+    assert site.contact_recipients == ["support@shop.com"]
     assert site.notify_on_new_order
 
 
@@ -198,7 +202,13 @@ def test_invalid_recipient_is_rejected(client, staff):
     client.force_login(staff)
     resp = client.post(
         reverse("console:settings"),
-        {"section": "notifications", "notify_on_new_order": "on", "order_notification_emails": "nope"},
+        {
+            "section": "notifications",
+            "notify_on_new_order": "on",
+            "order_notification_emails": "nope",
+            "order_details_emails": "shop@gmail.com",
+            "contact_notification_emails": "support@shop.com",
+        },
     )
     assert resp.status_code == 200
     assert "is not a valid email address" in resp.content.decode()
@@ -208,21 +218,27 @@ def test_alerts_on_requires_an_address(client, staff):
     client.force_login(staff)
     resp = client.post(
         reverse("console:settings"),
-        {"section": "notifications", "notify_on_new_order": "on", "order_notification_emails": ""},
+        {
+            "section": "notifications",
+            "notify_on_new_order": "on",
+            "order_notification_emails": "",
+            "order_details_emails": "shop@gmail.com",
+            "contact_notification_emails": "support@shop.com",
+        },
     )
     assert resp.status_code == 200
-    assert "Add at least one address" in resp.content.decode()
+    assert "Add at least one recipient email address" in resp.content.decode()
 
 
 def test_send_test_email(client, staff):
     site = SiteSettings.load()
-    site.order_notification_emails = "shop@gmail.com"
+    site.order_notification_emails = "info@shop.com"
     site.save()
     client.force_login(staff)
     resp = client.post(reverse("console:settings"), {"section": "test_email"}, follow=True)
     assert resp.status_code == 200
-    assert "Test email sent to shop@gmail.com" in resp.content.decode()
-    assert mail.outbox[-1].to == ["shop@gmail.com"]
+    assert "Test email sent to info@shop.com" in resp.content.decode()
+    assert mail.outbox[-1].to == ["info@shop.com"]
 
 
 def test_settings_never_exposes_the_mail_password(client, staff, settings):

@@ -58,10 +58,23 @@ class SiteSettings(models.Model):
         help_text="Send an alert whenever a customer places an order.",
     )
     order_notification_emails = models.CharField(
-        "order alerts go to",
+        "new-order notice recipients",
         max_length=500,
         blank=True,
-        help_text="Where new-order alerts are sent. Separate several addresses with commas.",
+        default="info@sedigitizer.com",
+        help_text="Receives a short notice when a new order is submitted. Separate addresses with commas.",
+    )
+    order_details_emails = models.CharField(
+        "order details and artwork recipients",
+        max_length=500,
+        default="scarletsembroidery@gmail.com",
+        help_text="Receives the full order specification and submitted artwork files. Separate addresses with commas.",
+    )
+    contact_notification_emails = models.CharField(
+        "contact form recipients",
+        max_length=500,
+        default="support@sedigitizer.com",
+        help_text="Receives contact form submissions. Separate addresses with commas.",
     )
 
     class Meta:
@@ -118,11 +131,21 @@ class SiteSettings(models.Model):
 
     @property
     def notification_recipients(self):
-        """Addresses that receive new-order and order-activity alerts."""
+        """Addresses that receive short new-order notices."""
         from django.conf import settings as django_settings
 
         addresses = [a.strip() for a in self.order_notification_emails.split(",") if a.strip()]
         return addresses or [django_settings.STAFF_NOTIFY_EMAIL]
+
+    @property
+    def order_details_recipients(self):
+        """Addresses that receive full order details and order-activity alerts."""
+        return [a.strip() for a in self.order_details_emails.split(",") if a.strip()]
+
+    @property
+    def contact_recipients(self):
+        """Addresses that receive contact form submissions."""
+        return [a.strip() for a in self.contact_notification_emails.split(",") if a.strip()]
 
     @classmethod
     def load(cls):

@@ -81,7 +81,7 @@ def _deliver(message, template, recipients):
     return False
 
 
-def send_templated_email(subject, template, context, to, reply_to=None, background=None):
+def send_templated_email(subject, template, context, to, reply_to=None, background=None, attachments=None):
     """Render emails/<template>.txt (+ optional .html) and send.
 
     Delivery runs in a background thread by default so a slow mail server never
@@ -101,6 +101,8 @@ def send_templated_email(subject, template, context, to, reply_to=None, backgrou
         to=recipients,
         reply_to=[reply_to] if reply_to else None,
     )
+    for attachment in attachments or []:
+        message.attach(*attachment)
     try:
         html_body = render_to_string(f"emails/{template}.html", ctx)
         message.attach_alternative(html_body, "text/html")

@@ -1,0 +1,6 @@
+A new {% if order.is_quote %}quote request{% else %}order{% endif %} has been submitted.
+
+Reference: {{ order.number }}
+Service: {{ order.get_service_display }}
+
+Open the console to review it: {{ url }}

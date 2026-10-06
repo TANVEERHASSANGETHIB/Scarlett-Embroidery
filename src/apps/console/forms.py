@@ -332,28 +332,45 @@ class AdminPasswordChangeForm(PasswordChangeForm):
 
 
 class NotificationSettingsForm(forms.ModelForm):
-    """Who gets told when an order comes in."""
+    """Where new-order notices, full order details, and contact messages are sent."""
 
     class Meta:
         model = SiteSettings
-        fields = ["notify_on_new_order", "order_notification_emails"]
+        fields = [
+            "notify_on_new_order",
+            "order_notification_emails",
+            "order_details_emails",
+            "contact_notification_emails",
+        ]
         widgets = {
-            "order_notification_emails": forms.TextInput(
-                attrs={"placeholder": "you@gmail.com, team@yourshop.com", "autocomplete": "off"}
+            field: forms.TextInput(
+                attrs={"placeholder": "you@example.com, team@example.com", "autocomplete": "off"}
             )
+            for field in ("order_notification_emails", "order_details_emails", "contact_notification_emails")
         }
 
-    def clean_order_notification_emails(self):
-        raw = self.cleaned_data["order_notification_emails"]
+    def _clean_recipients(self, field_name, required):
+        raw = self.cleaned_data[field_name]
         addresses = [a.strip() for a in raw.split(",") if a.strip()]
         for address in addresses:
             try:
                 validate_email(address)
             except forms.ValidationError as exc:
                 raise forms.ValidationError(f"“{address}” is not a valid email address.") from exc
-        if self.cleaned_data.get("notify_on_new_order") and not addresses:
-            raise forms.ValidationError("Add at least one address, or turn new-order alerts off.")
+        if required and not addresses:
+            raise forms.ValidationError("Add at least one recipient email address.")
         return ", ".join(addresses)
+
+    def clean_order_notification_emails(self):
+        return self._clean_recipients(
+            "order_notification_emails", required=self.cleaned_data.get("notify_on_new_order", True)
+        )
+
+    def clean_order_details_emails(self):
+        return self._clean_recipients("order_details_emails", required=True)
+
+    def clean_contact_notification_emails(self):
+        return self._clean_recipients("contact_notification_emails", required=True)
 
 
 def _row_widgets(**overrides):

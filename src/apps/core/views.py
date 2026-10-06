@@ -386,7 +386,7 @@ def contact(request):
                 f"New contact message: {msg.subject or msg.name}",
                 "contact_staff",
                 {"msg": msg},
-                SiteSettings.load().notification_recipients,
+                SiteSettings.load().contact_recipients,
                 reply_to=msg.email,
             )
             messages.success(request, "Message sent. A digitizer will reply within 30 minutes.")

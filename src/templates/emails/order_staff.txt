@@ -1,18 +1,34 @@
-{% if order.is_quote %}New QUOTE REQUEST {{ order.number }} — reply with a price{% else %}New order {{ order.number }}{% endif %}
+{% if order.is_quote %}Quote request{% else %}Order{% endif %} {{ order.number }} — full submission
 
-Customer: {{ order.contact_name }} <{{ order.contact_email }}>{% if order.customer.company %} · {{ order.customer.company }}{% endif %}
+CUSTOMER
+Name: {{ order.contact_name }}
+Email: {{ order.contact_email }}
+{% if order.customer.company %}Company: {{ order.customer.company }}
+{% endif %}
+ORDER
+Reference: {{ order.number }}
 Design: {{ order.design_name }}
 Service: {{ order.get_service_display }}
-{% if order.is_patch %}Patch: {{ order.patch.category.name }} · {{ order.patch.quantity }} pcs · {{ order.patch.get_backing_display }} · {{ order.patch.size_display }}
-Ship to:
+{% if order.is_patch %}Patch category: {{ order.patch.category.name }}
+Quantity: {{ order.patch.quantity }}
+Backing: {{ order.patch.get_backing_display }}
+Size: {{ order.patch.size_display }}
+Shipping address:
 {% for line in order.patch.address_lines %}  {{ line }}
 {% endfor %}{% else %}Design type: {{ order.tier.name }}
 Turnaround: {{ order.turnaround.name }} (due {{ order.due_at|date:"d M H:i" }})
-Fabric / placement: {{ order.fabric|default:"-" }} / {{ order.placement|default:"-" }} {{ order.size_display }}
-Formats: {{ order.formats_display }}
-{% endif %}Estimate: {% if order.estimate is not None %}${{ order.estimate }}{% else %}-{% endif %}
+Fabric: {{ order.fabric|default:"-" }}
+Placement: {{ order.placement|default:"-" }}
+Size: {{ order.size_display|default:"-" }}
+Requested formats: {{ order.formats_display }}
+{% endif %}Estimate: {% if order.estimate is not None %}${{ order.estimate }}{% else %}Quote required{% endif %}
 
-Instructions:
+INSTRUCTIONS
 {{ order.instructions|default:"(none)" }}
 
-Open in console: {{ url }}
+SUBMITTED ARTWORK
+{% for file in artwork %}- {{ file.original_name }} ({{ file.size }} bytes)
+{% empty %}(No artwork files attached)
+{% endfor %}
+
+Open order in console: {{ url }}

@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 import pytest
-from django.conf import settings as django_settings
 from django.core import mail
 from django.test import Client
 from django.urls import reverse
@@ -90,7 +89,22 @@ def test_place_digitizing_order(client, customer, pricing, artwork, django_captu
     assert order.due_at is not None
     assert order.files.filter(kind=OrderFile.Kind.ARTWORK).count() == 2
     assert order.events.count() == 1
-    assert {m.to[0] for m in mail.outbox} == {"jane@shop.com", django_settings.STAFF_NOTIFY_EMAIL}
+    details = next(m for m in mail.outbox if "Order details" in m.subject)
+    notice = next(m for m in mail.outbox if "New order received" in m.subject)
+    assert details.to == ["scarletsembroidery@gmail.com"]
+    assert details.reply_to == ["jane@shop.com"]
+    assert "Jane Whitfield" in details.body
+    assert "Full back" in details.body
+    assert "DST, PES" in details.body
+    assert "table" in details.alternatives[0][0]
+    assert [attachment[0] for attachment in details.attachments] == ["crest.png", "crest.ai"]
+    assert notice.to == ["info@sedigitizer.com"]
+    assert notice.body.count("Jane Whitfield") == 0
+    assert notice.body.count("crest.png") == 0
+    assert {m.to[0] for m in mail.outbox if m.to != ["jane@shop.com"]} == {
+        "scarletsembroidery@gmail.com",
+        "info@sedigitizer.com",
+    }
 
 
 def test_digitizing_order_requires_tier_and_formats(client, customer, pricing, artwork):
@@ -188,26 +202,31 @@ def test_customer_requests_revision(client, customer, pricing, artwork):
     assert order.events.filter(message="Thicker outline").exists()
 
 
-def test_alert_goes_to_the_address_configured_in_the_console(
+def test_order_details_and_new_order_notice_use_separate_recipients(
     client, customer, pricing, artwork, django_capture_on_commit_callbacks
 ):
     site = SiteSettings.load()
-    site.order_notification_emails = "shop@gmail.com, manager@shop.com"
+    site.order_details_emails = "shop@gmail.com, manager@shop.com"
+    site.order_notification_emails = "info@shop.com"
     site.save()
 
     client.force_login(customer)
     with django_capture_on_commit_callbacks(execute=True):
         client.post(reverse("orders:place"), _digitizing_payload(pricing, artwork))
 
-    alert = next(m for m in mail.outbox if "New order" in m.subject)
-    assert alert.to == ["shop@gmail.com", "manager@shop.com"]
-    assert alert.reply_to == ["jane@shop.com"]  # replying reaches the customer
+    details = next(m for m in mail.outbox if "Order details" in m.subject)
+    notice = next(m for m in mail.outbox if "New order received" in m.subject)
+    assert details.to == ["shop@gmail.com", "manager@shop.com"]
+    assert details.reply_to == ["jane@shop.com"]  # replying reaches the customer
+    assert notice.to == ["info@shop.com"]
     order = Order.objects.get()
-    assert order.number in alert.subject and order.design_name in alert.subject
-    assert order.design_name in alert.body
+    assert order.number in details.subject and order.design_name in details.body
+    assert order.design_name not in notice.body
 
 
-def test_alerts_can_be_switched_off(client, customer, pricing, artwork, django_capture_on_commit_callbacks):
+def test_short_notice_can_be_switched_off_without_suppressing_order_details(
+    client, customer, pricing, artwork, django_capture_on_commit_callbacks
+):
     site = SiteSettings.load()
     site.notify_on_new_order = False
     site.order_notification_emails = "shop@gmail.com"
@@ -217,7 +236,8 @@ def test_alerts_can_be_switched_off(client, customer, pricing, artwork, django_c
     with django_capture_on_commit_callbacks(execute=True):
         client.post(reverse("orders:place"), _digitizing_payload(pricing, artwork))
 
-    assert not [m for m in mail.outbox if "New order" in m.subject]
+    assert not [m for m in mail.outbox if "New order received" in m.subject]
+    assert [m for m in mail.outbox if "Order details" in m.subject]
     assert [m for m in mail.outbox if m.to == ["jane@shop.com"]]  # customer still gets their copy
 
 
@@ -232,10 +252,12 @@ def test_patch_order_alert_includes_address_and_patch_details(
     with django_capture_on_commit_callbacks(execute=True):
         client.post(reverse("orders:place"), _patch_payload(pricing, artwork))
 
-    alert = next(m for m in mail.outbox if "New order" in m.subject)
-    assert "Rubber patch" in alert.body
-    assert "12 Loom St" in alert.body
-    assert "Gold border, merrowed edge" in alert.body
+    details = next(m for m in mail.outbox if "Order details" in m.subject)
+    assert "Rubber patch" in details.body
+    assert "12 Loom St" in details.body
+    assert "Gold border, merrowed edge" in details.body
+    notice = next(m for m in mail.outbox if "New order received" in m.subject)
+    assert "12 Loom St" not in notice.body
 
 
 # ── Guests: fill in first, sign in to send ───────────────

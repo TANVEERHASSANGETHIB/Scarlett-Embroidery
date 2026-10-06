@@ -73,7 +73,7 @@
           <header class="settings-card-head">
             <div>
               <h2 class="settings-card-title">Order alerts</h2>
-              <p class="settings-card-sub">We email you the moment a customer places an order, with their details, specs and a link to the order.</p>
+              <p class="settings-card-sub">Route full order details and artwork, short new-order notices, and contact form submissions to separate inboxes.</p>
             </div>
             <span class="badge {% if email_status.live %}badge-gold{% else %}badge-muted{% endif %}">
               {% if email_status.live %}Live email{% else %}Test inbox{% endif %}
@@ -98,10 +98,12 @@
               <span class="switch-track" aria-hidden="true"></span>
               <span class="switch-text">
                 <strong>Email me about new orders</strong>
-                <small>Turn off to stop new-order alerts. Proof and delivery emails to customers are unaffected.</small>
+                <small>Turn off only the short new-order notice. Full order details and artwork are still sent to their recipient.</small>
               </span>
             </label>
             {% include "partials/field.html" with field=notify_form.order_notification_emails hide_required=True %}
+            {% include "partials/field.html" with field=notify_form.order_details_emails hide_required=True %}
+            {% include "partials/field.html" with field=notify_form.contact_notification_emails hide_required=True %}
             {% if recipients %}
             <div class="chips" style="margin-top:-4px">
               {% for r in recipients %}<span class="chip" style="cursor:default">{{ r }}</span>{% endfor %}

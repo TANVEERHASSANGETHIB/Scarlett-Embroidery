@@ -57,7 +57,9 @@ def test_contact_form_saves_and_notifies(client, django_capture_on_commit_callba
     assert resp.status_code == 302
     assert ContactMessage.objects.count() == 1
     assert len(mail.outbox) == 1
+    assert mail.outbox[0].to == ["support@sedigitizer.com"]
     assert mail.outbox[0].reply_to == ["jane@shop.com"]
+    assert "3.5in DST please" in mail.outbox[0].body
 
 
 def test_contact_honeypot_blocks_spam(client):

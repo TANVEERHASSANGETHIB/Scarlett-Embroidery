@@ -178,8 +178,8 @@ EMAIL_RETRY_DELAY_SECONDS = env.int("EMAIL_RETRY_DELAY_SECONDS", default=3)
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="Scarlett Embroidery <no-reply@sedigitizer.com>")
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
-# Fallback recipient for order alerts; the live value is editable in the console.
-STAFF_NOTIFY_EMAIL = env("STAFF_NOTIFY_EMAIL", default="orders@sedigitizer.com")
+# Fallback recipient for short new-order notices; live recipients are editable in the console.
+STAFF_NOTIFY_EMAIL = env("STAFF_NOTIFY_EMAIL", default="info@sedigitizer.com")
 
 # Email verification (6-digit code)
 VERIFICATION_CODE_TTL_MINUTES = 15

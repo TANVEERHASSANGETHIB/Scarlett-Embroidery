@@ -1,3 +1,6 @@
+import mimetypes
+import os
+
 from django.conf import settings
 from django.db import transaction
 from django.urls import reverse
@@ -68,8 +71,8 @@ def create_order(user, order_form, patch_form=None, draft=None, is_quote=False):
 
 
 def staff_recipients():
-    """Who gets order alerts — configured in the admin console (Settings -> Notifications)."""
-    return SiteSettings.load().notification_recipients
+    """Who gets full order details and order-activity alerts."""
+    return SiteSettings.load().order_details_recipients
 
 
 def order_url(order, staff=False):
@@ -78,22 +81,41 @@ def order_url(order, staff=False):
 
 
 def notify_order_created(order_id):
-    order = Order.objects.select_related("customer", "tier", "turnaround", "patch__category").get(pk=order_id)
+    order = (
+        Order.objects.select_related("customer", "tier", "turnaround", "patch__category")
+        .prefetch_related("files")
+        .get(pk=order_id)
+    )
+    artwork = [file for file in order.files.all() if file.kind == OrderFile.Kind.ARTWORK]
+    attachments = []
+    for file in artwork:
+        with file.file.open("rb") as uploaded_file:
+            content = uploaded_file.read()
+        filename = os.path.basename(file.original_name.replace("\\", "/")) or "artwork"
+        mimetype = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+        attachments.append((filename, content, mimetype))
+
+    site = SiteSettings.load()
     send_templated_email(
         f"Quote request {order.number} received" if order.is_quote else f"Order {order.number} received",
         "order_received",
         {"order": order, "url": order_url(order)},
         order.contact_email,
     )
-    site = SiteSettings.load()
+    send_templated_email(
+        f"Order details {order.number}" if not order.is_quote else f"Quote request details {order.number}",
+        "order_staff",
+        {"order": order, "url": order_url(order, staff=True), "artwork": artwork},
+        site.order_details_recipients,
+        reply_to=order.contact_email,
+        attachments=attachments,
+    )
     if site.notify_on_new_order:
         send_templated_email(
-            f"New {'quote request' if order.is_quote else 'order'} {order.number} · "
-            f"{order.get_service_display()} · {order.design_name}",
-            "order_staff",
+            f"New {'quote request' if order.is_quote else 'order'} received: {order.number}",
+            "order_notification",
             {"order": order, "url": order_url(order, staff=True)},
             site.notification_recipients,
-            reply_to=order.contact_email,
         )
 
 

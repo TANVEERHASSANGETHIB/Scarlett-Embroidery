@@ -97,6 +97,7 @@ def test_place_digitizing_order(client, customer, pricing, artwork, django_captu
     assert "Full back" in details.body
     assert "DST, PES" in details.body
     assert "table" in details.alternatives[0][0]
+    assert "padding:4px 8px" in details.alternatives[0][0]
     assert [attachment[0] for attachment in details.attachments] == ["crest.png", "crest.ai"]
     assert notice.to == ["info@sedigitizer.com"]
     assert notice.body.count("Jane Whitfield") == 0

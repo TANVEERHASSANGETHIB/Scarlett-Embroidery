@@ -8,34 +8,34 @@
       <h2 style="font-size:16px">Customer</h2>
       <table style="width:100%;border-collapse:collapse">
         <tbody>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Name</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.contact_name }}</td></tr>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Email</th><td style="padding:8px;border-bottom:1px solid #eee"><a href="mailto:{{ order.contact_email }}">{{ order.contact_email }}</a></td></tr>
-          {% if order.customer.company %}<tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Company</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.customer.company }}</td></tr>{% endif %}
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Name</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.contact_name }}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Email</th><td style="padding:4px 8px;border-bottom:1px solid #eee"><a href="mailto:{{ order.contact_email }}">{{ order.contact_email }}</a></td></tr>
+          {% if order.customer.company %}<tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Company</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.customer.company }}</td></tr>{% endif %}
         </tbody>
       </table>
       <h2 style="font-size:16px">Order details</h2>
       <table style="width:100%;border-collapse:collapse">
         <tbody>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Reference</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.number }}</td></tr>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Design</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.design_name }}</td></tr>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Service</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.get_service_display }}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Reference</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.number }}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Design</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.design_name }}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Service</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.get_service_display }}</td></tr>
           {% if order.is_patch %}
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Patch category</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.patch.category.name }}</td></tr>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Quantity</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.patch.quantity }}</td></tr>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Backing</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.patch.get_backing_display }}</td></tr>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Size</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.patch.size_display }}</td></tr>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Shipping address</th><td style="padding:8px;border-bottom:1px solid #eee">{% for line in order.patch.address_lines %}{{ line }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Patch category</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.patch.category.name }}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Quantity</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.patch.quantity }}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Backing</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.patch.get_backing_display }}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Size</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.patch.size_display }}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Shipping address</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{% for line in order.patch.address_lines %}{{ line }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</td></tr>
           {% else %}
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Design type</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.tier.name }}</td></tr>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Turnaround</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.turnaround.name }} (due {{ order.due_at|date:"d M H:i" }})</td></tr>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Fabric</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.fabric|default:"-" }}</td></tr>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Placement</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.placement|default:"-" }}</td></tr>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Size</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.size_display|default:"-" }}</td></tr>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Requested formats</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.formats_display }}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Design type</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.tier.name }}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Turnaround</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.turnaround.name }} (due {{ order.due_at|date:"d M H:i" }})</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Fabric</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.fabric|default:"-" }}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Placement</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.placement|default:"-" }}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Size</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.size_display|default:"-" }}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Requested formats</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.formats_display }}</td></tr>
           {% endif %}
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Estimate</th><td style="padding:8px;border-bottom:1px solid #eee">{% if order.estimate is not None %}${{ order.estimate }}{% else %}Quote required{% endif %}</td></tr>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Instructions</th><td style="padding:8px;border-bottom:1px solid #eee">{{ order.instructions|default:"(none)"|linebreaksbr }}</td></tr>
-          <tr><th align="left" style="padding:8px;border-bottom:1px solid #eee">Submitted artwork</th><td style="padding:8px;border-bottom:1px solid #eee">{% for file in artwork %}{{ file.original_name }} ({{ file.size }} bytes){% if not forloop.last %}<br>{% endif %}{% empty %}No artwork files{% endfor %}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Estimate</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{% if order.estimate is not None %}${{ order.estimate }}{% else %}Quote required{% endif %}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Instructions</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{{ order.instructions|default:"(none)"|linebreaksbr }}</td></tr>
+          <tr><th align="left" style="padding:4px 8px;border-bottom:1px solid #eee">Submitted artwork</th><td style="padding:4px 8px;border-bottom:1px solid #eee">{% for file in artwork %}{{ file.original_name }} ({{ file.size }} bytes){% if not forloop.last %}<br>{% endif %}{% empty %}No artwork files{% endfor %}</td></tr>
         </tbody>
       </table>
       <p style="margin:24px 0 0"><a href="{{ url }}" style="display:inline-block;padding:11px 16px;background:#24221f;color:#fff;text-decoration:none;border-radius:6px">Open in console</a></p>

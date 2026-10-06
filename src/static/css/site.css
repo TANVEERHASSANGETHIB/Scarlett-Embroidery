@@ -240,14 +240,14 @@ a.chip.is-active { background: var(--ink); color: #fff; border-color: var(--ink)
 
 /* ── Footer ────────────────────────────────────────────────────────────── */
 .site-footer { background: var(--night-deep); color: var(--bone); }
-.footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 44px; padding-block: 56px 28px; }
+.footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 44px; padding-block: 56px 12px; }
 .footer-logo { background: var(--bone); border-radius: var(--radius-md); padding: 8px; width: fit-content; margin-bottom: 16px; }
 .footer-logo img { width: 60px; height: 60px; object-fit: contain; }
 .footer-phone { display: inline-block; margin: 0 0 8px; font-size: 12px; color: var(--bone-70); }
 .footer-phone:hover { color: var(--gold); }
-.footer-payment { padding-block: 8px 28px; text-align: center; }
-.footer-payment .footer-col-title { margin-bottom: 10px; }
-.footer-payment img { display: block; width: min(100%, 380px); height: auto; margin-inline: auto; }
+.footer-payment { padding-block: 0 28px; text-align: center; }
+.footer-payment .footer-col-title { margin-bottom: 5px; }
+.footer-payment img { display: block; width: min(100%, 360px); height: auto; margin-inline: auto; }
 .footer-col-title { font-family: var(--f-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
 .footer-links { display: flex; flex-direction: column; gap: 9px; }
 .footer-links a { color: var(--bone-80); font-size: 14px; }
@@ -628,6 +628,7 @@ a.chip.is-active { background: var(--ink); color: #fff; border-color: var(--ink)
 
 /* ── Footer social icons ───────────────────────────────── */
 .social-links { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 0; padding: 0; }
+.site-footer .footer-grid > :first-child .social-links { justify-content: flex-start; gap: 8px; margin-top: 12px; }
 .social-links a { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border: 1px solid var(--night-line-strong); border-radius: 999px; color: var(--bone-80); transition: background .15s, color .15s, border-color .15s, transform .15s; }
 .social-links a:hover { background: var(--gold); border-color: var(--gold); color: var(--ink); transform: translateY(-2px); }
 .social-links a:focus-visible { background: var(--gold); border-color: var(--gold); color: var(--ink); outline: 2px solid var(--gold); outline-offset: 3px; }

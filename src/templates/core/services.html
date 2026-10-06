@@ -4,13 +4,18 @@
 {% block meta_description %}Embroidery digitizing, vector art and custom patches — see what each service includes and start an order or ask for a quote.{% endblock %}
 {% block content %}
 <section class="dark page-hero">
-  <div class="container">
-    <div class="kicker">Services</div>
-    <h1 class="display d-xl" style="margin-bottom:14px;max-width:20ch">Three services, one production standard</h1>
-    <p class="lead" style="margin-bottom:28px">Every file is built by hand and checked before it reaches you. Pick a service to see exactly what's included.</p>
-    <div class="row">
-      <a class="btn btn-gold btn-lg" href="{% url 'orders:place' %}">Place order</a>
-      <a class="btn btn-ghost-light btn-lg" href="{% url 'orders:quote' %}">Get a quote</a>
+  <div class="container services-overview-hero">
+    <div>
+      <div class="kicker">Services</div>
+      <h1 class="display d-xl" style="margin-bottom:14px;max-width:20ch">Three services, one production standard</h1>
+      <p class="lead" style="margin-bottom:28px">Every file is built by hand and checked before it reaches you. Pick a service to see exactly what's included.</p>
+      <div class="row">
+        <a class="btn btn-gold btn-lg" href="{% url 'orders:place' %}">Place order</a>
+        <a class="btn btn-ghost-light btn-lg" href="{% url 'orders:quote' %}">Get a quote</a>
+      </div>
+    </div>
+    <div class="services-overview-hero-image placeholder-img">
+      {% if photos.services_hero %}<img src="{{ photos.services_hero }}" alt="Scarlett Embroidery services">{% else %}{% include "partials/img_note.html" with label="services overview hero" size="1200 × 900 px" %}{% endif %}
     </div>
   </div>
 </section>
@@ -36,6 +41,8 @@
     {% endfor %}
   </div>
 </section>
+
+{% include "core/_pricing_section.html" %}
 
 <section class="band-dark">
   <div class="container" style="padding-block:72px">

@@ -1,0 +1,69 @@
+<section class="dark pricing-section" id="pricing">
+  <div class="container" style="padding-block:72px">
+    <div class="kicker">Pricing</div>
+    <div class="between mb-l">
+      <h2 class="display" style="font-size:clamp(36px,4vw,54px);max-width:24ch">Flat price per design. Nothing else added.</h2>
+      <p class="muted mb-0" style="font-size:14px;max-width:30ch">Quoted before we start, invoiced after you approve. Revisions inside scope are free.</p>
+    </div>
+
+    <div class="price-tabs" data-price-tabs>
+      <div class="price-tablist" role="tablist" aria-label="Pricing by service">
+        <button type="button" class="price-tab{% if active_pricing_tab == 'embroidery' %} is-active{% endif %}" role="tab" id="ptab-embroidery" aria-controls="pprice-embroidery" aria-selected="{% if active_pricing_tab == 'embroidery' %}true{% else %}false{% endif %}"{% if active_pricing_tab != 'embroidery' %} tabindex="-1"{% endif %} data-price-tab="embroidery">Embroidery</button>
+        <button type="button" class="price-tab{% if active_pricing_tab == 'vector' %} is-active{% endif %}" role="tab" id="ptab-vector" aria-controls="pprice-vector" aria-selected="{% if active_pricing_tab == 'vector' %}true{% else %}false{% endif %}"{% if active_pricing_tab != 'vector' %} tabindex="-1"{% endif %} data-price-tab="vector">Vector</button>
+        <button type="button" class="price-tab{% if active_pricing_tab == 'patches' %} is-active{% endif %}" role="tab" id="ptab-patches" aria-controls="pprice-patches" aria-selected="{% if active_pricing_tab == 'patches' %}true{% else %}false{% endif %}"{% if active_pricing_tab != 'patches' %} tabindex="-1"{% endif %} data-price-tab="patches">Patches</button>
+      </div>
+
+      <div class="price-panel" role="tabpanel" id="pprice-embroidery" aria-labelledby="ptab-embroidery" data-price-panel="embroidery"{% if active_pricing_tab != 'embroidery' %} hidden{% endif %}>
+        <div class="plan-grid">
+          {% for tier in digitizing_tiers %}
+          {% include "core/_plan_card.html" with plan=tier unit="" %}
+          {% empty %}<p class="muted">Pricing coming soon.</p>{% endfor %}
+        </div>
+        <div class="price-cta"><a class="btn btn-ghost-light btn-md" href="{% url 'core:service' 'embroidery' %}">About embroidery digitizing →</a></div>
+      </div>
+
+      <div class="price-panel" role="tabpanel" id="pprice-vector" aria-labelledby="ptab-vector" data-price-panel="vector"{% if active_pricing_tab != 'vector' %} hidden{% endif %}>
+        <div class="plan-grid">
+          {% for tier in vector_tiers %}
+          {% include "core/_plan_card.html" with plan=tier unit="per logo" %}
+          {% empty %}<p class="muted">Pricing coming soon.</p>{% endfor %}
+        </div>
+        <div class="price-cta"><a class="btn btn-ghost-light btn-md" href="{% url 'core:service' 'vector' %}">About vector art →</a></div>
+      </div>
+
+      <div class="price-panel" role="tabpanel" id="pprice-patches" aria-labelledby="ptab-patches" data-price-panel="patches"{% if active_pricing_tab != 'patches' %} hidden{% endif %}>
+        <div class="plan-grid">
+          {% for cat in patch_categories %}
+          <div class="plan{% if cat.is_highlighted %} is-featured{% endif %}">
+            <div class="plan-label">{{ cat.card_name }}</div>
+            <div class="plan-card">
+              {% if cat.ribbon %}<span class="plan-ribbon">{{ cat.ribbon }}</span>{% endif %}
+              <div class="plan-head">
+                <div class="plan-price"><span class="plan-currency">$</span>{{ cat.unit_price|floatformat:"-2" }}</div>
+                <div class="plan-tier">per patch</div>
+              </div>
+              <ul class="plan-features">
+                {% for feature in cat.feature_list %}
+                <li>{{ feature }}</li>
+                {% empty %}
+                <li>{{ cat.description }}</li>
+                {% endfor %}
+              </ul>
+              <div class="plan-foot">
+                <a class="btn btn-gold btn-md" href="{% url 'orders:place' %}?service=patches">Order now</a>
+              </div>
+            </div>
+          </div>
+          {% empty %}<p class="muted">Pricing coming soon.</p>{% endfor %}
+        </div>
+        <p class="price-note">{{ site.patch_min_quantity }}-piece minimum · {{ site.patch_production_note }} plus shipping.</p>
+        <div class="price-cta"><a class="btn btn-ghost-light btn-md" href="{% url 'core:service' 'patches' %}">About patches →</a></div>
+      </div>
+    </div>
+
+    <div class="row mt-l" style="gap:14px">
+      <a class="btn btn-gold btn-lg" href="{% url 'orders:quote' %}">Get an exact quote</a>
+      <span style="font-size:13px;color:#0a0a0a99">Free quote in under 30 minutes · ask anything on live chat</span>
+    </div>
+  </div>
+</section>

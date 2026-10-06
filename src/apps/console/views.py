@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, F, Max, Q, Sum
+from django.db.models import Count, Max, Q, Sum
 from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -249,11 +249,7 @@ def orders(request):
             | Q(customer__company__icontains=query)
             | Q(customer__full_name__icontains=query)
         )
-    if status == "open":
-        # Oldest unassigned first, then soonest due.
-        qs = qs.order_by(
-            F("assigned_to").asc(nulls_first=True), F("due_at").asc(nulls_last=True), "created_at"
-        )
+    qs = qs.order_by("-created_at")
     page = Paginator(qs, 25).get_page(request.GET.get("page"))
     return render(
         request,

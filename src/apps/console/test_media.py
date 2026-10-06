@@ -115,6 +115,22 @@ def test_site_photo_shows_on_the_about_page(client, staff, image_file):
     assert SiteImage.objects.filter(slot="about_hero").count() == 1
 
 
+def test_services_overview_hero_photo_is_admin_managed(client, staff, image_file):
+    assert "/media/site/" not in client.get(reverse("core:services")).content.decode()
+    client.force_login(staff)
+    media_page = client.get(reverse("console:media")).content.decode()
+    assert "Services — overview hero photo" in media_page
+    assert "1200 × 900 px" in media_page
+
+    client.post(
+        reverse("console:media"),
+        {"action": "site_image", "slot": "services_hero", "image": image_file("services.png")},
+    )
+    hero = SiteImage.objects.get(slot="services_hero")
+    body = client.get(reverse("core:services")).content.decode()
+    assert hero.image.url in body
+
+
 def test_non_images_are_refused(client, staff, artwork):
     client.force_login(staff)
     resp = client.post(

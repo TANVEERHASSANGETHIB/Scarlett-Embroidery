@@ -126,6 +126,7 @@ class PortfolioUploadForm(forms.Form):
 
     images = MultipleFileField(
         label="Photos",
+        help_text="Recommended dimensions: 1000 × 1000 px.",
         allowed_extensions=settings.IMAGE_EXTENSIONS,
         max_bytes=settings.PORTFOLIO_IMAGE_MAX_BYTES,
     )
@@ -182,6 +183,7 @@ class PortfolioItemForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["image"].required = False  # keep the current photo unless a new one is picked
+        self.fields["image"].help_text = "Recommended dimensions: 1000 × 1000 px."
         choices = category_choices()
         if self.instance.pk and self.instance.category not in {c[0] for c in choices}:
             choices.append((self.instance.category, self.instance.get_category_display()))

@@ -101,7 +101,7 @@
         <div class="dropzone" data-dropzone data-max-bytes="{{ max_image_bytes }}" style="padding:20px">
           <div>
             <div class="h4" style="margin-bottom:2px">Drop photos here</div>
-            <div class="muted" style="font-size:12.5px">JPG, PNG, WEBP or GIF — up to {{ max_image_bytes|filesizeformat }} each. Pick several at once.</div>
+            <div class="muted" style="font-size:12.5px">JPG, PNG, WEBP or GIF — up to {{ max_image_bytes|filesizeformat }} each. Recommended dimensions: 1000 × 1000 px. Pick several at once.</div>
           </div>
           <label class="btn btn-ink" data-browse for="{{ upload_form.images.id_for_label }}">Browse</label>
           {{ upload_form.images }}

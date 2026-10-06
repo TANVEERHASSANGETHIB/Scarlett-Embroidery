@@ -97,6 +97,8 @@ def place_order(request, quote=False):
             order_ok = form.is_valid()
             patch_ok = patch_form.is_valid() if is_patch else True
             if order_ok and patch_ok:
+                form.instance.client_ip = get_client_ip(request.META)
+                form.instance.client_country = request.META.get("HTTP_CF_IPCOUNTRY", "").strip()[:60]
                 order = create_order(
                     user, form, patch_form if is_patch else None, draft=draft, is_quote=quote
                 )

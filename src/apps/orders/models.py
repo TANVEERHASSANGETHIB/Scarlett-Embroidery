@@ -185,6 +185,13 @@ class Order(TimeStampedModel):
     contact_name = models.CharField("name", max_length=120)
     contact_email = models.EmailField("email")
     design_name = models.CharField("design name / PO reference", max_length=160)
+    client_ip = models.GenericIPAddressField("customer IP address", null=True, blank=True)
+    client_country = models.CharField(
+        "customer country code",
+        max_length=60,
+        blank=True,
+        help_text="Country code from the trusted Cloudflare request header, when available.",
+    )
 
     tier = models.ForeignKey(
         PricingTier,

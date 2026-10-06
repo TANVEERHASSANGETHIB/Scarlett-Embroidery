@@ -88,11 +88,12 @@
       <div>
         <div class="footer-logo"><img src="{% static 'img/logo-wide.png' %}" alt="Scarlett Embroidery" width="104" height="75"></div>
         <p class="muted" style="font-size:14px;max-width:34ch;color:var(--bone-70)">Embroidery digitizing, vector art and custom patches. Hand-punched files, test-sewn before delivery.</p>
+        {% if site.phone %}<a class="footer-phone mono" href="tel:{{ site.phone|urlencode }}">{{ site.phone }}</a>{% endif %}
         <div class="mono" style="font-size:12px;color:var(--bone-55)">{{ site.email }}</div>
         {% if site.social_links %}
         <ul class="social-links" aria-label="Social media">
           {% for key, label, link in site.social_links %}
-          <li><a href="{{ link }}" target="_blank" rel="noopener noreferrer" aria-label="{{ label }}" title="{{ label }}">{% include "partials/social_icon.html" with key=key %}</a></li>
+          <li><a class="social-{{ key }}" href="{{ link }}" target="_blank" rel="noopener noreferrer" aria-label="{{ label }}" title="{{ label }}">{% include "partials/social_icon.html" with key=key %}</a></li>
           {% endfor %}
         </ul>
         {% endif %}
@@ -125,6 +126,10 @@
           <a href="{% url 'core:terms' %}">Terms &amp; Conditions</a>
         </div>
       </div>
+    </div>
+    <div class="container footer-payment">
+      <div class="footer-col-title">Accepted payments</div>
+      <img src="{% static 'img/payment-methods.png' %}" alt="Visa, Mastercard, American Express, PayPal and Apple Pay">
     </div>
     <div class="footer-bottom">
       <div class="container">

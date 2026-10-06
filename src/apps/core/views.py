@@ -170,6 +170,15 @@ SERVICE_PAGES = {
 }
 
 
+def _pricing_context(active_tab="embroidery"):
+    return {
+        "digitizing_tiers": PricingTier.objects.filter(is_active=True, service=Service.DIGITIZING),
+        "vector_tiers": PricingTier.objects.filter(is_active=True, service=Service.VECTOR),
+        "patch_categories": PatchCategory.objects.filter(is_active=True),
+        "active_pricing_tab": active_tab,
+    }
+
+
 def _services_overview():
     tiers = list(PricingTier.objects.filter(is_active=True))
     patch_from = PatchCategory.objects.filter(is_active=True).order_by("unit_price").first()
@@ -268,9 +277,7 @@ def home(request):
         "services": _services_overview(),
         "showcase": showcase,
         "steps": STEPS,
-        "digitizing_tiers": PricingTier.objects.filter(is_active=True, service=Service.DIGITIZING),
-        "vector_tiers": PricingTier.objects.filter(is_active=True, service=Service.VECTOR),
-        "patch_categories": PatchCategory.objects.filter(is_active=True),
+        **_pricing_context(),
         "why_us": WHY_US,
         "testimonials": Testimonial.objects.filter(is_published=True),
         "faqs": FAQ.objects.filter(is_published=True),
@@ -323,6 +330,7 @@ def services(request):
             "process": PROCESS_STEPS,
             "perks": SERVICE_PERKS,
             "photos": SiteImage.urls(),
+            **_pricing_context(),
         },
     )
 
@@ -350,6 +358,7 @@ def service_page(request, slug):
             "before_after": before_after,
             "has_slider": slug != "patches",
             "stats": HERO_STATS[:3],
+            **_pricing_context(active_tab=slug),
         },
     )
 

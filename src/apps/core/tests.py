@@ -37,6 +37,36 @@ def test_home_with_demo_content(client):
     assert b"$6" in resp.content
 
 
+def test_pricing_section_is_available_on_home_services_and_service_pages(client, pricing):
+    pages = [
+        ("core:home", None, "embroidery"),
+        ("core:services", None, "embroidery"),
+        ("core:service", ["embroidery"], "embroidery"),
+        ("core:service", ["vector"], "vector"),
+        ("core:service", ["patches"], "patches"),
+    ]
+    for route, args, active_tab in pages:
+        response = client.get(reverse(route, args=args or []))
+        body = response.content.decode()
+        assert 'id="pricing"' in body
+        assert "Left chest" in body and "Standard vector" in body and "Iron-on patch" in body
+        assert f'data-price-tab="{active_tab}"' in body
+        assert f'data-price-panel="{active_tab}"' in body
+
+
+def test_footer_shows_phone_payment_methods_and_branded_social_links(client):
+    site = SiteSettings.load()
+    site.phone = "+1 512 555 0148"
+    site.facebook_url = "https://facebook.com/example"
+    site.save()
+
+    body = client.get(reverse("core:home")).content.decode()
+    assert 'href="tel:%2B1%20512%20555%200148"' in body
+    assert "Visa, Mastercard, American Express, PayPal and Apple Pay" in body
+    assert 'class="container footer-payment"' in body
+    assert 'class="social-facebook"' in body
+
+
 def test_seed_is_idempotent():
     call_command("seed")
     call_command("seed")

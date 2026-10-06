@@ -32,6 +32,8 @@
           <div class="spec-row"><span class="label">Due</span><span class="v">{{ order.due_at|date:"d M Y H:i"|default:"—" }}{% if order.is_overdue %} · <span style="color:#ff8a80">overdue</span>{% endif %}</span></div>
         {% endif %}
         <div class="spec-row"><span class="label">Placed</span><span class="v">{{ order.created_at|date:"d M Y H:i" }}</span></div>
+        <div class="spec-row"><span class="label">Customer IP</span><span class="v">{{ order.client_ip|default:"—" }}</span></div>
+        <div class="spec-row"><span class="label">Country / region</span><span class="v">{{ order.client_country|default:"—" }}</span></div>
         <div class="spec-row"><span class="label">Estimate</span><span class="v">{% if order.estimate is not None %}${{ order.estimate }}{% else %}—{% endif %}</span></div>
         {% if order.instructions %}<div class="mt-s"><span class="label">Instructions</span><p class="mb-0" style="white-space:pre-line;font-size:14px">{{ order.instructions }}</p></div>{% endif %}
       </div>

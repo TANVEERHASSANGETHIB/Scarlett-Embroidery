@@ -80,7 +80,12 @@ def test_order_page_is_open_to_everyone(client):
 def test_place_digitizing_order(client, customer, pricing, artwork, django_capture_on_commit_callbacks):
     client.force_login(customer)
     with django_capture_on_commit_callbacks(execute=True):
-        resp = client.post(reverse("orders:place"), _digitizing_payload(pricing, artwork))
+        resp = client.post(
+            reverse("orders:place"),
+            _digitizing_payload(pricing, artwork),
+            HTTP_X_FORWARDED_FOR="198.51.100.77",
+            HTTP_CF_IPCOUNTRY="US",
+        )
     assert resp.status_code == 302, resp.content
     order = Order.objects.get()
     assert order.number.startswith("SE-")
@@ -89,6 +94,8 @@ def test_place_digitizing_order(client, customer, pricing, artwork, django_captu
     assert order.due_at is not None
     assert order.files.filter(kind=OrderFile.Kind.ARTWORK).count() == 2
     assert order.events.count() == 1
+    assert order.client_ip == "198.51.100.77"
+    assert order.client_country == "US"
     details = next(m for m in mail.outbox if "Order details" in m.subject)
     notice = next(m for m in mail.outbox if "New order received" in m.subject)
     assert details.to == ["scarletsembroidery@gmail.com"]

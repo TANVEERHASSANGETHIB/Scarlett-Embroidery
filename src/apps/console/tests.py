@@ -1,9 +1,11 @@
+from datetime import timedelta
 from decimal import Decimal
 
 import pytest
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.core.models import PortfolioItem, SiteSettings, Testimonial
@@ -97,6 +99,39 @@ def test_staff_uploads_proof_moves_to_awaiting_approval(client, staff, order):
     order.refresh_from_db()
     assert order.status == Order.Status.AWAITING_APPROVAL
     assert order.files.filter(kind=OrderFile.Kind.PROOF).count() == 1
+
+
+def test_order_lists_show_the_newest_order_first(client, staff, order):
+    Order.objects.filter(pk=order.pk).update(created_at=timezone.now() - timedelta(days=2))
+    newest = Order.objects.create(
+        customer=order.customer,
+        service="vector",
+        contact_name="Jane",
+        contact_email=order.contact_email,
+        design_name="Newest design",
+    )
+    client.force_login(staff)
+
+    for query in ("", "?status=all"):
+        body = client.get(reverse("console:orders") + query).content.decode()
+        assert body.index(newest.number) < body.index(order.number)
+
+
+def test_order_detail_shows_customer_ip_and_country(client, staff, order):
+    order.client_ip = "198.51.100.77"
+    order.client_country = "US"
+    order.save(update_fields=["client_ip", "client_country"])
+    client.force_login(staff)
+
+    body = client.get(reverse("console:order_detail", args=[order.number])).content.decode()
+    assert "198.51.100.77" in body
+    assert "Country / region" in body and ">US</span>" in body
+
+
+def test_portfolio_upload_shows_recommended_image_dimensions(client, staff):
+    client.force_login(staff)
+    body = client.get(reverse("console:portfolio")).content.decode()
+    assert "Recommended dimensions: 1000 × 1000 px" in body
 
 
 def test_staff_edits_pricing_tier(client, staff, pricing):

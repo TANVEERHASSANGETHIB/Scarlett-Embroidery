@@ -66,17 +66,25 @@ def test_before_after_needs_both_photos_the_first_time(client, staff, image_file
     assert resp.status_code == 200 and not BeforeAfter.objects.exists()
 
 
-def test_patches_cannot_have_a_slider(client, staff, image_file):
+def test_patches_hero_uses_one_photo_and_can_be_replaced(client, staff, image_file):
     client.force_login(staff)
-    client.post(
-        reverse("console:media"),
-        {
-            "action": "before_after",
-            "service": "patches",
-            "before_image": image_file(),
-            "after_image": image_file(),
-        },
-    )
+    url = reverse("console:media")
+    assert 'value="patches"' in client.get(url).content.decode()
+    assert client.post(url, {"action": "before_after", "service": "patches", "is_active": "on"}).status_code == 200
+    assert not BeforeAfter.objects.exists()
+    for name in ("patch.png", "replacement.png"):
+        response = client.post(url, {"action": "before_after", "service": "patches", "before_image": image_file(name), "is_active": "on"})
+        assert response.status_code == 302
+        hero = BeforeAfter.objects.get(service="patches")
+        assert not hero.after_image
+        body = client.get(reverse("core:service", args=["patches"])).content.decode()
+        assert hero.before_image.url in body
+        assert "data-before-after" not in body
+    assert BeforeAfter.objects.count() == 1
+    assert client.post(url, {"action": "before_after", "service": "patches"}).status_code == 302
+    body = client.get(reverse("core:service", args=["patches"])).content.decode()
+    assert hero.before_image.url not in body
+    assert client.post(url, {"action": "before_after_delete", "id": hero.pk}).status_code == 302
     assert not BeforeAfter.objects.exists()
 
 

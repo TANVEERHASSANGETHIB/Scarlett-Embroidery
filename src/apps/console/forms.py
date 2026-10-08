@@ -499,12 +499,16 @@ class BeforeAfterForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["before_image"].required = False
         self.fields["after_image"].required = False
+        if self.is_bound and self.data.get("service") == PageService.PATCHES:
+            self.fields["before_label"].required = False
+            self.fields["after_label"].required = False
 
     def clean(self):
         cleaned = super().clean()
         service = cleaned.get("service")
         existing = BeforeAfter.objects.filter(service=service).first() if service else None
-        for name in ("before_image", "after_image"):
+        required_photos = ("before_image",) if service == PageService.PATCHES else ("before_image", "after_image")
+        for name in required_photos:
             if not cleaned.get(name) and not (existing and getattr(existing, name)):
                 self.add_error(name, "Choose a photo.")
         return cleaned

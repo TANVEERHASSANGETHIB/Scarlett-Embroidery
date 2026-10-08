@@ -340,10 +340,10 @@ class BeforeAfter(models.Model):
     service = models.CharField(
         max_length=20,
         unique=True,
-        choices=[c for c in PageService.choices if c[0] != PageService.PATCHES],
+        choices=PageService.choices,
     )
     before_image = models.ImageField(upload_to="before-after/")
-    after_image = models.ImageField(upload_to="before-after/")
+    after_image = models.ImageField(upload_to="before-after/", blank=True)
     before_label = models.CharField(max_length=20, default="Before")
     after_label = models.CharField(max_length=20, default="After")
     is_active = models.BooleanField(default=True)

@@ -29,7 +29,11 @@
           {% endif %}
         </div>
       {% else %}
-        {% include "partials/pic.html" with url=pictures.0.image.url alt=page.title cls="pic-hero" size="1200 × 900 px" %}
+        {% if before_after %}
+          {% include "partials/pic.html" with url=before_after.before_image.url alt=page.title cls="pic-hero" size="1200 × 900 px" %}
+        {% else %}
+          {% include "partials/pic.html" with url=pictures.0.image.url alt=page.title cls="pic-hero" size="1200 × 900 px" %}
+        {% endif %}
       {% endif %}
     </div>
   </div>

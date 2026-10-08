@@ -342,7 +342,7 @@ def service_page(request, slug):
     overview = {sv["service"]: sv for sv in _services_overview()}
     pictures = list(ServiceImage.objects.filter(service=slug, is_published=True))
     before_after = (
-        BeforeAfter.objects.filter(service=slug, is_active=True).first() if slug != "patches" else None
+        BeforeAfter.objects.filter(service=slug, is_active=True).first()
     )
     return render(
         request,

@@ -742,7 +742,8 @@ def media(request):
             ba_form = BeforeAfterForm(request.POST, request.FILES)
             if ba_form.is_valid():
                 pair = ba_form.save()
-                messages.success(request, f"Before/after for {pair.get_service_display().lower()} saved.")
+                kind = "Hero photo" if pair.service == "patches" else "Before/after"
+                messages.success(request, f"{kind} for {pair.get_service_display().lower()} saved.")
                 return redirect("console:media")
             messages.error(request, "Please check the before/after form.")
 

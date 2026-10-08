@@ -1,4 +1,5 @@
 {% extends "console/base.html" %}
+{% load static %}
 {% block title %}Media{% endblock %}
 {% block content %}
 <div class="console-page">
@@ -12,13 +13,13 @@
   <div class="stack-lg">
     <!-- Before / after -->
     <div class="panel panel-pad stack" style="gap:16px">
-      <div class="panel-title mb-0">Before / after slider</div>
-      <p class="muted mb-0" style="font-size:13.5px">Shown in the hero of the Embroidery and Vector service pages. Visitors drag a handle to compare the two photos. Use two photos of the same size and framing (about 1000 × 1200 px, portrait works best).</p>
+      <div class="panel-title mb-0">Service hero images</div>
+      <p class="muted mb-0" style="font-size:13.5px">Shown in the hero of the Embroidery and Vector service pages. Visitors drag a handle to compare the two photos. Patches uses a single hero photo. For comparisons, use two photos of the same size and framing (about 1000 × 1200 px, portrait works best).</p>
       <div class="media-grid">
         {% for pair in pairs %}
         <div class="media-card">
           <div class="row" style="gap:8px;flex-wrap:nowrap">
-            <img class="media-thumb" src="{{ pair.before_image.url }}" alt="Before"><img class="media-thumb" src="{{ pair.after_image.url }}" alt="After">
+            <img class="media-thumb" src="{{ pair.before_image.url }}" alt="Before">{% if pair.after_image %}<img class="media-thumb" src="{{ pair.after_image.url }}" alt="After">{% endif %}
           </div>
           <div class="review-name">{{ pair.get_service_display }}</div>
           <form method="post">{% csrf_token %}<input type="hidden" name="action" value="before_after_delete"><input type="hidden" name="id" value="{{ pair.pk }}">
@@ -26,7 +27,7 @@
         </div>
         {% endfor %}
       </div>
-      <form method="post" enctype="multipart/form-data" class="stack" style="gap:12px" data-progress data-once novalidate>
+      <form method="post" enctype="multipart/form-data" class="stack" style="gap:12px" data-progress data-once novalidate data-service-hero>
         {% csrf_token %}<input type="hidden" name="action" value="before_after">
         {% include "partials/form_errors.html" with form=ba_form %}
         <div class="grid-2" style="gap:14px">
@@ -34,22 +35,22 @@
           <label class="checkbox" style="align-self:end">{{ ba_form.is_active }} Show on the page</label>
         </div>
         <div class="grid-2" style="gap:14px">
-          <div class="field"><span class="label">Before photo</span>{{ ba_form.before_image }}{{ ba_form.before_image.errors }}</div>
-          <div class="field"><span class="label">After photo</span>{{ ba_form.after_image }}{{ ba_form.after_image.errors }}</div>
+          <div class="field"><span class="label" data-hero-photo-label>Before photo</span>{{ ba_form.before_image }}{{ ba_form.before_image.errors }}</div>
+          <div class="field" data-comparison-only><span class="label">After photo</span>{{ ba_form.after_image }}{{ ba_form.after_image.errors }}</div>
         </div>
-        <div class="grid-2" style="gap:14px">
+        <div class="grid-2" style="gap:14px" data-comparison-only>
           {% include "partials/field.html" with field=ba_form.before_label label="Left label" %}
           {% include "partials/field.html" with field=ba_form.after_label label="Right label" %}
         </div>
-        <button class="btn btn-gold" style="align-self:flex-start">Save before / after</button>
-        <p class="help mb-0">Saving for a service that already has a pair replaces it. Leave a photo empty to keep the current one.</p>
+        <button class="btn btn-gold" style="align-self:flex-start" data-hero-save>Save before / after</button>
+        <p class="help mb-0">Saving for a service replaces its existing hero images. Leave a photo empty to keep the current one.</p>
       </form>
     </div>
 
     <!-- Service pictures -->
     <div class="panel panel-pad stack" style="gap:16px">
       <div class="panel-title mb-0">Service pictures</div>
-      <p class="muted mb-0" style="font-size:13.5px">Recommended 1200 × 900 px. The first two pictures of a service fill its feature sections; any others appear in its gallery. Patches uses these as its hero picture.</p>
+      <p class="muted mb-0" style="font-size:13.5px">Recommended 1200 × 900 px. The first two pictures of a service fill its feature sections; any others appear in its gallery. Patches uses the first picture as its hero when no dedicated hero photo is active.</p>
       <div class="folio-grid">
         {% for img in service_images %}
         <figure class="folio-tile{% if not img.is_published %} is-hidden{% endif %}">
@@ -106,4 +107,8 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/media-hero.js' %}" defer></script>
 {% endblock %}
